@@ -280,18 +280,18 @@ function fileExtension(name) {
 }
 
 function storedFileName(company, packagingType, group, submissionId, originalName, sequence) {
+  // Storage 내부 파일명은 ASCII 안전 형식으로 자동 저장합니다.
+  // 업체명, 포장재명, 원본 파일명은 DB에 그대로 보존됩니다.
   const groupNames = {
-    "heavy-metal": "중금속성적서",
-    "pfas": "PFAS성적서",
+    "heavy-metal": "HeavyMetal",
+    "pfas": "PFAS",
     "doc": "DoC",
-    "other": "기타증빙자료"
+    "other": "Other"
   };
-  const companyPart = compactLabel(company);
-  const packagingPart = compactLabel(packagingType);
-  const groupPart = groupNames[group] || compactLabel(group);
+  const groupPart = groupNames[group] || "File";
   const shortId = String(submissionId || "").split("-").pop() || "PPWR";
-  const seqPart = sequence > 1 ? `_${sequence}` : "";
-  return `${companyPart}_${packagingPart}_${groupPart}_${shortId}${seqPart}${fileExtension(originalName)}`;
+  const seq = String(sequence || 1).padStart(2, "0");
+  return `${shortId}_${groupPart}_${seq}${fileExtension(originalName)}`;
 }
 
 window.submitToSupabase = async function() {
