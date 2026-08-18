@@ -24,23 +24,93 @@ th{background:#f9fafb;color:#475467;font-size:12px}.check{width:18px;height:18px
 .empty{text-align:center;padding:45px;color:var(--muted)}.status{font-size:12px;color:var(--muted);margin:8px 0}.files button{margin:3px}
 @media(max-width:900px){.stats{grid-template-columns:1fr 1fr}.toolbar{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
 
+
+  :root{
+    --border:#d9dee7;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --bg:#f6f8fb;
+    --card:#ffffff;
+    --primary:#163a70;
+    --primary2:#244f8f;
+    --danger:#b42318;
+    --ok:#067647;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);font-family:Arial,"Noto Sans KR",sans-serif;color:var(--text)}
+  .wrap{max-width:1180px;margin:28px auto;padding:0 18px 60px}
+  .hero{background:linear-gradient(135deg,#153963,#24548e);color:#fff;border-radius:14px;padding:28px 32px;box-shadow:0 6px 20px rgba(15,23,42,.12)}
+  h1{font-size:26px;margin:0 0 10px}
+  .hero p{margin:6px 0;line-height:1.55}
+  .small{font-size:13px;color:var(--muted)}
+  .hero .small{color:#dbe7f5}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-top:18px;padding:22px;box-shadow:0 2px 8px rgba(15,23,42,.04)}
+  h2{font-size:19px;margin:0 0 18px;color:#173b68}
+  h3{font-size:15px;margin:12px 0 8px}
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  label{font-weight:700;font-size:13px;display:block;margin-bottom:6px}
+  input,select,textarea{width:100%;border:1px solid #cdd4df;border-radius:8px;padding:10px 11px;font-size:14px;background:#fff}
+  textarea{min-height:88px;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:#4774ad;box-shadow:0 0 0 3px rgba(71,116,173,.12)}
+  .required{color:#c62828}
+  .hint{font-size:13px;color:var(--muted);line-height:1.45;margin:3px 0 12px}
+  .checks{display:flex;flex-wrap:wrap;gap:9px 16px;padding:10px 0}
+  .check{display:flex;align-items:center;gap:7px;font-size:13px}
+  .check input{width:auto}
+  .rowbox{border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:10px;background:#fbfcfe}
+  .rowhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  button{border:0;border-radius:8px;padding:10px 14px;font-weight:700;cursor:pointer}
+  .btn{background:#e8eef6;color:#163a70}
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-danger{background:#fff0ee;color:var(--danger);border:1px solid #f2c7c2}
+  .btn-ghost{background:#fff;border:1px solid var(--border);color:#374151}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  table{width:100%;border-collapse:collapse;margin-top:10px}
+  th,td{border-bottom:1px solid var(--border);padding:8px 7px;vertical-align:middle}
+  th{font-size:12px;background:#f3f6fa;text-align:left}
+  td input{padding:8px}
+  .material-name{min-width:170px}
+  .delete-cell{width:70px}
+  .totalbar{display:flex;gap:12px;align-items:center;justify-content:flex-end;margin-top:12px;font-size:14px}
+  .totalbar strong{font-size:18px}
+  .status{font-weight:700}
+  .status.ok{color:var(--ok)}
+  .status.bad{color:var(--danger)}
+  .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .sumitem{border:1px solid var(--border);border-radius:10px;padding:14px;background:#fafbfd}
+  .sumitem span{display:block;font-size:12px;color:var(--muted);margin-bottom:7px}
+  .sumitem strong{font-size:22px;color:#183c69}
+  .notice{background:#fff8e7;border:1px solid #eed999;border-radius:9px;padding:12px 14px;font-size:13px;line-height:1.5;margin-top:12px}
+  .pfas-panel{display:none;margin-top:12px}
+  .footer{text-align:center;color:var(--muted);font-size:12px;margin-top:20px}
+  @media(max-width:760px){.grid,.grid3,.summary{grid-template-columns:1fr}.hero{padding:22px}.card{padding:16px}table{font-size:12px;display:block;overflow:auto}}
+
+.completed-screen{
+  display:none;min-height:72vh;align-items:center;justify-content:center;padding:30px 12px
+}
+.completed-card{
+  width:min(680px,100%);background:#fff;border:1px solid #e4e7ec;border-radius:18px;
+  padding:38px 28px;text-align:center;box-shadow:0 10px 30px rgba(16,24,40,.08)
+}
+.completed-card h2{margin:0 0 12px;color:#173b66;font-size:28px}
+.completed-card p{color:#475467;line-height:1.7}
+.submission-box{
+  margin:22px auto;padding:16px;background:#f8fafc;border:1px solid #e4e7ec;
+  border-radius:12px;max-width:520px
+}
+.submission-box .label{font-size:12px;color:#667085;margin-bottom:6px}
+.submission-box strong{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:16px;word-break:break-all}
+
+
+.edit-modal{display:none;position:fixed;inset:0;background:rgba(16,24,40,.58);z-index:9999;overflow:auto;padding:24px}
+.edit-shell{max-width:1100px;margin:auto;background:#f5f7fb;border-radius:16px;min-height:90vh;position:relative}
+.edit-head{position:sticky;top:0;z-index:5;background:#173b66;color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-radius:16px 16px 0 0}
+.edit-head h2{margin:0;font-size:20px}.edit-head button{background:#fff;color:#173b66}
+.edit-content{padding:18px}.edit-actions-admin{display:flex;gap:10px;justify-content:flex-end;padding:0 18px 24px;flex-wrap:wrap}
+.existing-files-admin{display:grid;gap:8px;margin-top:10px}.existing-file-admin{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:9px;border:1px solid #e4e7ec;border-radius:8px;background:#fff}
 .reviewbox{margin-top:14px;padding:14px;border:1px solid #d0d5dd;border-radius:10px;background:#f8fafc}
-.review-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.review-actions label{display:flex;align-items:center;gap:6px;font-weight:700}
-.review-reason{width:100%;margin-top:10px;padding:10px;border:1px solid #d0d5dd;border-radius:8px;min-height:72px}
-.review-save{margin-top:10px;background:#173b66;color:#fff}
-.review-status{font-weight:800}
-
-
-.editbox{margin-top:14px;padding:14px;border:1px solid #d0d5dd;border-radius:10px;background:#fff}
-.editgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.editgrid label{display:block;font-size:11px;font-weight:700;color:#475467;margin-bottom:4px}
-.editgrid input,.editgrid select,.editgrid textarea{width:100%;box-sizing:border-box;padding:9px;border:1px solid #d0d5dd;border-radius:7px}
-.editgrid textarea{min-height:70px}
-.edit-full{grid-column:1/-1}.edit-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-.edit-files{margin-top:12px;padding-top:12px;border-top:1px solid #e4e7ec}
-.edit-file-row{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #eee}
-@media(max-width:700px){.editgrid{grid-template-columns:1fr}}
+.review-actions{display:flex;gap:14px;flex-wrap:wrap}.review-reason{width:100%;box-sizing:border-box;margin-top:10px;min-height:70px;padding:9px}
 
 </style>
 </head>
@@ -78,6 +148,160 @@ th{background:#f9fafb;color:#475467;font-size:12px}.check{width:18px;height:18px
   <div id="empty" class="empty" style="display:none">조회된 자료가 없습니다.</div>
  </div>
 </div>
+
+<div id="editModal" class="edit-modal">
+ <div class="edit-shell">
+  <div class="edit-head"><h2>제출자료 수정 / Edit Submission</h2><button id="editClose">닫기 / Close</button></div>
+  <div class="edit-content"><div class="supplier-edit-form">
+  <section class="hero">
+    <h1>PPWR 포장재 구성정보 및 규제물질 조사</h1>
+    <p><strong>PPWR Packaging Material Composition & Regulatory Substance Survey</strong></p>
+    <p>EU 포장 및 포장폐기물 규정(PPWR) 대응을 위해 당사에 공급되는 포장재의 <strong>구성재질, 구성비, 재생원료 함량 및 규제물질 정보</strong>를 조사하고 있습니다.</p>
+    <p>Please provide the material composition, composition ratio, recycled content, and regulated substance information for packaging materials supplied to our company.</p>
+    <p class="small"><strong>작성 기준 / Submission Guide</strong><br>동일한 재질 및 구성비를 사용하는 규격은 복수 등록할 수 있으며, 시험성적서 등 관련 증빙자료가 있는 경우 함께 첨부해 주시기 바랍니다.<br>Multiple specifications using the same material composition may be registered together. Please attach relevant test reports or supporting documents where available.</p>
+    <p class="small">Toray Advanced Materials Korea Inc. · 구매기획팀 / Purchasing Planning Team</p>
+  </section>
+
+  <section class="card">
+    <h2>1. 협력사 정보 / Supplier Information</h2>
+    <div class="grid">
+      <div><label>회사명 / Company <span class="required">*</span></label><input id="ed_company"></div>
+      <div><label>담당자 / Contact Person <span class="required">*</span></label><input id="ed_contact"></div>
+      <div><label>이메일 / E-mail</label><input id="ed_email" type="email"></div>
+      <div><label>연락처 / Phone</label><input id="ed_phone"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2. 품목군 / Packaging Category</h2>
+    <p class="hint">품목군을 선택하면 예상 구성재질이 표시됩니다.</p>
+    <div class="grid">
+      <div>
+        <label>대분류 / Major Category <span class="required">*</span></label>
+        <select id="ed_major"><option value="">선택 / Select</option></select>
+      </div>
+      <div>
+        <label>세부 품목군 / Packaging Type <span class="required">*</span></label>
+        <select id="ed_type"><option value="">선택 / Select</option></select>
+      </div>
+    </div>
+    <p class="hint" style="margin-top:14px">예상 재질은 참고용입니다. 실제 납품품의 구성과 다르면 체크를 해제하고, 기타 재질을 직접 추가해 주세요.</p>
+    <div id="ed_expectedMaterials" class="checks"></div>
+  </section>
+
+  <section class="card">
+    <h2>3. 대표 규격 및 품번 / Representative Specification & Item Code</h2>
+    <p class="hint">동일한 재질 및 구성으로 여러 규격을 납품하는 경우, 대표 규격과 대표 품번을 입력해 주세요. / If multiple sizes share the same material composition, please enter one representative specification and item code.</p>
+    <div class="grid">
+      <div>
+        <label>대표 규격 / Representative Specification</label>
+        <input id="ed_representativeSpec" placeholder="예: 1,000 × 1,200 mm">
+      </div>
+      <div>
+        <label>대표 품번 / Representative Item Code</label>
+        <input id="ed_representativeCode" placeholder="예: EBG01001">
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>4. 실제 구성재질 / Actual Material Composition</h2>
+    <div class="grid">
+      <div>
+        <label>기타 재질 직접 입력 / Add Other Material</label>
+        <input id="ed_otherMaterial" placeholder="예: EVA, Ink, Adhesive...">
+      </div>
+      <div style="display:flex;align-items:end"><button class="btn" style="width:100%" onclick="addOtherMaterial()">+ 재질 추가 / Add Material</button></div>
+    </div>
+    <div style="overflow:auto">
+      <table>
+        <thead><tr>
+          <th>구성재질 / Material</th><th>부위 / Component</th><th>구성비(%) / Composition</th><th>재생원료 함량(%) / Recycled Content</th><th>비고 / Remarks</th><th>삭제</th>
+        </tr></thead>
+        <tbody id="ed_materialsBody"></tbody>
+      </table>
+    </div>
+    <div class="totalbar">구성비 합계 / Total Composition: <strong id="ed_compositionTotal">0%</strong> <span id="ed_compositionStatus" class="status bad">100%가 되도록 입력해 주세요. / Total must equal 100%.</span></div>
+  </section>
+
+  <section class="card">
+    <h2>5. 유해물질 함량 / Restricted Substance Content</h2>
+    <p class="hint">4대 중금속은 시험성적서 또는 공급사 보증자료에 기재된 <strong>농도(mg/kg)</strong>를 입력해 주세요. 포장재 총중량은 입력하지 않습니다.</p>
+    <div class="grid3">
+      <div><label>납 / Lead (Pb) mg/kg</label><input class="metal" id="ed_pb" type="number" min="0" step="0.001"></div>
+      <div><label>카드뮴 / Cadmium (Cd) mg/kg</label><input class="metal" id="ed_cd" type="number" min="0" step="0.001"></div>
+      <div><label>수은 / Mercury (Hg) mg/kg</label><input class="metal" id="ed_hg" type="number" min="0" step="0.001"></div>
+      <div><label>6가 크롬 / Cr(VI) mg/kg</label><input class="metal" id="ed_cr6" type="number" min="0" step="0.001"></div>
+      <div><label>4대 중금속 합계 / Total Heavy Metals</label><input id="ed_metalTotal" readonly></div>
+      <div><label>판정 / Assessment</label><input id="ed_metalAssessment" readonly></div>
+    </div>
+
+    <h3>PFAS — 식품접촉 포장재 해당 시 / For Food-contact Packaging Only</h3>
+    <p class="hint">해당 여부를 선택하고, 해당 시 시험값을 입력해 주세요.</p>
+    <div>
+      <label>PFAS 적용 여부 / PFAS Applicable?</label>
+      <select id="ed_pfasApplicable">
+        <option value="Not applicable">해당 없음 / Not applicable</option>
+        <option value="Applicable">해당 / Applicable</option>
+        <option value="To be confirmed">확인 필요 / To be confirmed</option>
+      </select>
+    </div>
+    <div id="ed_pfasPanel" class="pfas-panel grid3">
+      <div><label>PFAS Total (mg/kg)</label><input id="ed_pfasTotal" type="number" min="0" step="0.001"></div>
+      <div><label>PFAS 개별값 / Individual PFAS</label><input id="ed_pfasIndividual" placeholder="예: PFOA ..."></div>
+      <div><label>비고 / Remarks</label><input id="ed_pfasRemarks"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>6. 시험성적서 및 증빙자료 / Test Reports & Supporting Documents</h2>
+    <div class="grid3">
+      <div><label>시험기관 / Laboratory</label><input id="ed_lab"></div>
+      <div><label>성적서 번호 / Report No.</label><input id="ed_reportNo"></div>
+      <div><label>발행일 / Issue Date</label><input id="ed_issueDate" type="date"></div>
+    </div>
+    <div class="grid" style="margin-top:14px">
+      <div><label>4대 중금속 시험성적서 / Heavy Metal Test Report</label><input id="ed_heavyFiles" type="file" multiple accept=".pdf,.xls,.xlsx,.csv,.jpg,.jpeg,.png"></div>
+      <div><label>PFAS 시험성적서 / PFAS Test Report</label><input id="ed_pfasFiles" type="file" multiple accept=".pdf,.xls,.xlsx,.csv,.jpg,.jpeg,.png"></div>
+      <div><label>DoC / Declaration of Conformity <span style="font-weight:400;color:#667085">(선택 / Optional)</span></label><input id="ed_docFiles" type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"></div>
+      <div><label>기타 증빙자료 / Other Supporting Documents</label><input id="ed_otherFiles" type="file" multiple accept=".pdf,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.doc,.docx"></div>
+      <div><label>비고 / Remarks</label><textarea id="ed_remarks"></textarea></div>
+    </div>
+    
+  </section>
+
+  <section class="card">
+    <h2>7. 입력 현황 / Summary</h2>
+    <div class="summary">
+      <div class="sumitem"><span>대표 규격 / Representative Spec.</span><strong id="ed_sumSpecs">-</strong></div>
+      <div class="sumitem"><span>구성재질 수 / Materials</span><strong id="ed_sumMaterials">0</strong></div>
+      <div class="sumitem"><span>구성비 합계 / Composition</span><strong id="ed_sumComposition">0%</strong></div>
+      <div class="sumitem"><span>중금속 합계 / Heavy Metals</span><strong id="ed_sumMetals">0 mg/kg</strong></div>
+    </div>
+    <div id="ed_submitStatus" class="notice" style="display:none"></div>
+    <div class="actions">
+      <button class="btn-primary" id="ed_submitBtn" onclick="submitToSupabase()">제출 / Submit</button>
+      
+      
+      
+      <button class="btn-danger" onclick="resetForm()">초기화 / Reset</button>
+    </div>
+  </section>
+
+  <div class="footer">Toray Advanced Materials Korea Inc. · Purchasing Planning Team</div>
+</div></div>
+  <div class="card" style="margin:0 18px 18px">
+   <h2>기존 첨부파일 / Existing Attachments</h2>
+   <div id="existingFilesAdmin" class="existing-files-admin"></div>
+  </div>
+  <div class="edit-actions-admin">
+   <button id="editSave" class="primary">수정내용 저장 / Save Changes</button>
+   <button id="editCancel" class="secondary">취소 / Cancel</button>
+  </div>
+  <div id="editMsg" class="status" style="padding:0 18px 20px"></div>
+ </div>
+</div>
+
 <script type="module">
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2";
 const SUPABASE_URL="https://husxmsxbhdalmubabfbv.supabase.co";
@@ -90,6 +314,12 @@ const E=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt
 const N=v=>(v===null||v===undefined||v==="")?"-":Number(v).toLocaleString();
 let rows=[],filtered=[],selected=new Set();
 
+function reviewBadge(r){
+ const v=String(r.quality_review_status||"");
+ if(v==="적합")return '<span class="badge good">적합</span>';
+ if(v==="반려")return '<span class="badge bad">반려</span>';
+ return '<span class="badge neutral">미검증</span>';
+}
 function dateFromId(id){const m=String(id||"").match(/^PPWR-(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})-/);return m?`${m[1]}-${m[2]}-${m[3]} ${m[4]}:${m[5]}:${m[6]}`:""}
 function cls(v){
  const s=String(v||"").trim().toLowerCase();
@@ -113,12 +343,6 @@ function pfasState(r){
  return "미입력";
 }
 function fc(r){return A(r.uploaded_files).length}
-function reviewBadge(r){
- const v=String(r.quality_review_status||"").trim();
- if(v==="적합") return '<span class="badge good">적합</span>';
- if(v==="반려") return '<span class="badge bad">반려</span>';
- return '<span class="badge neutral">미검증</span>';
-}
 function shortSpec(v){const a=A(v);if(!a.length)return"-";const x=a[0];return `${E(x.item||"-")}<br><span class="muted">${E(x.size||"")}${x.code?" · "+E(x.code):""}</span>${a.length>1?`<br><span class="muted">외 ${a.length-1}건</span>`:""}`}
 function shortMat(v){const a=A(v).filter(x=>x?.material);if(!a.length)return"-";return a.slice(0,2).map(x=>`${E(x.material)}${x.composition!==""&&x.composition!=null?" "+E(x.composition)+"%":""}`).join("<br>")+(a.length>2?`<br><span class="muted">외 ${a.length-2}건</span>`:"")}
 
@@ -165,12 +389,11 @@ function render(){
  <td>${E(r.major_category||"-")}<br><span class="muted">${E(r.packaging_type||"-")}</span></td>
  <td>${shortSpec(r.specifications)}</td><td>${shortMat(r.materials)}</td>
  <td><span class="badge ${cls(r.heavy_metals_assessment)}">${E(r.heavy_metals_assessment||"미입력")}</span><br><span class="muted">${N(r.heavy_metals_total)} mg/kg</span></td>
- <td>${E(r.pfas_applicable||"-")}<br><span class="muted">${r.pfas_total==null?"":E(r.pfas_total)+" mg/kg"}</span></td>
- <td>${reviewBadge(r)}</td><td>${fc(r)}개</td><td><button class="secondary detailbtn">보기</button></td>`;
- const dr=document.createElement("tr");dr.className="detailrow";dr.innerHTML=`<td colspan="11"><div id="${did}" class="detail">${details(r)}</div></td>`;
+ <td>${E(r.pfas_applicable||"-")}<br><span class="muted">${r.pfas_total==null?"":E(r.pfas_total)+" mg/kg"}</span></td><td>${reviewBadge(r)}</td><td>${fc(r)}개</td><td><button class="secondary detailbtn">보기</button></td>`;
+ const dr=document.createElement("tr");dr.className="detailrow";dr.innerHTML=`<td colspan="10"><div id="${did}" class="detail">${details(r)}</div></td>`;
  tr.addEventListener("click",e=>{if(e.target.classList.contains("rowcheck"))return;$(did).classList.toggle("open")});
  const cb=tr.querySelector(".rowcheck");cb.checked=selected.has(r.submission_id);cb.addEventListener("click",e=>e.stopPropagation());cb.addEventListener("change",()=>{cb.checked?selected.add(r.submission_id):selected.delete(r.submission_id);selUI()});
- tb.append(tr,dr);bindFiles(dr);bindEdit(dr,r);bindReview(dr)});
+ tb.append(tr,dr);bindFiles(dr);bindAdmin(dr,r)});
  selUI()
 }
 function details(r){
@@ -183,135 +406,76 @@ function details(r){
  <div class="section"><h3>납품 규격 (${specs.length}건)</h3><table class="mini"><tr><th>#</th><th>품목명</th><th>규격</th><th>코드</th></tr>${sr}</table></div>
  <div class="section"><h3>구성재질 (${mats.length}건)</h3><table class="mini"><tr><th>#</th><th>재질</th><th>부위</th><th>구성비%</th><th>재생%</th><th>비고</th></tr>${mr}</table></div>
  <div class="section" style="grid-column:1/-1"><h3>첨부파일 (${files.length}개)</h3><div class="files">${fb}</div><div class="filestatus status"></div></div>
- <div class="section" style="grid-column:1/-1"><h3>제출자료 수정</h3>
- <button class="edit-open secondary" data-submission="${E(r.submission_id)}">수정 / Edit</button>
- <div class="editbox" style="display:none" data-edit="${E(r.submission_id)}">
-  <div class="editgrid">
-   <div><label>업체명</label><input data-f="company" value="${E(r.company||"")}"></div>
-   <div><label>담당자</label><input data-f="contact_person" value="${E(r.contact_person||"")}"></div>
-   <div><label>이메일</label><input data-f="email" value="${E(r.email||"")}"></div>
-   <div><label>연락처</label><input data-f="phone" value="${E(r.phone||"")}"></div>
-   <div><label>대분류</label><input data-f="major_category" value="${E(r.major_category||"")}"></div>
-   <div><label>세부 품목군</label><input data-f="packaging_type" value="${E(r.packaging_type||"")}"></div>
-   <div><label>Pb (mg/kg)</label><input type="number" step="0.001" data-f="lead_pb" value="${E(r.lead_pb??"")}"></div>
-   <div><label>Cd (mg/kg)</label><input type="number" step="0.001" data-f="cadmium_cd" value="${E(r.cadmium_cd??"")}"></div>
-   <div><label>Hg (mg/kg)</label><input type="number" step="0.001" data-f="mercury_hg" value="${E(r.mercury_hg??"")}"></div>
-   <div><label>CrVI (mg/kg)</label><input type="number" step="0.001" data-f="chromium_vi" value="${E(r.chromium_vi??"")}"></div>
-   <div><label>PFAS 적용</label><input data-f="pfas_applicable" value="${E(r.pfas_applicable||"")}"></div>
-   <div><label>PFAS Total (mg/kg)</label><input type="number" step="0.001" data-f="pfas_total" value="${E(r.pfas_total??"")}"></div>
-   <div><label>시험기관</label><input data-f="laboratory" value="${E(r.laboratory||"")}"></div>
-   <div><label>성적서 번호</label><input data-f="report_no" value="${E(r.report_no||"")}"></div>
-   <div><label>발행일</label><input type="date" data-f="issue_date" value="${E(r.issue_date||"")}"></div>
-   <div class="edit-full"><label>PFAS 개별값</label><input data-f="pfas_individual" value="${E(r.pfas_individual||"")}"></div>
-   <div class="edit-full"><label>PFAS 비고</label><textarea data-f="pfas_remarks">${E(r.pfas_remarks||"")}</textarea></div>
-   <div class="edit-full"><label>비고</label><textarea data-f="remarks">${E(r.remarks||"")}</textarea></div>
-  </div>
-  <div class="edit-files">
-   <strong>첨부파일 관리</strong>
-   <div class="existing-edit-files"></div>
-   <div style="margin-top:10px"><label>새 첨부파일 추가</label>
-    <input class="newfiles" type="file" multiple accept=".pdf,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.doc,.docx">
-   </div>
-   <div class="muted" style="margin-top:5px">기존 파일은 개별 삭제할 수 있고 새 파일을 추가할 수 있습니다.</div>
-  </div>
-  <div class="edit-actions">
-   <button class="edit-save">수정내용 저장</button>
-   <button class="edit-cancel secondary">취소</button>
-  </div>
-  <div class="status editmsg"></div>
- </div>
-</div>
+<div class="section" style="grid-column:1/-1"><h3>관리</h3><button class="open-edit secondary" data-id="${E(r.submission_id)}">업체 제출화면 형식으로 수정 / Edit</button></div>
 <div class="section" style="grid-column:1/-1"><h3>적합성 검증</h3>
-  <div class="reviewbox" data-submission="${E(r.submission_id)}">
-   <div class="review-actions">
-    <label><input type="radio" name="review_${E(r.submission_id)}" value="적합" ${r.quality_review_status==="적합"?"checked":""}> 적합</label>
-    <label><input type="radio" name="review_${E(r.submission_id)}" value="반려" ${r.quality_review_status==="반려"?"checked":""}> 반려</label>
-    <span class="muted">미선택 시 미검증</span>
-   </div>
-   <textarea class="review-reason" placeholder="반려 사유를 입력해 주세요.">${E(r.quality_rejection_reason||"")}</textarea>
-   <button class="review-save">적합성 검증 결과 저장</button>
-   <div class="status reviewmsg"></div>
-  </div>
- </div></div>`
+ <div class="reviewbox" data-id="${E(r.submission_id)}">
+  <div class="review-actions"><label><input type="radio" name="rv_${E(r.submission_id)}" value="적합" ${r.quality_review_status==="적합"?"checked":""}> 적합</label>
+  <label><input type="radio" name="rv_${E(r.submission_id)}" value="반려" ${r.quality_review_status==="반려"?"checked":""}> 반려</label></div>
+  <textarea class="review-reason" placeholder="반려 사유를 입력해 주세요.">${E(r.quality_rejection_reason||"")}</textarea>
+  <button class="review-save" style="margin-top:8px">적합성 검증 결과 저장</button><div class="review-msg status"></div>
+ </div>
+</div></div>`
 }
 
-function adminPassword(){
- const pw=prompt("관리자 비밀번호를 입력해 주세요.");
- if(pw===null)return false;
- if(pw!=="1234"){alert("비밀번호가 올바르지 않습니다.");return false}
- return true;
-}
-function safeUploadName(name){return String(name||"file").replace(/[^\w.\-가-힣]/g,"_")}
-function bindEdit(root,r){
- const open=root.querySelector(".edit-open"), box=root.querySelector(".editbox");
- if(!open||!box)return;
- const fileArea=box.querySelector(".existing-edit-files");
- let files=A(r.uploaded_files).map(x=>({...x}));
- const drawFiles=()=>{
-  fileArea.innerHTML=files.length?files.map((f,i)=>`<div class="edit-file-row"><span>${E(f.originalName||f.storedName||f.path||"file")}</span><button type="button" class="delete edit-file-delete" data-i="${i}">삭제</button></div>`).join(""):'<div class="muted" style="margin-top:8px">첨부파일 없음</div>';
-  fileArea.querySelectorAll(".edit-file-delete").forEach(b=>b.onclick=async()=>{
-   if(!adminPassword())return;
-   const i=Number(b.dataset.i), f=files[i];
-   if(!confirm("이 첨부파일을 삭제할까요?"))return;
-   if(f?.path){const {error}=await sb.storage.from(BUCKET).remove([f.path]);if(error){alert("파일 삭제 실패: "+error.message);return}}
-   files.splice(i,1); drawFiles();
-   const {error}=await sb.from(TABLE).update({uploaded_files:files}).eq("submission_id",r.submission_id);
-   if(error)alert("DB 반영 실패: "+error.message); else await load();
-  });
- };
- drawFiles();
- open.onclick=()=>{if(!adminPassword())return;box.style.display="block";open.style.display="none"};
- box.querySelector(".edit-cancel").onclick=()=>{box.style.display="none";open.style.display=""};
- box.querySelector(".edit-save").onclick=async()=>{
-  if(!adminPassword())return;
-  const msg=box.querySelector(".editmsg");msg.textContent="저장 중...";
-  const payload={};
-  box.querySelectorAll("[data-f]").forEach(el=>{payload[el.dataset.f]=el.value===""?null:el.value});
-  const nums=["lead_pb","cadmium_cd","mercury_hg","chromium_vi","pfas_total"];
-  nums.forEach(k=>{if(payload[k]!==null)payload[k]=Number(payload[k])});
-  const metals=nums.slice(0,4).map(k=>Number(payload[k]||0));
-  if(metals.some(v=>v>0)||nums.slice(0,4).some(k=>payload[k]!==null)){
-    payload.heavy_metals_total=metals.reduce((a,b)=>a+b,0);
-    payload.heavy_metals_assessment=payload.heavy_metals_total<=100?"적합":"부적합";
-  }else{payload.heavy_metals_total=null;payload.heavy_metals_assessment=null}
-
-  const add=[...box.querySelector(".newfiles").files];
-  for(let i=0;i<add.length;i++){
-   const f=add[i], stored=`관리자추가_${Date.now()}_${i+1}_${safeUploadName(f.name)}`;
-   const path=`${r.submission_id}/admin/${stored}`;
-   const {error}=await sb.storage.from(BUCKET).upload(path,f,{upsert:false,contentType:f.type||undefined});
-   if(error){msg.textContent="첨부파일 업로드 실패: "+error.message;return}
-   files.push({category:"admin",originalName:f.name,storedName:stored,path,type:f.type||"",size:f.size});
-  }
-  payload.uploaded_files=files;
-  const {error}=await sb.from(TABLE).update(payload).eq("submission_id",r.submission_id);
-  if(error){msg.textContent="수정 실패: "+error.message;return}
-  msg.textContent="수정되었습니다.";await load();
- };
-}
-function bindReview(root){
- const box=root.querySelector(".reviewbox"); if(!box)return;
- const reason=box.querySelector(".review-reason");
- const radios=[...box.querySelectorAll('input[type="radio"]')];
- const sync=()=>{const v=radios.find(x=>x.checked)?.value||"";reason.style.display=v==="반려"?"block":"none";};
- radios.forEach(x=>x.addEventListener("change",sync)); sync();
- box.querySelector(".review-save").addEventListener("click",async e=>{
-  e.stopPropagation();
-  const status=radios.find(x=>x.checked)?.value||"";
-  const msg=box.querySelector(".reviewmsg");
-  if(!status){msg.textContent="적합 또는 반려를 선택해 주세요.";return}
-  if(status==="반려"&&!reason.value.trim()){msg.textContent="반려 사유를 입력해 주세요.";reason.focus();return}
-  msg.textContent="저장 중...";
-  const payload={
-   quality_review_status:status,
-   quality_rejection_reason:status==="반려"?reason.value.trim():null,
-   quality_reviewed_at:new Date().toISOString()
-  };
-  const {error}=await sb.from(TABLE).update(payload).eq("submission_id",box.dataset.submission);
-  if(error){msg.textContent="저장 실패: "+error.message;return}
-  msg.textContent="검증 결과가 저장되었습니다.";
-  await load();
+let editingRow=null, editingFiles=[];
+const ep=id=>document.getElementById("ed_"+id);
+function askPw(){const p=prompt("관리자 비밀번호를 입력해 주세요.");if(p===null)return false;if(p!=="1234"){alert("비밀번호가 올바르지 않습니다.");return false}return true}
+function setv(id,v){const e=ep(id);if(e)e.value=v??""}
+function materialRows(materials){
+ const tb=ep("materialsBody"); if(!tb)return; tb.innerHTML="";
+ A(materials).forEach(m=>{
+  const tr=document.createElement("tr");
+  tr.innerHTML=`<td><input class="m-material" value="${E(m.material||"")}"></td><td><input class="m-component" value="${E(m.component||"")}"></td><td><input class="m-composition" type="number" step="0.01" value="${E(m.composition??"")}"></td><td><input class="m-recycled" type="number" step="0.01" value="${E(m.recycled??"")}"></td><td><input class="m-remarks" value="${E(m.remarks||"")}"></td><td><button type="button" class="delete">삭제</button></td>`;
+  tr.querySelector("button").onclick=()=>tr.remove();tb.appendChild(tr);
  });
+}
+function getMaterials(){
+ return [...ep("materialsBody").querySelectorAll("tr")].map(tr=>({material:tr.querySelector(".m-material").value,component:tr.querySelector(".m-component").value,composition:tr.querySelector(".m-composition").value,recycled:tr.querySelector(".m-recycled").value,remarks:tr.querySelector(".m-remarks").value}));
+}
+function drawExisting(){
+ const area=$("existingFilesAdmin");
+ area.innerHTML=editingFiles.length?editingFiles.map((f,i)=>`<div class="existing-file-admin"><span>${E(f.originalName||f.storedName||f.path||"file")}</span><button class="delete" data-i="${i}">삭제</button></div>`).join(""):'<div class="muted">첨부파일 없음</div>';
+ area.querySelectorAll("button").forEach(b=>b.onclick=async()=>{if(!askPw())return;if(!confirm("첨부파일을 삭제할까요?"))return;const i=+b.dataset.i,f=editingFiles[i];if(f.path){const {error}=await sb.storage.from(BUCKET).remove([f.path]);if(error){alert(error.message);return}}editingFiles.splice(i,1);drawExisting()});
+}
+function openEditor(r){
+ if(!askPw())return; editingRow=r; editingFiles=A(r.uploaded_files).map(x=>({...x}));
+ setv("company",r.company);setv("contact",r.contact_person);setv("email",r.email);setv("phone",r.phone);
+ setv("major",r.major_category);setv("type",r.packaging_type);
+ const sp=A(r.specifications)[0]||{};setv("representativeSpec",sp.size);setv("representativeCode",sp.code);
+ materialRows(r.materials);
+ setv("pb",r.lead_pb);setv("cd",r.cadmium_cd);setv("hg",r.mercury_hg);setv("cr6",r.chromium_vi);
+ setv("pfasApplicable",r.pfas_applicable);setv("pfasTotal",r.pfas_total);setv("pfasIndividual",r.pfas_individual);setv("pfasRemarks",r.pfas_remarks);
+ setv("lab",r.laboratory);setv("reportNo",r.report_no);setv("issueDate",r.issue_date);setv("remarks",r.remarks);
+ ["heavyFiles","pfasFiles","docFiles","otherFiles"].forEach(id=>{if(ep(id))ep(id).value=""});
+ drawExisting();$("editModal").style.display="block";document.body.style.overflow="hidden";
+}
+function closeEditor(){$("editModal").style.display="none";document.body.style.overflow=""}
+$("editClose").onclick=closeEditor;$("editCancel").onclick=closeEditor;
+async function uploadAdminFiles(r){
+ const groups=[["heavy-metal",ep("heavyFiles")],["pfas",ep("pfasFiles")],["doc",ep("docFiles")],["other",ep("otherFiles")]];
+ for(const [cat,input] of groups){if(!input)continue;let n=0;for(const f of [...input.files]){n++;const clean=String(f.name).replace(/[^\w.\-가-힣]/g,"_");const path=`${r.submission_id}/${cat}/관리자수정_${Date.now()}_${n}_${clean}`;const {error}=await sb.storage.from(BUCKET).upload(path,f,{contentType:f.type||undefined});if(error)throw error;editingFiles.push({category:cat,originalName:f.name,path,type:f.type,size:f.size})}}
+}
+$("editSave").onclick=async()=>{
+ if(!editingRow||!askPw())return;const msg=$("editMsg");msg.textContent="저장 중...";
+ try{
+  await uploadAdminFiles(editingRow);
+  const nums=id=>ep(id)&&ep(id).value!==""?Number(ep(id).value):null;
+  const vals=[nums("pb"),nums("cd"),nums("hg"),nums("cr6")], has=vals.some(v=>v!==null), total=has?vals.reduce((a,v)=>a+(v||0),0):null;
+  const payload={company:ep("company").value,contact_person:ep("contact").value,email:ep("email").value,phone:ep("phone").value,major_category:ep("major").value,packaging_type:ep("type").value,
+   specifications:[{item:ep("type").value,size:ep("representativeSpec").value,code:ep("representativeCode").value}],materials:getMaterials(),
+   lead_pb:vals[0],cadmium_cd:vals[1],mercury_hg:vals[2],chromium_vi:vals[3],heavy_metals_total:total,heavy_metals_assessment:total===null?null:(total<=100?"적합":"부적합"),
+   pfas_applicable:ep("pfasApplicable").value,pfas_total:nums("pfasTotal"),pfas_individual:ep("pfasIndividual").value,pfas_remarks:ep("pfasRemarks").value,
+   laboratory:ep("lab").value,report_no:ep("reportNo").value,issue_date:ep("issueDate").value||null,remarks:ep("remarks").value,uploaded_files:editingFiles};
+  const {error}=await sb.from(TABLE).update(payload).eq("submission_id",editingRow.submission_id);if(error)throw error;
+  msg.textContent="수정되었습니다.";closeEditor();await load();
+ }catch(e){msg.textContent="수정 실패: "+(e.message||e)}
+};
+function bindAdmin(root,r){
+ const b=root.querySelector(".open-edit");if(b)b.onclick=()=>openEditor(r);
+ const rv=root.querySelector(".reviewbox");if(rv){
+  const radios=[...rv.querySelectorAll('input[type="radio"]')],reason=rv.querySelector(".review-reason"),sync=()=>reason.style.display=(radios.find(x=>x.checked)?.value==="반려"?"block":"none");radios.forEach(x=>x.onchange=sync);sync();
+  rv.querySelector(".review-save").onclick=async()=>{if(!askPw())return;const v=radios.find(x=>x.checked)?.value||"";if(!v){alert("적합 또는 반려를 선택해 주세요.");return}if(v==="반려"&&!reason.value.trim()){alert("반려 사유를 입력해 주세요.");return}const {error}=await sb.from(TABLE).update({quality_review_status:v,quality_rejection_reason:v==="반려"?reason.value.trim():null,quality_reviewed_at:new Date().toISOString()}).eq("submission_id",r.submission_id);if(error)alert(error.message);else await load()}
+ }
 }
 function bindFiles(root){root.querySelectorAll(".file").forEach(b=>b.addEventListener("click",async e=>{e.stopPropagation();const s=root.querySelector(".filestatus");s.textContent="파일 불러오는 중...";const {data,error}=await sb.storage.from(BUCKET).download(b.dataset.path);if(error){s.textContent="다운로드 실패: "+error.message;return}const u=globalThis.URL.createObjectURL(data),a=document.createElement("a");a.href=u;a.download=b.dataset.name;a.click();setTimeout(()=>globalThis.URL.revokeObjectURL(u),3000);s.textContent=""}))}
 function selUI(){const ids=filtered.map(r=>r.submission_id),n=ids.filter(id=>selected.has(id)).length;$("all").checked=ids.length>0&&n===ids.length;$("all").indeterminate=n>0&&n<ids.length;$("del").disabled=selected.size===0;$("del").textContent=`선택 삭제 (${selected.size}건)`}
