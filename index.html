@@ -89,10 +89,27 @@
   <section class="hero">
     <h1>PPWR 포장재 구성정보 및 규제물질 조사</h1>
     <p><strong>PPWR Packaging Material Composition & Regulatory Substance Survey</strong></p>
-    <p>EU 포장 및 포장폐기물 규정(PPWR) 대응을 위해 당사에 공급되는 포장재의 <strong>구성재질, 구성비, 재생원료 함량 및 규제물질 정보</strong>를 조사하고 있습니다.</p>
-    <p>Please provide the material composition, composition ratio, recycled content, and regulated substance information for packaging materials supplied to our company.</p>
-    <p class="small"><strong>작성 기준 / Submission Guide</strong><br>본 양식은 PPWR 대응을 위한 포장재 관련 자료 취합을 목적으로 합니다. 대표 규격 및 대표 품번을 기준으로 정보를 입력해 주시고, 각 구성재질별 시험성적서 등 관련 증빙자료를 함께 첨부해 주시기 바랍니다. 제출해 주신 자료는 PPWR 적합성 검토 및 관련 문서 관리에 활용될 예정입니다. 원활한 자료 취합을 위해 정확한 정보 입력 및 관련 자료 첨부에 협조 부탁드립니다.<br>Multiple specifications using the same material composition may be registered together. Please attach relevant test reports or supporting documents where available.</p>
-    <p class="small">Toray Advanced Materials Korea Inc. · 구매기획팀 / Purchasing Planning Team</p>
+    <p>EU 포장 및 포장폐기물 규정(PPWR) 대응을 위해 당사에 공급되는 포장재의 <strong>구성재질, 구성비, 재생원료 함량, 규제물질 및 관련 증빙자료</strong>를 조사하고 있습니다.</p>
+    <p>Please provide the material composition, recycled content, regulated substance information and supporting evidence for packaging materials supplied to our company.</p>
+
+    <div class="small" style="margin-top:16px;line-height:1.75">
+      <strong>작성 안내 / Submission Guide</strong><br>
+      ① 제출 건별로 <strong>대표 규격 및 대표 품번</strong>을 입력해 주세요.<br>
+      ② 세부 품목을 선택하면 <strong>예상 구성재질이 자동 표시</strong>됩니다. 실제 공급 포장재의 구성과 다른 경우 불필요한 재질은 제외하고, 필요한 재질은 직접 추가해 주세요.<br>
+      ③ 복합 포장재는 종이, 플라스틱, 스폰지, 접착제, 잉크 등 <strong>실제 구성재질을 각각 구분</strong>하여 입력해 주세요.<br>
+      ④ 시험성적서 또는 증빙자료가 재질별로 구분되는 경우 <strong>해당 구성재질 행에 각각 첨부</strong>해 주세요.<br>
+      ⑤ 포장재 식별을 위한 <strong>제품 사진</strong>을 첨부해 주세요.<br>
+      ⑥ <strong>DoC (Declaration of Conformity)는 필수 첨부자료</strong>입니다.<br>
+      <span style="display:block;margin-top:6px">
+      ① Enter the representative specification and item code for each submission.<br>
+      ② Selecting a packaging type displays expected materials automatically. Remove materials that do not apply and add any actual materials that are missing.<br>
+      ③ For multi-material packaging, enter each actual constituent material separately.<br>
+      ④ Attach material-specific test reports/evidence to the corresponding material row.<br>
+      ⑤ Attach a product photo for packaging identification.<br>
+      ⑥ A <strong>Declaration of Conformity (DoC) is required.</strong>
+      </span>
+    </div>
+    <p class="small" style="margin-top:14px">Toray Advanced Materials Korea Inc. · 구매기획팀 / Purchasing Planning Team</p>
   </section>
 
   <section class="card">
@@ -212,10 +229,10 @@
     <h2>7. 기타 증빙자료 / Other Supporting Documents</h2>
     <div class="grid">
       <div>
-<label>DoC / Declaration of Conformity <span style="color:#d92d20;font-weight:700">* 필수 / Required</span></label>
-<input id="docFiles" type="file" multiple required accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
-<div class="hint">DoC를 1개 이상 반드시 첨부해 주세요. / At least one DoC must be attached.</div>
-</div>
+        <label>DoC / Declaration of Conformity <span style="color:#d92d20;font-weight:700">* 필수 / Required</span></label>
+        <input id="docFiles" type="file" multiple required accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+        <div class="hint">DoC를 1개 이상 첨부해 주세요. / Please attach at least one DoC.</div>
+      </div>
       <div>
         <label>기타 참고자료 / Other Documents <span style="font-weight:400;color:#667085">(선택 / Optional)</span></label>
         <input id="otherFiles" type="file" multiple accept=".pdf,.xls,.xlsx,.csv,.doc,.docx,.jpg,.jpeg,.png">
@@ -518,48 +535,104 @@ function closeSurveyWindow(){
 
 const data = {
  "종이 포장재 / Paper Packaging": {
-   types:["골판지 박스 / Corrugated Box","종이 지관 / Paper Core","종이 패드·시트 / Paper Pad & Sheet","기타 / Other"],
-   mats:["종이·판지 / Paper & Board","접착제 / Adhesive","잉크 / Ink"]
+   types:["골판지 박스 / Corrugated Box","종이 지관 / Paper Core","스폰지 지관 / Sponge-covered Paper Core","종이 패드·시트 / Paper Pad & Sheet","기타 / Other"],
+   typeMats:{
+     "골판지 박스 / Corrugated Box":["종이·판지 / Paper & Board","접착제 / Adhesive","잉크 / Ink"],
+     "종이 지관 / Paper Core":["종이·판지 / Paper & Board","접착제 / Adhesive","잉크 / Ink"],
+     "스폰지 지관 / Sponge-covered Paper Core":["종이·판지 / Paper & Board","스폰지·폼 / Sponge & Foam","접착제 / Adhesive","잉크 / Ink"],
+     "종이 패드·시트 / Paper Pad & Sheet":["종이·판지 / Paper & Board","접착제 / Adhesive","잉크 / Ink"],
+     "기타 / Other":[]
+   }
  },
  "목재 포장재 / Wood Packaging": {
    types:["목재 팔레트 / Wooden Pallet","합판 / Plywood","목재 박스 / Wooden Box","기타 / Other"],
-   mats:["원목 / Wood","합판 / Plywood","금속 체결재 / Metal Fastener","접착제 / Adhesive"]
+   typeMats:{
+     "목재 팔레트 / Wooden Pallet":["원목 / Wood","금속 체결재 / Metal Fastener"],
+     "합판 / Plywood":["목재·베니어 / Wood Veneer","접착제 / Adhesive"],
+     "목재 박스 / Wooden Box":["원목·합판 / Wood & Plywood","금속 체결재 / Metal Fastener","접착제 / Adhesive"],
+     "기타 / Other":[]
+   }
  },
  "플라스틱 필름·봉투 / Plastic Films & Bags": {
-   types:["PE Film·Bag","PP Film·Bag","PET Film","방습·보호필름 / Protective Film","기타 / Other"],
-   mats:["PE / Polyethylene","PP / Polypropylene","PET / Polyethylene Terephthalate","첨가제 / Additive","잉크 / Ink"]
+   types:["PE 필름·봉투 / PE Film & Bag","PP 필름·봉투 / PP Film & Bag","PET 필름 / PET Film","방습·보호필름 / Protective Film","기타 / Other"],
+   typeMats:{
+     "PE 필름·봉투 / PE Film & Bag":["PE / Polyethylene","첨가제·마스터배치 / Additive & Masterbatch","잉크 / Ink"],
+     "PP 필름·봉투 / PP Film & Bag":["PP / Polypropylene","첨가제·마스터배치 / Additive & Masterbatch","잉크 / Ink"],
+     "PET 필름 / PET Film":["PET / Polyethylene Terephthalate","코팅층 / Coating","잉크 / Ink"],
+     "방습·보호필름 / Protective Film":["기재필름(PE·PET·PP) / Base Film","점착제·접착제 / Adhesive","코팅층 / Coating"],
+     "기타 / Other":[]
+   }
  },
  "직조 포장재·톤백 / Woven Packaging & FIBC": {
-   types:["PP Woven Bag","FIBC / Ton Bag","기타 / Other"],
-   mats:["PP / Polypropylene","PE Liner","봉제사 / Sewing Thread","잉크 / Ink"]
+   types:["PP 직조백 / PP Woven Bag","톤백·FIBC / FIBC & Ton Bag","기타 / Other"],
+   typeMats:{
+     "PP 직조백 / PP Woven Bag":["PP 직조원단 / PP Woven Fabric","PE·PP 코팅 / PE & PP Coating","봉제사 / Sewing Thread","잉크 / Ink"],
+     "톤백·FIBC / FIBC & Ton Bag":["PP 직조원단 / PP Woven Fabric","PE Liner","PP Webbing / 리프팅벨트","봉제사 / Sewing Thread","잉크 / Ink"],
+     "기타 / Other":[]
+   }
  },
  "플라스틱 성형 포장재 / Rigid Plastic Packaging": {
-   types:["플라스틱 팔레트 / Plastic Pallet","Cap·Plug","Tray","Bobbin·Reel","기타 / Other"],
-   mats:["PP / Polypropylene","PE / Polyethylene","PET / Polyethylene Terephthalate","PS / Polystyrene","ABS","첨가제 / Additive"]
+   types:["플라스틱 팔레트 / Plastic Pallet","캡·플러그 / Cap & Plug","트레이 / Tray","보빈·릴 / Bobbin & Reel","기타 / Other"],
+   typeMats:{
+     "플라스틱 팔레트 / Plastic Pallet":["HDPE / High-density Polyethylene","PP / Polypropylene","첨가제·마스터배치 / Additive & Masterbatch","금속 보강재 / Metal Reinforcement"],
+     "캡·플러그 / Cap & Plug":["PE / Polyethylene","PP / Polypropylene","첨가제·마스터배치 / Additive & Masterbatch"],
+     "트레이 / Tray":["PET / Polyethylene Terephthalate","PP / Polypropylene","PS / Polystyrene","PE / Polyethylene","첨가제·마스터배치 / Additive & Masterbatch"],
+     "보빈·릴 / Bobbin & Reel":["PP / Polypropylene","ABS","PS / Polystyrene","금속 부품 / Metal Parts","첨가제·마스터배치 / Additive & Masterbatch"],
+     "기타 / Other":[]
+   }
  },
  "완충·보호재 / Cushioning & Protective Materials": {
-   types:["PE Foam","EVA Foam","PU Foam","Sponge","기타 / Other"],
-   mats:["PE Foam","EVA","PU / Polyurethane","고무 / Rubber","접착제 / Adhesive"]
+   types:["PE 폼 / PE Foam","EVA 폼 / EVA Foam","PU 폼 / PU Foam","스폰지 / Sponge","기타 / Other"],
+   typeMats:{
+     "PE 폼 / PE Foam":["PE 폼 / PE Foam","첨가제 / Additive","접착제 / Adhesive"],
+     "EVA 폼 / EVA Foam":["EVA 폼 / EVA Foam","첨가제 / Additive","접착제 / Adhesive"],
+     "PU 폼 / PU Foam":["PU / Polyurethane Foam","첨가제 / Additive","접착제 / Adhesive"],
+     "스폰지 / Sponge":["스폰지·고무폼 / Sponge & Rubber Foam","접착제 / Adhesive"],
+     "기타 / Other":[]
+   }
  },
  "결속·테이프류 / Strapping & Tapes": {
-   types:["PET Band","PP Band","Adhesive Tape","기타 / Other"],
-   mats:["PET / Polyethylene Terephthalate","PP / Polypropylene","PE / Polyethylene","접착제 / Adhesive"]
+   types:["PET 밴드 / PET Strap","PP 밴드 / PP Strap","점착테이프 / Adhesive Tape","기타 / Other"],
+   typeMats:{
+     "PET 밴드 / PET Strap":["PET / Polyethylene Terephthalate","첨가제·마스터배치 / Additive & Masterbatch"],
+     "PP 밴드 / PP Strap":["PP / Polypropylene","첨가제·마스터배치 / Additive & Masterbatch"],
+     "점착테이프 / Adhesive Tape":["기재(필름·종이·직물) / Backing","점착제 / Pressure-sensitive Adhesive","이형층·라이너 / Release Layer & Liner"],
+     "기타 / Other":[]
+   }
  },
  "라벨·인쇄재 / Labels & Printing": {
-   types:["Paper Label","PET Label","PE·PP Label","Ribbon","기타 / Other"],
-   mats:["종이 / Paper","PET / Polyethylene Terephthalate","PE / Polyethylene","PP / Polypropylene","접착제 / Adhesive","잉크 / Ink"]
+   types:["종이 라벨 / Paper Label","PET 라벨 / PET Label","PE·PP 라벨 / PE & PP Label","리본 / Thermal Transfer Ribbon","기타 / Other"],
+   typeMats:{
+     "종이 라벨 / Paper Label":["종이 표면재 / Paper Facestock","접착제 / Adhesive","이형지·라이너 / Release Liner","잉크·코팅 / Ink & Coating"],
+     "PET 라벨 / PET Label":["PET 표면재 / PET Facestock","접착제 / Adhesive","이형지·PET 라이너 / Release Liner","잉크·코팅 / Ink & Coating"],
+     "PE·PP 라벨 / PE & PP Label":["PE·PP 표면재 / PE & PP Facestock","접착제 / Adhesive","이형지·라이너 / Release Liner","잉크·코팅 / Ink & Coating"],
+     "리본 / Thermal Transfer Ribbon":["PET 베이스필름 / PET Base Film","잉크층(왁스·레진) / Ink Layer","백코팅 / Back Coating"],
+     "기타 / Other":[]
+   }
  },
  "금속·배리어·복합 포장재 / Metal, Barrier & Composite": {
    types:["알루미늄 시트·포일 / Aluminum Sheet & Foil","증착·배리어 필름 / Barrier Film","FRP·FWP 지관 / Composite Cores","복합 조립 포장재 / Multi-material Assembly","금속 팔레트·보빈 / Metal Pallets & Bobbins","기타 / Other"],
-   mats:["PET / Polyethylene Terephthalate","증착 PET / Metallized PET","알루미늄 / Aluminum","PE·PP 실링층 / PE & PP Sealant Layer","PA·Nylon / Polyamide","라미네이션 접착제 / Laminating Adhesive"]
+   typeMats:{
+     "알루미늄 시트·포일 / Aluminum Sheet & Foil":["알루미늄 / Aluminum","코팅·라커 / Coating & Lacquer","접착제 / Adhesive"],
+     "증착·배리어 필름 / Barrier Film":["PET·PP 기재필름 / PET & PP Base Film","증착·배리어층 / Metallized & Barrier Layer","PE·PP 실링층 / PE & PP Sealant Layer","PA·Nylon / Polyamide","라미네이션 접착제 / Laminating Adhesive","잉크 / Ink"],
+     "FRP·FWP 지관 / Composite Cores":["수지 / Resin","보강섬유 / Reinforcing Fiber","종이·기타 기재 / Paper & Other Substrate","접착제 / Adhesive"],
+     "복합 조립 포장재 / Multi-material Assembly":["종이·판지 / Paper & Board","플라스틱 / Plastic","금속 / Metal","폼·완충재 / Foam & Cushioning","접착제 / Adhesive"],
+     "금속 팔레트·보빈 / Metal Pallets & Bobbins":["철·스테인리스 / Steel & Stainless Steel","알루미늄 / Aluminum","플라스틱 부품 / Plastic Parts","표면 코팅 / Surface Coating"],
+     "기타 / Other":[]
+   }
  },
  "방습제·기타 / Desiccants & Others": {
-   types:["Silica Gel","Clay Desiccant","Absorbent","기타 / Other"],
-   mats:["실리카겔 / Silica Gel","Clay","부직포 / Nonwoven","종이 / Paper","PE / Polyethylene"]
+   types:["실리카겔 / Silica Gel","클레이 방습제 / Clay Desiccant","흡수제 / Absorbent","기타 / Other"],
+   typeMats:{
+     "실리카겔 / Silica Gel":["실리카겔 / Silica Gel","외피(부직포·종이) / Sachet Material","잉크 / Ink"],
+     "클레이 방습제 / Clay Desiccant":["Clay / Desiccant Clay","외피(부직포·종이) / Sachet Material","잉크 / Ink"],
+     "흡수제 / Absorbent":["흡수제 / Absorbent","외피(부직포·필름) / Sachet Material","접착·실링층 / Adhesive & Sealant"],
+     "기타 / Other":[]
+   }
  },
  "기타 / Other": {
    types:["기타 / Other"],
-   mats:[]
+   typeMats:{"기타 / Other":[]}
  }
 };
 
@@ -569,6 +642,7 @@ function init(){
   const major=document.getElementById('major');
   Object.keys(data).forEach(k=>{ const o=document.createElement('option');o.value=k;o.textContent=k;major.appendChild(o); });
   major.addEventListener('change',updateCategory);
+  document.getElementById('type').addEventListener('change',updateTypeMaterials);
   document.querySelectorAll('.metal').forEach(x=>x.addEventListener('input',calcMetals));
 document.getElementById('representativeSpec').addEventListener('input', updateSummary);
   document.getElementById('pfasApplicable').addEventListener('change',()=> {
@@ -581,15 +655,25 @@ function updateCategory(){
   const major=document.getElementById('major').value;
   const type=document.getElementById('type');
   type.innerHTML='<option value="">선택 / Select</option>';
-  const box=document.getElementById('expectedMaterials'); box.innerHTML='';
-  if(!major || !data[major]) return;
-  data[major].types.forEach(t=>{let o=document.createElement('option');o.value=t;o.textContent=t;type.appendChild(o)});
-  data[major].mats.forEach(m=>{
+  document.getElementById('expectedMaterials').innerHTML='';
+  document.querySelectorAll('#materialsBody .material-row[data-auto="1"]').forEach(r=>r.remove());
+  if(!major || !data[major]){calcComposition();updateSummary();return;}
+  data[major].types.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;type.appendChild(o)});
+  calcComposition();updateSummary();
+}
+function updateTypeMaterials(){
+  const major=document.getElementById('major').value;
+  const selectedType=document.getElementById('type').value;
+  const box=document.getElementById('expectedMaterials');box.innerHTML='';
+  document.querySelectorAll('#materialsBody .material-row[data-auto="1"]').forEach(r=>r.remove());
+  if(!major || !selectedType || !data[major]){calcComposition();updateSummary();return;}
+  const mats=data[major].typeMats?.[selectedType]||[];
+  mats.forEach(mat=>{
     const lab=document.createElement('label');lab.className='check';
-    lab.innerHTML=`<input type="checkbox" checked value="${esc(m)}" onchange="syncExpectedMaterial(this)"> ${m}`;
-    box.appendChild(lab);
-    addMaterial(m, true);
+    lab.innerHTML=`<input type="checkbox" checked value="${esc(mat)}" onchange="syncExpectedMaterial(this)"> ${mat}`;
+    box.appendChild(lab);addMaterial(mat,true);
   });
+  calcComposition();updateSummary();
 }
 function esc(s){return String(s).replace(/"/g,'&quot;')}
 
