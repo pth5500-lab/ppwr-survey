@@ -237,14 +237,14 @@ function details(r){
 }
 function renderDashboard(){
  const host=document.getElementById("dashboard");if(!host)return;
- const rows=all||[], total=rows.length;
- const companies=new Set(rows.map(r=>(r.company||"").trim()).filter(Boolean)).size;
- const pass=rows.filter(r=>r.quality_review_status==="적합").length;
- const reject=rows.filter(r=>r.quality_review_status==="반려").length;
+ const dataRows=rows||[], total=dataRows.length;
+ const companies=new Set(dataRows.map(r=>(r.company||"").trim()).filter(Boolean)).size;
+ const pass=dataRows.filter(r=>r.quality_review_status==="적합").length;
+ const reject=dataRows.filter(r=>r.quality_review_status==="반려").length;
  const reviewed=pass+reject,pending=Math.max(0,total-reviewed);
- const docs=rows.filter(r=>A(r.uploaded_files).some(f=>String(f.category||"").toLowerCase()==="doc")).length;
+ const docs=dataRows.filter(r=>A(r.uploaded_files).some(f=>String(f.category||"").toLowerCase()==="doc")).length;
  const reviewRate=total?Math.round(reviewed/total*100):0,docRate=total?Math.round(docs/total*100):0;
- const cats={};rows.forEach(r=>{const k=(r.major_category||"미분류").split(" / ")[0];cats[k]=(cats[k]||0)+1});
+ const cats={};dataRows.forEach(r=>{const k=(r.major_category||"미분류").split(" / ")[0];cats[k]=(cats[k]||0)+1});
  const top=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,7),mx=Math.max(1,...top.map(x=>x[1]));
  host.innerHTML=`<div class="metric-grid">
  <div class="metric"><div class="metric-label">전체 제출 건수</div><div class="metric-value">${total}</div><div class="metric-sub">Total submissions</div></div>
@@ -256,7 +256,7 @@ function renderDashboard(){
  <div class="chart-card"><div class="chart-title">적합성 검증 현황</div><div class="status-list"><div class="status-box"><b>${pass}</b><span>적합</span></div><div class="status-box"><b>${reject}</b><span>반려</span></div><div class="status-box"><b>${pending}</b><span>미검증</span></div></div><div style="margin-top:16px"><div class="bar-row"><span>검증 진행률</span><div class="bar-track"><div class="bar-fill" style="width:${reviewRate}%"></div></div><b>${reviewRate}%</b></div><div class="bar-row" style="margin-top:12px"><span>DoC 확보율</span><div class="bar-track"><div class="bar-fill" style="width:${docRate}%"></div></div><b>${docRate}%</b></div></div></div></div>`;
 }
 function render(){
- renderDashboard();
+ try{renderDashboard()}catch(e){console.error("Dashboard render error:",e);const h=document.getElementById("dashboard");if(h)h.innerHTML='<div class="chart-card"><span class="muted">대시보드 표시 중 오류가 발생했습니다. 제출자료 목록은 정상 조회됩니다.</span></div>';}
  $("tbody").innerHTML="";
  view.forEach((r,i)=>{
   const sp=spec(r),tr=document.createElement("tr"),dr=document.createElement("tr"),id="detail_"+i;
