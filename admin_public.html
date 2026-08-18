@@ -125,23 +125,21 @@ function details(r){
  const allFiles=A(r.uploaded_files);
  const by=cat=>allFiles.filter(f=>String(f.category||"").toLowerCase()===cat);
  const fh=(files,empty="첨부파일 없음")=>files.length?files.map(f=>`<div class="file"><span>${esc(f.storedName||f.originalName||f.path||"file")}</span><button class="secondary fileDownload" data-path="${esc(f.path||"")}">보기</button></div>`).join(""):`<span class="muted">${esc(empty)}</span>`;
- const materialReports=by("material-report");
+ const reports=by("material-report");
  const mats=A(r.materials).map((m,i)=>{
-   const mf=materialReports.filter(f=>Number(f.materialIndex)===i || (!Number.isFinite(Number(f.materialIndex)) && String(f.materialName||"")===String(m.material||"")));
-   return `<div style="padding:9px 0;border-bottom:1px solid #eee"><b>${i+1}. ${esc(m.material||"-")}</b> / ${esc(m.component||"-")} / 구성비 ${esc(m.composition??"-")}% / 재생원료 ${esc(m.recycled??"-")}%<div class="files" style="margin-top:6px">${fh(mf,"재질별 성적서 없음")}</div></div>`;
- }).join("")||"-";
- const heavy=by("heavy-metal"),pfas=by("pfas"),doc=by("doc"),other=by("other"),photos=by("product-photo");
- const pfasNA=pfasStatus(r)==="비해당";
+   const mf=reports.filter(f=>Number(f.materialIndex)===i);
+   return `<div style="padding:10px 0;border-bottom:1px solid #e7ebf0"><div><b>${i+1}. ${esc(m.material||"-")}</b> · 부위 ${esc(m.component||"-")} · 구성비 ${esc(m.composition??"-")}% · 재생원료 ${esc(m.recycled??"-")}%</div><div class="files" style="margin-top:7px">${fh(mf,"재질별 성적서 없음")}</div></div>`;
+ }).join("")||"<span class=muted>구성재질 없음</span>";
+ const pfas=by("pfas"),doc=by("doc"),other=by("other"),photos=by("product-photo");
  return `<div class="grid">
- <div class="section"><h3>협력사 정보</h3><div class="kv"><b>업체명</b><span>${esc(r.company)}</span><b>담당자</b><span>${esc(r.contact_person)}</span><b>이메일</b><span>${esc(r.email)}</span><b>연락처</b><span>${esc(r.phone)}</span></div></div>
- <div class="section"><h3>포장재 정보</h3><div class="kv"><b>대분류</b><span>${esc(r.major_category)}</span><b>세부 품목군</b><span>${esc(r.packaging_type)}</span><b>대표 규격</b><span>${esc(spec(r).size)}</span><b>대표 품번</b><span>${esc(spec(r).code)}</span></div></div>
- <div class="section full"><h3>포장재 제품 사진</h3><div class="files">${fh(photos,"제품 사진 없음")}</div></div>
- <div class="section full"><h3>구성재질 및 재질별 성적서</h3>${mats}</div>
- <div class="section"><h3>4대 중금속</h3><div class="kv"><b>Pb</b><span>${esc(r.lead_pb)}</span><b>Cd</b><span>${esc(r.cadmium_cd)}</span><b>Hg</b><span>${esc(r.mercury_hg)}</span><b>CrVI</b><span>${esc(r.chromium_vi)}</span><b>합계</b><span>${r.heavy_metals_total==null?"-":esc(r.heavy_metals_total)+" mg/kg"}</span><b>판정</b><span>${badge(hmAssess(r))}</span></div></div>
- <div class="section"><h3>PFAS</h3><div class="kv"><b>PFAS 적용</b><span>${badge(pfasStatus(r),"비해당")}</span><b>Total</b><span>${r.pfas_total==null?"-":esc(r.pfas_total)+" mg/kg"}</span><b>개별 PFAS</b><span>${esc(r.pfas_individual||"-")}</span><b>비고</b><span>${esc(r.pfas_remarks||"-")}</span></div><div style="margin-top:12px"><b>PFAS 성적서</b><div class="files" style="margin-top:6px">${fh(pfas,pfasNA?"해당 없음":"첨부파일 없음")}</div></div></div>
- <div class="section"><h3>시험정보</h3><div class="kv"><b>시험기관</b><span>${esc(r.laboratory||"-")}</span><b>성적서 번호</b><span>${esc(r.report_no||"-")}</span><b>발행일</b><span>${esc(r.issue_date||"-")}</span></div></div>
- <div class="section"><h3>DoC / Declaration of Conformity</h3><div class="files">${fh(doc)}</div></div>
- <div class="section full"><h3>기타 참고자료</h3><div class="files">${fh(other)}</div></div>
+ <div class="section"><h3>1. 협력사 정보</h3><div class="kv"><b>업체명</b><span>${esc(r.company)}</span><b>담당자</b><span>${esc(r.contact_person)}</span><b>이메일</b><span>${esc(r.email)}</span><b>연락처</b><span>${esc(r.phone)}</span></div></div>
+ <div class="section"><h3>2~3. 포장재 정보</h3><div class="kv"><b>대분류</b><span>${esc(r.major_category)}</span><b>세부 품목군</b><span>${esc(r.packaging_type)}</span><b>대표 규격</b><span>${esc(spec(r).size)}</span><b>대표 품번</b><span>${esc(spec(r).code)}</span></div></div>
+ <div class="section full"><h3>4. 구성재질 및 재질별 증빙</h3>${mats}</div>
+ <div class="section"><h3>5. 4대 중금속</h3><div class="kv"><b>Pb</b><span>${esc(r.lead_pb)}</span><b>Cd</b><span>${esc(r.cadmium_cd)}</span><b>Hg</b><span>${esc(r.mercury_hg)}</span><b>CrVI</b><span>${esc(r.chromium_vi)}</span><b>합계</b><span>${r.heavy_metals_total==null?"-":esc(r.heavy_metals_total)+" mg/kg"}</span><b>판정</b><span>${badge(hmAssess(r))}</span></div></div>
+ <div class="section"><h3>5. PFAS</h3><div class="kv"><b>상태</b><span>${badge(pfasStatus(r),"비해당")}</span><b>Total</b><span>${r.pfas_total==null?"-":esc(r.pfas_total)+" mg/kg"}</span><b>개별 PFAS</b><span>${esc(r.pfas_individual||"-")}</span><b>비고</b><span>${esc(r.pfas_remarks||"-")}</span></div><div class="files" style="margin-top:8px">${fh(pfas,pfasStatus(r)==="비해당"?"해당 없음":"PFAS 성적서 없음")}</div></div>
+ <div class="section full"><h3>6. 포장재 제품 사진</h3><div class="files">${fh(photos,"제품 사진 없음")}</div></div>
+ <div class="section"><h3>7. DoC</h3><div class="files">${fh(doc)}</div></div>
+ <div class="section"><h3>7. 기타 참고자료</h3><div class="files">${fh(other)}</div></div>
  <div class="section full review"><h3>적합성 검증</h3><label><input type="radio" name="rv_${esc(r.submission_id)}" value="적합" ${r.quality_review_status==="적합"?"checked":""}> 적합</label> &nbsp; <label><input type="radio" name="rv_${esc(r.submission_id)}" value="반려" ${r.quality_review_status==="반려"?"checked":""}> 반려</label><textarea class="rejectReason" placeholder="반려 사유">${esc(r.quality_rejection_reason||"")}</textarea><button class="primary saveReview" style="margin-top:8px">적합성 검증 저장</button></div>
  </div>`;
 }
@@ -191,37 +189,13 @@ $("refresh").onclick=load;["search","hmFilter","pfasFilter","reviewFilter"].forE
 $("checkAll").onchange=e=>document.querySelectorAll(".rowCheck").forEach(c=>c.checked=e.target.checked);
 $("deleteSelected").onclick=async()=>{const ids=[...document.querySelectorAll(".rowCheck:checked")].map(x=>x.dataset.id);if(!ids.length){alert("삭제할 건을 선택해 주세요.");return}if(!pw()||!confirm(`${ids.length}건을 삭제할까요?`))return;const {error}=await sb.from(TABLE).delete().in("submission_id",ids);if(error)alert(error.message);else load()};
 $("csv").onclick=()=>{
- const H=[
-  "접수번호","회사명","담당자","이메일","연락처",
-  "대분류","세부 품목군","대표규격","대표품번",
-  "구성재질 상세",
-  "Pb (mg/kg)","Cd (mg/kg)","Hg (mg/kg)","CrVI (mg/kg)","4대중금속 합계 (mg/kg)","중금속 판정",
-  "PFAS 상태","PFAS Total (mg/kg)","개별 PFAS","PFAS 비고",
-  "시험기관","성적서번호","발행일",
-  "제품 사진","재질별 성적서","PFAS 첨부파일","DoC 첨부파일","기타 첨부파일",
-  "적합성 검증","반려사유","검증일시","비고"
- ];
+ const H=["접수번호","회사명","담당자","이메일","연락처","대분류","세부 품목군","대표규격","대표품번","구성재질 상세","재질별 성적서","Pb","Cd","Hg","CrVI","중금속 합계","중금속 판정","PFAS 상태","PFAS Total","개별 PFAS","PFAS 비고","PFAS 성적서","제품 사진","DoC","기타 참고자료","적합성 검증","반려사유","검증일시","비고"];
  const Q=v=>`"${String(v??"").replace(/"/g,'""')}"`;
- const materialText=r=>A(r.materials).map((m,i)=>`${i+1}) 재질:${m.material||""} / 부위:${m.component||""} / 구성비:${m.composition??""}% / 재생원료:${m.recycled??""}% / 비고:${m.remarks||""}`).join(" | ");
- const fileText=(r,cat)=>A(r.uploaded_files).filter(f=>String(f.category||"").toLowerCase()===cat).map(f=>f.storedName||f.originalName||f.path||"").join(" | ");
+ const files=(r,c)=>A(r.uploaded_files).filter(f=>String(f.category||"").toLowerCase()===c).map(f=>f.storedName||f.originalName||f.path||"").join(" | ");
+ const mats=r=>A(r.materials).map((m,i)=>`${i+1}) ${m.material||""} / 부위:${m.component||""} / 구성비:${m.composition??""}% / 재생원료:${m.recycled??""}% / 비고:${m.remarks||""}`).join(" | ");
  const L=[H.map(Q).join(",")];
- rows.forEach(r=>{
-   const sp=spec(r);
-   L.push([
-    r.submission_id,r.company,r.contact_person,r.email,r.phone,
-    r.major_category,r.packaging_type,sp.size,sp.code,
-    materialText(r),
-    r.lead_pb,r.cadmium_cd,r.mercury_hg,r.chromium_vi,r.heavy_metals_total,hmAssess(r),
-    pfasStatus(r),r.pfas_total,r.pfas_individual,r.pfas_remarks,
-    r.laboratory,r.report_no,r.issue_date,
-    fileText(r,"product-photo"),fileText(r,"material-report"),fileText(r,"pfas"),fileText(r,"doc"),fileText(r,"other"),
-    review(r),r.quality_rejection_reason,r.quality_reviewed_at,r.remarks
-   ].map(Q).join(","));
- });
- const a=document.createElement("a");
- a.href="data:text/csv;charset=utf-8,"+encodeURIComponent("\uFEFF"+L.join("\r\n"));
- a.download="PPWR_All_Submissions.csv";
- document.body.appendChild(a);a.click();a.remove();
+ rows.forEach(r=>{const sp=spec(r);L.push([r.submission_id,r.company,r.contact_person,r.email,r.phone,r.major_category,r.packaging_type,sp.size,sp.code,mats(r),files(r,"material-report"),r.lead_pb,r.cadmium_cd,r.mercury_hg,r.chromium_vi,r.heavy_metals_total,hmAssess(r),pfasStatus(r),r.pfas_total,r.pfas_individual,r.pfas_remarks,files(r,"pfas"),files(r,"product-photo"),files(r,"doc"),files(r,"other"),review(r),r.quality_rejection_reason,r.quality_reviewed_at,r.remarks].map(Q).join(","))});
+ const a=document.createElement("a");a.href="data:text/csv;charset=utf-8,"+encodeURIComponent("\uFEFF"+L.join("\r\n"));a.download="PPWR_All_Submissions.csv";document.body.appendChild(a);a.click();a.remove();
 };
 await load();
 </script>
