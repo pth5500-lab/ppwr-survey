@@ -664,5 +664,115 @@ function exportCSV(){
 }
 init();
 </script>
+
+<script type="module">
+import {createClient as createAdminEditClient} from "https://esm.sh/@supabase/supabase-js@2";
+const aeSb=createAdminEditClient("https://husxmsxbhdalmubabfbv.supabase.co","sb_publishable_eTDBSThdDcMahPfXeadm8g_N0wBGHSS");
+const AE_BUCKET="ppwr-files";
+let aeRow=null, aeFiles=[];
+
+const ae=id=>document.getElementById(id);
+const aeArr=v=>Array.isArray(v)?v:[];
+const aeEsc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const aeSet=(id,v)=>{const e=ae(id);if(e)e.value=v??""};
+
+function aeRenderExisting(){
+ let box=ae("adminExistingFiles");
+ if(!box){
+   const sec=document.querySelector("#heavyFiles")?.closest(".card");
+   if(!sec)return;
+   box=document.createElement("div");box.id="adminExistingFiles";
+   box.innerHTML='<h3 style="margin-top:22px">기존 첨부파일 / Existing Attachments</h3><div id="adminExistingList"></div>';
+   sec.appendChild(box);
+ }
+ const list=ae("adminExistingList");
+ list.innerHTML=aeFiles.length?aeFiles.map((f,i)=>`<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px;border:1px solid #e4e7ec;border-radius:8px;margin:6px 0"><span>${aeEsc(f.originalName||f.storedName||f.path||"file")}</span><button type="button" class="btn-ghost ae-del" data-i="${i}">삭제</button></div>`).join(""):'<div class="hint">기존 첨부파일 없음</div>';
+ list.querySelectorAll(".ae-del").forEach(b=>b.onclick=()=>parent.postMessage({type:"PPWR_ADMIN_FILE_DELETE",file:aeFiles[+b.dataset.i]},"*"));
+}
+function aeMaterials(ms){
+ const tb=ae("materialsBody"); if(!tb)return;
+ tb.innerHTML="";
+ aeArr(ms).forEach(m=>{
+   const tr=document.createElement("tr");
+   tr.innerHTML=`<td><input class="m-material" value="${aeEsc(m.material||"")}"></td><td><input class="m-component" value="${aeEsc(m.component||"")}"></td><td><input class="m-composition" type="number" step="0.01" value="${aeEsc(m.composition??"")}"></td><td><input class="m-recycled" type="number" step="0.01" value="${aeEsc(m.recycled??"")}"></td><td><input class="m-remarks" value="${aeEsc(m.remarks||"")}"></td><td><button type="button" class="btn-ghost ae-rm">삭제</button></td>`;
+   tr.querySelector(".ae-rm").onclick=()=>tr.remove();tb.appendChild(tr);
+ });
+}
+function aeGetMaterials(){
+ return [...ae("materialsBody").querySelectorAll("tr")].map(tr=>({
+  material:tr.querySelector(".m-material")?.value||"",component:tr.querySelector(".m-component")?.value||"",
+  composition:tr.querySelector(".m-composition")?.value||"",recycled:tr.querySelector(".m-recycled")?.value||"",
+  remarks:tr.querySelector(".m-remarks")?.value||""
+ }));
+}
+async function aeChooseCategory(r){
+ aeSet("major",r.major_category);
+ ae("major")?.dispatchEvent(new Event("change",{bubbles:true}));
+ await new Promise(x=>setTimeout(x,50));
+ aeSet("type",r.packaging_type);
+ ae("type")?.dispatchEvent(new Event("change",{bubbles:true}));
+}
+async function aeUploadNew(){
+ const groups=[["heavy-metal","heavyFiles"],["pfas","pfasFiles"],["doc","docFiles"],["other","otherFiles"]];
+ for(const [cat,id] of groups){
+   const input=ae(id);if(!input)continue;let n=0;
+   for(const f of [...input.files]){
+     n++;const clean=String(f.name).replace(/[^\w.\-가-힣]/g,"_");
+     const path=`${aeRow.submission_id}/${cat}/관리자수정_${Date.now()}_${n}_${clean}`;
+     const {error}=await aeSb.storage.from(AE_BUCKET).upload(path,f,{contentType:f.type||undefined});
+     if(error)throw error;
+     aeFiles.push({category:cat,originalName:f.name,path,type:f.type||"",size:f.size});
+   }
+ }
+}
+function aeNum(id){const e=ae(id);return !e||e.value===""?null:Number(e.value)}
+async function aeSave(){
+ const status=ae("submitStatus"); if(status)status.textContent="수정내용 저장 중...";
+ try{
+   await aeUploadNew();
+   const vals=[aeNum("pb"),aeNum("cd"),aeNum("hg"),aeNum("cr6")];
+   const has=vals.some(v=>v!==null), total=has?vals.reduce((a,v)=>a+(v||0),0):null;
+   const payload={
+    company:ae("company")?.value||"",contact_person:ae("contact")?.value||"",email:ae("email")?.value||"",phone:ae("phone")?.value||"",
+    major_category:ae("major")?.value||"",packaging_type:ae("type")?.value||"",
+    specifications:[{item:ae("type")?.value||"",size:ae("representativeSpec")?.value||"",code:ae("representativeCode")?.value||""}],
+    materials:aeGetMaterials(),lead_pb:vals[0],cadmium_cd:vals[1],mercury_hg:vals[2],chromium_vi:vals[3],
+    heavy_metals_total:total,heavy_metals_assessment:total===null?null:(total<=100?"적합":"부적합"),
+    pfas_applicable:ae("pfasApplicable")?.value||"",pfas_total:aeNum("pfasTotal"),pfas_individual:ae("pfasIndividual")?.value||"",
+    pfas_remarks:ae("pfasRemarks")?.value||"",laboratory:ae("lab")?.value||"",report_no:ae("reportNo")?.value||"",
+    issue_date:ae("issueDate")?.value||null,remarks:ae("remarks")?.value||"",uploaded_files:aeFiles
+   };
+   parent.postMessage({type:"PPWR_ADMIN_EDIT_SAVE",payload},"*");
+ }catch(e){if(status)status.textContent="수정 실패: "+(e.message||e)}
+}
+
+window.addEventListener("message",async ev=>{
+ const d=ev.data||{};
+ if(d.type==="PPWR_ADMIN_EDIT_LOAD"){
+   aeRow=d.row;aeFiles=aeArr(aeRow.uploaded_files).map(x=>({...x}));
+   document.querySelector("header h1").textContent="PPWR 제출자료 수정";
+   const sub=document.querySelector("header p");if(sub)sub.textContent="업체 제출자료와 동일한 화면에서 내용을 수정할 수 있습니다.";
+   aeSet("company",aeRow.company);aeSet("contact",aeRow.contact_person);aeSet("email",aeRow.email);aeSet("phone",aeRow.phone);
+   await aeChooseCategory(aeRow);
+   const sp=aeArr(aeRow.specifications)[0]||{};aeSet("representativeSpec",sp.size);aeSet("representativeCode",sp.code);
+   aeMaterials(aeRow.materials);
+   aeSet("pb",aeRow.lead_pb);aeSet("cd",aeRow.cadmium_cd);aeSet("hg",aeRow.mercury_hg);aeSet("cr6",aeRow.chromium_vi);
+   aeSet("pfasApplicable",aeRow.pfas_applicable);aeSet("pfasTotal",aeRow.pfas_total);aeSet("pfasIndividual",aeRow.pfas_individual);aeSet("pfasRemarks",aeRow.pfas_remarks);
+   aeSet("lab",aeRow.laboratory);aeSet("reportNo",aeRow.report_no);aeSet("issueDate",aeRow.issue_date);aeSet("remarks",aeRow.remarks);
+   aeRenderExisting();
+   const submit=[...document.querySelectorAll("button")].find(b=>/제출\s*\/\s*Submit/.test(b.textContent));
+   if(submit){submit.textContent="수정내용 저장 / Save Changes";submit.onclick=(e)=>{e.preventDefault();e.stopImmediatePropagation();aeSave()}}
+   [...document.querySelectorAll("button")].filter(b=>/초기화\s*\/\s*Reset/.test(b.textContent)).forEach(b=>b.style.display="none");
+   window.scrollTo(0,0);
+ }
+ if(d.type==="PPWR_ADMIN_EDIT_RESULT"){
+   const st=ae("submitStatus");if(st)st.textContent=d.message||"";
+ }
+ if(d.type==="PPWR_ADMIN_FILE_RESULT"){
+   if(d.ok){aeFiles=aeArr(d.files);aeRenderExisting()}else alert(d.message||"파일 처리 실패");
+ }
+});
+</script>
+
 </body>
 </html>
