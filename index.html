@@ -258,7 +258,16 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_eTDBSThdDcMahPfXeadm8g_N0wBGHSS
 const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 function safeFileName(name) {
-  return name.replace(/[^\w.\-가-힣]+/g, "_");
+  const raw=String(name||"");
+  const dot=raw.lastIndexOf(".");
+  const ext=(dot>=0?raw.slice(dot+1):"").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,10);
+  const base=(dot>=0?raw.slice(0,dot):raw)
+    .normalize("NFKD")
+    .replace(/[^A-Za-z0-9._-]/g,"_")
+    .replace(/_+/g,"_")
+    .replace(/^[._-]+|[._-]+$/g,"")
+    .slice(0,60) || "file";
+  return ext ? `${base}.${ext}` : base;
 }
 
 function makeSubmissionId() {
@@ -280,18 +289,11 @@ function fileExtension(name) {
 }
 
 function storedFileName(company, packagingType, group, submissionId, originalName, sequence) {
-  // Storage 내부 파일명은 ASCII 안전 형식으로 자동 저장합니다.
-  // 업체명, 포장재명, 원본 파일명은 DB에 그대로 보존됩니다.
-  const groupNames = {
-    "heavy-metal": "HeavyMetal",
-    "pfas": "PFAS",
-    "doc": "DoC",
-    "other": "Other"
-  };
-  const groupPart = groupNames[group] || "File";
-  const shortId = String(submissionId || "").split("-").pop() || "PPWR";
-  const seq = String(sequence || 1).padStart(2, "0");
-  return `${shortId}_${groupPart}_${seq}${fileExtension(originalName)}`;
+  const ext=fileExtension(originalName);
+  const groupNames={"heavy-metal":"HeavyMetal","pfas":"PFAS","doc":"DoC","other":"Other"};
+  const groupPart=groupNames[group]||"File";
+  const seq=sequence>1?`_${sequence}`:"";
+  return `${submissionId}_${groupPart}${seq}${ext}`;
 }
 
 window.submitToSupabase = async function() {
@@ -360,7 +362,9 @@ window.submitToSupabase = async function() {
       for (const file of fileList) {
         sequence += 1;
         const renamedFile = storedFileName(d.company, d.type, group, submissionId, file.name, sequence);
-        const path = `${submissionId}/${group}/${renamedFile}`;
+        const folderNames={"heavy-metal":"heavy_metal","pfas":"pfas","doc":"doc","other":"other"};
+        const folder=folderNames[group]||"file";
+        const path = `${submissionId}/${folder}/${renamedFile}`;
 
         const { error: uploadError } = await supabase
           .storage
