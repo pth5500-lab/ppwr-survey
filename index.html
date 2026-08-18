@@ -65,10 +65,27 @@
   .pfas-panel{display:none;margin-top:12px}
   .footer{text-align:center;color:var(--muted);font-size:12px;margin-top:20px}
   @media(max-width:760px){.grid,.grid3,.summary{grid-template-columns:1fr}.hero{padding:22px}.card{padding:16px}table{font-size:12px;display:block;overflow:auto}}
+
+.completed-screen{
+  display:none;min-height:72vh;align-items:center;justify-content:center;padding:30px 12px
+}
+.completed-card{
+  width:min(680px,100%);background:#fff;border:1px solid #e4e7ec;border-radius:18px;
+  padding:38px 28px;text-align:center;box-shadow:0 10px 30px rgba(16,24,40,.08)
+}
+.completed-card h2{margin:0 0 12px;color:#173b66;font-size:28px}
+.completed-card p{color:#475467;line-height:1.7}
+.submission-box{
+  margin:22px auto;padding:16px;background:#f8fafc;border:1px solid #e4e7ec;
+  border-radius:12px;max-width:520px
+}
+.submission-box .label{font-size:12px;color:#667085;margin-bottom:6px}
+.submission-box strong{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:16px;word-break:break-all}
+
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap" id="surveyWrap">
   <section class="hero">
     <h1>PPWR 포장재 구성정보 및 규제물질 조사</h1>
     <p><strong>PPWR Packaging Material Composition & Regulatory Substance Survey</strong></p>
@@ -106,10 +123,18 @@
   </section>
 
   <section class="card">
-    <h2>3. 납품 규격 / Specifications</h2>
-    <p class="hint">아래 규격들은 <strong>동일 재질·동일 구성비가 적용되는 품목</strong>만 묶어서 입력해 주세요. 재질구성이 다른 규격이 있다면 별도 설문으로 작성하는 것을 권장합니다.</p>
-    <div id="specs"></div>
-    <div class="actions"><button class="btn" onclick="addSpec()">+ 규격 추가 / Add Specification</button></div>
+    <h2>3. 대표 규격 및 품번 / Representative Specification & Item Code</h2>
+    <p class="hint">동일한 재질 및 구성으로 여러 규격을 납품하는 경우, 대표 규격과 대표 품번을 입력해 주세요. / If multiple sizes share the same material composition, please enter one representative specification and item code.</p>
+    <div class="grid">
+      <div>
+        <label>대표 규격 / Representative Specification</label>
+        <input id="representativeSpec" placeholder="예: 1,000 × 1,200 mm">
+      </div>
+      <div>
+        <label>대표 품번 / Representative Item Code</label>
+        <input id="representativeCode" placeholder="예: EBG01001">
+      </div>
+    </div>
   </section>
 
   <section class="card">
@@ -171,16 +196,17 @@
     <div class="grid" style="margin-top:14px">
       <div><label>4대 중금속 시험성적서 / Heavy Metal Test Report</label><input id="heavyFiles" type="file" multiple accept=".pdf,.xls,.xlsx,.csv,.jpg,.jpeg,.png"></div>
       <div><label>PFAS 시험성적서 / PFAS Test Report</label><input id="pfasFiles" type="file" multiple accept=".pdf,.xls,.xlsx,.csv,.jpg,.jpeg,.png"></div>
+      <div><label>DoC / Declaration of Conformity <span style="font-weight:400;color:#667085">(선택 / Optional)</span></label><input id="docFiles" type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"></div>
       <div><label>기타 증빙자료 / Other Supporting Documents</label><input id="otherFiles" type="file" multiple accept=".pdf,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.doc,.docx"></div>
       <div><label>비고 / Remarks</label><textarea id="remarks"></textarea></div>
     </div>
-    <div class="notice">CSV 저장 시에는 첨부파일명만 기록됩니다. <strong>제출 / Submit</strong> 버튼을 사용하면 설문 데이터는 Supabase Database에, 실제 첨부파일은 Supabase Storage의 <code>ppwr-files</code> 버킷에 저장됩니다.</div>
+    
   </section>
 
   <section class="card">
     <h2>7. 입력 현황 / Summary</h2>
     <div class="summary">
-      <div class="sumitem"><span>규격 수 / Specifications</span><strong id="sumSpecs">1</strong></div>
+      <div class="sumitem"><span>대표 규격 / Representative Spec.</span><strong id="sumSpecs">-</strong></div>
       <div class="sumitem"><span>구성재질 수 / Materials</span><strong id="sumMaterials">0</strong></div>
       <div class="sumitem"><span>구성비 합계 / Composition</span><strong id="sumComposition">0%</strong></div>
       <div class="sumitem"><span>중금속 합계 / Heavy Metals</span><strong id="sumMetals">0 mg/kg</strong></div>
@@ -188,14 +214,39 @@
     <div id="submitStatus" class="notice" style="display:none"></div>
     <div class="actions">
       <button class="btn-primary" id="submitBtn" onclick="submitToSupabase()">제출 / Submit</button>
-      <button class="btn-ghost" onclick="exportCSV()">CSV 저장 / Export CSV</button>
-      <button class="btn" onclick="saveDraft()">임시저장 / Save Draft</button>
-      <button class="btn-ghost" onclick="loadDraft()">불러오기 / Load Draft</button>
+      
+      
+      
       <button class="btn-danger" onclick="resetForm()">초기화 / Reset</button>
     </div>
   </section>
 
   <div class="footer">Toray Advanced Materials Korea Inc. · Purchasing Planning Team</div>
+</div>
+
+
+<div id="completedScreen" class="completed-screen">
+  <div class="completed-card">
+    <h2>제출이 완료되었습니다.<br><span style="font-size:18px">Submission Completed</span></h2>
+    <p>
+      자료를 제출해 주셔서 감사합니다.<br>
+      Thank you for your submission.
+    </p>
+    <div class="submission-box">
+      <div class="label">접수번호 / Submission ID</div>
+      <strong id="completedSubmissionId">-</strong>
+    </div>
+    <p>
+      제출하신 자료가 정상적으로 접수되었습니다.<br>
+      Your submission has been successfully received.
+    </p>
+    <button class="btn-primary" type="button" onclick="closeSurveyWindow()" style="margin-top:8px">
+      창 닫기 / Close
+    </button>
+    <div id="closeGuide" style="display:none;margin-top:12px;color:#667085;font-size:12px">
+      이 창을 닫으셔도 됩니다. / You may now close this window.
+    </div>
+  </div>
 </div>
 
 
@@ -216,6 +267,31 @@ function makeSubmissionId() {
   const stamp = `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
   const rnd = Math.random().toString(36).slice(2, 7).toUpperCase();
   return `PPWR-${stamp}-${rnd}`;
+}
+
+function compactLabel(value) {
+  const text = String(value || "").split("/")[0].trim();
+  return safeFileName(text || "Unknown").replace(/_+/g, "_").replace(/^_+|_+$/g, "");
+}
+
+function fileExtension(name) {
+  const m = String(name || "").match(/(\.[A-Za-z0-9]+)$/);
+  return m ? m[1].toLowerCase() : "";
+}
+
+function storedFileName(company, packagingType, group, submissionId, originalName, sequence) {
+  const groupNames = {
+    "heavy-metal": "중금속성적서",
+    "pfas": "PFAS성적서",
+    "doc": "DoC",
+    "other": "기타증빙자료"
+  };
+  const companyPart = compactLabel(company);
+  const packagingPart = compactLabel(packagingType);
+  const groupPart = groupNames[group] || compactLabel(group);
+  const shortId = String(submissionId || "").split("-").pop() || "PPWR";
+  const seqPart = sequence > 1 ? `_${sequence}` : "";
+  return `${companyPart}_${packagingPart}_${groupPart}_${shortId}${seqPart}${fileExtension(originalName)}`;
 }
 
 window.submitToSupabase = async function() {
@@ -273,14 +349,18 @@ window.submitToSupabase = async function() {
     const groups = [
       ["heavy-metal", document.getElementById("heavyFiles").files],
       ["pfas", document.getElementById("pfasFiles").files],
+      ["doc", document.getElementById("docFiles").files],
       ["other", document.getElementById("otherFiles").files]
     ];
 
     // Upload files first, then insert the submission once with all file metadata.
     currentStage = "첨부파일 업로드 / File upload";
     for (const [group, fileList] of groups) {
+      let sequence = 0;
       for (const file of fileList) {
-        const path = `${submissionId}/${group}/${Date.now()}_${safeFileName(file.name)}`;
+        sequence += 1;
+        const renamedFile = storedFileName(d.company, d.type, group, submissionId, file.name, sequence);
+        const path = `${submissionId}/${group}/${renamedFile}`;
 
         const { error: uploadError } = await supabase
           .storage
@@ -306,6 +386,7 @@ window.submitToSupabase = async function() {
         uploaded.push({
           category: group,
           originalName: file.name,
+          storedName: renamedFile,
           path,
           size: file.size,
           contentType: file.type || ""
@@ -331,10 +412,11 @@ window.submitToSupabase = async function() {
       };
     }
 
-    status.innerHTML =
-      `<strong>제출 완료 / Submitted</strong><br>` +
-      `접수번호 / Submission ID: <strong>${submissionId}</strong>`;
-    alert(`제출이 완료되었습니다.\n접수번호: ${submissionId}`);
+    document.getElementById("completedSubmissionId").textContent = submissionId;
+    document.getElementById("surveyWrap").style.display = "none";
+    const completedScreen = document.getElementById("completedScreen");
+    completedScreen.style.display = "flex";
+    window.scrollTo({ top: 0, behavior: "smooth" });
 
   } catch (err) {
     console.error("PPWR submission error:", err);
@@ -374,6 +456,15 @@ window.submitToSupabase = async function() {
 </script>
 
 <script>
+
+function closeSurveyWindow(){
+  window.close();
+  setTimeout(()=>{
+    const guide=document.getElementById("closeGuide");
+    if(guide) guide.style.display="block";
+  },250);
+}
+
 const data = {
  "종이 포장재 / Paper Packaging": {
    types:["골판지 박스 / Corrugated Box","종이 지관 / Paper Core","종이 패드·시트 / Paper Pad & Sheet","기타 / Other"],
@@ -428,6 +519,7 @@ function init(){
   Object.keys(data).forEach(k=>{ const o=document.createElement('option');o.value=k;o.textContent=k;major.appendChild(o); });
   major.addEventListener('change',updateCategory);
   document.querySelectorAll('.metal').forEach(x=>x.addEventListener('input',calcMetals));
+document.getElementById('representativeSpec').addEventListener('input', updateSummary);
   document.getElementById('pfasApplicable').addEventListener('change',()=> {
     document.getElementById('pfasPanel').style.display=document.getElementById('pfasApplicable').value==='Applicable'?'grid':'none';
   });
@@ -456,22 +548,6 @@ function syncExpectedMaterial(cb){
   else removeMaterialByName(cb.value);
 }
 
-function addSpec(values={}){
-  specCount++;
-  const div=document.createElement('div'); div.className='rowbox spec-row';
-  div.innerHTML=`
-    <div class="rowhead"><strong>Specification ${specCount}</strong><button class="btn-danger" onclick="this.closest('.spec-row').remove();renumberSpecs();updateSummary()">삭제</button></div>
-    <div class="grid3">
-      <div><label>품명 / Item Name</label><input class="spec-item" value="${esc(values.item||'')}"></div>
-      <div><label>규격 / Size · Specification</label><input class="spec-size" value="${esc(values.size||'')}"></div>
-      <div><label>품번 / Item Code</label><input class="spec-code" value="${esc(values.code||'')}"></div>
-    </div>`;
-  document.getElementById('specs').appendChild(div);
-  updateSummary();
-}
-function renumberSpecs(){
-  document.querySelectorAll('.spec-row').forEach((r,i)=>r.querySelector('.rowhead strong').textContent='Specification '+(i+1));
-}
 
 function materialExists(name){
   return [...document.querySelectorAll('.material-name')].some(x=>x.value===name);
@@ -520,7 +596,7 @@ function calcMetals(){
   updateSummary();
 }
 function updateSummary(){
-  document.getElementById('sumSpecs').textContent=document.querySelectorAll('.spec-row').length;
+  document.getElementById('sumSpecs').textContent = document.getElementById('representativeSpec')?.value || '-';
   document.getElementById('sumMaterials').textContent=document.querySelectorAll('.material-row').length;
   document.getElementById('sumComposition').textContent=document.getElementById('compositionTotal').textContent;
   document.getElementById('sumMetals').textContent=document.getElementById('metalTotal').value || '0 mg/kg';
@@ -537,12 +613,12 @@ window.collectData = function collectData(){
     remarks:r.querySelector('.material-remarks').value
   }));
   return {
-    company:company.value,contact:contact.value,email:email.value,phone:phone.value,
+    company:company.value,contact:contact.value,email:email.value,phone:phone.value,representativeSpec:representativeSpec.value,representativeCode:representativeCode.value,
     major:major.value,type:type.value,specs,materials,
     pb:pb.value,cd:cd.value,hg:hg.value,cr6:cr6.value,metalTotal:metalTotal.value,metalAssessment:metalAssessment.value,
     pfasApplicable:pfasApplicable.value,pfasTotal:pfasTotal.value,pfasIndividual:pfasIndividual.value,pfasRemarks:pfasRemarks.value,
     lab:lab.value,reportNo:reportNo.value,issueDate:issueDate.value,
-    heavyFiles:filenames('heavyFiles'),pfasFiles:filenames('pfasFiles'),otherFiles:filenames('otherFiles'),remarks:remarks.value
+    heavyFiles:filenames('heavyFiles'),pfasFiles:filenames('pfasFiles'),docFiles:filenames('docFiles'),otherFiles:filenames('otherFiles'),remarks:remarks.value
   };
 }
 
@@ -553,7 +629,7 @@ function saveDraft(){
 function loadDraft(){
   const raw=localStorage.getItem('ppwrSurveyDraft'); if(!raw)return alert('저장된 임시자료가 없습니다.');
   const d=JSON.parse(raw);
-  ['company','contact','email','phone','pb','cd','hg','cr6','pfasTotal','pfasIndividual','pfasRemarks','lab','reportNo','issueDate','remarks'].forEach(id=>{if(d[id]!=null)document.getElementById(id).value=d[id]});
+  ['company','contact','email','phone','representativeSpec','representativeCode','pb','cd','hg','cr6','pfasTotal','pfasIndividual','pfasRemarks','lab','reportNo','issueDate','remarks'].forEach(id=>{if(d[id]!=null)document.getElementById(id).value=d[id]});
   major.value=d.major||''; updateCategory(); type.value=d.type||'';
   document.getElementById('specs').innerHTML=''; (d.specs||[]).forEach(x=>addSpec(x)); if(!(d.specs||[]).length)addSpec();
   document.getElementById('materialsBody').innerHTML=''; (d.materials||[]).forEach(x=>addMaterial(x.material,false,x));
@@ -579,7 +655,7 @@ function exportCSV(){
   d.materials.forEach((x,i)=>{add('Material '+(i+1),'Material',x.material);add('Material '+(i+1),'Component',x.component);add('Material '+(i+1),'Composition (%)',x.composition);add('Material '+(i+1),'Recycled Content (%)',x.recycled);add('Material '+(i+1),'Remarks',x.remarks)});
   add('Restricted Substance','Pb (mg/kg)',d.pb);add('Restricted Substance','Cd (mg/kg)',d.cd);add('Restricted Substance','Hg (mg/kg)',d.hg);add('Restricted Substance','Cr(VI) (mg/kg)',d.cr6);add('Restricted Substance','Total Heavy Metals',d.metalTotal);add('Restricted Substance','Assessment',d.metalAssessment);
   add('PFAS','Applicable',d.pfasApplicable);add('PFAS','PFAS Total (mg/kg)',d.pfasTotal);add('PFAS','Individual PFAS',d.pfasIndividual);add('PFAS','Remarks',d.pfasRemarks);
-  add('Evidence','Laboratory',d.lab);add('Evidence','Report No.',d.reportNo);add('Evidence','Issue Date',d.issueDate);add('Evidence','Heavy Metal Files',d.heavyFiles);add('Evidence','PFAS Files',d.pfasFiles);add('Evidence','Other Files',d.otherFiles);add('Evidence','Remarks',d.remarks);
+  add('Evidence','Laboratory',d.lab);add('Evidence','Report No.',d.reportNo);add('Evidence','Issue Date',d.issueDate);add('Evidence','Heavy Metal Files',d.heavyFiles);add('Evidence','PFAS Files',d.pfasFiles);add('Evidence','DoC Files',d.docFiles);add('Evidence','Other Files',d.otherFiles);add('Evidence','Remarks',d.remarks);
   const csv='\uFEFF'+rows.map(r=>r.map(csvEscape).join(',')).join('\r\n');
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
