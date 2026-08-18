@@ -630,7 +630,7 @@ function updateSummary(){
   document.getElementById('sumComposition').textContent=document.getElementById('compositionTotal').textContent;
   document.getElementById('sumMetals').textContent=document.getElementById('metalTotal').value || '0 mg/kg';
 }
-function filenames(id){return [...document.getElementById(id).files].map(f=>f.name).join('; ')}
+function filenames(id){const el=document.getElementById(id);return el?[...el.files].map(f=>f.name).join(' | '):'';}
 
 window.collectData = function collectData(){
   const specs=[{
@@ -649,7 +649,7 @@ window.collectData = function collectData(){
     pb:pb.value,cd:cd.value,hg:hg.value,cr6:cr6.value,metalTotal:metalTotal.value,metalAssessment:metalAssessment.value,
     pfasApplicable:pfasApplicable.value,pfasTotal:pfasTotal.value,pfasIndividual:pfasIndividual.value,pfasRemarks:pfasRemarks.value,
     lab:lab.value,reportNo:reportNo.value,issueDate:issueDate.value,
-    heavyFiles:filenames('heavyFiles'),pfasFiles:filenames('pfasFiles'),docFiles:filenames('docFiles'),otherFiles:filenames('otherFiles'),remarks:remarks.value
+    pfasFiles:filenames('pfasFiles'),docFiles:filenames('docFiles'),otherFiles:filenames('otherFiles'),remarks:remarks.value
   };
 }
 
@@ -686,7 +686,7 @@ function exportCSV(){
   d.materials.forEach((x,i)=>{add('Material '+(i+1),'Material',x.material);add('Material '+(i+1),'Component',x.component);add('Material '+(i+1),'Composition (%)',x.composition);add('Material '+(i+1),'Recycled Content (%)',x.recycled);add('Material '+(i+1),'Remarks',x.remarks)});
   add('Restricted Substance','Pb (mg/kg)',d.pb);add('Restricted Substance','Cd (mg/kg)',d.cd);add('Restricted Substance','Hg (mg/kg)',d.hg);add('Restricted Substance','Cr(VI) (mg/kg)',d.cr6);add('Restricted Substance','Total Heavy Metals',d.metalTotal);add('Restricted Substance','Assessment',d.metalAssessment);
   add('PFAS','Applicable',d.pfasApplicable);add('PFAS','PFAS Total (mg/kg)',d.pfasTotal);add('PFAS','Individual PFAS',d.pfasIndividual);add('PFAS','Remarks',d.pfasRemarks);
-  add('Evidence','Laboratory',d.lab);add('Evidence','Report No.',d.reportNo);add('Evidence','Issue Date',d.issueDate);add('Evidence','Heavy Metal Files',d.heavyFiles);add('Evidence','PFAS Files',d.pfasFiles);add('Evidence','DoC Files',d.docFiles);add('Evidence','Other Files',d.otherFiles);add('Evidence','Remarks',d.remarks);
+  add('Evidence','Laboratory',d.lab);add('Evidence','Report No.',d.reportNo);add('Evidence','Issue Date',d.issueDate);add('Evidence','PFAS Files',d.pfasFiles);add('Evidence','DoC Files',d.docFiles);add('Evidence','Other Files',d.otherFiles);add('Evidence','Remarks',d.remarks);
   const csv='\uFEFF'+rows.map(r=>r.map(csvEscape).join(',')).join('\r\n');
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
