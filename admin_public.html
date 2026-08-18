@@ -3,382 +3,168 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PPWR 제출자료 조회</title>
+<title>TAK PPWR 제출자료 관리</title>
 <style>
-:root{--bg:#f4f6f8;--card:#fff;--text:#17202a;--muted:#667085;--line:#e4e7ec;--accent:#173b66;--bad:#b42318;--good:#067647}
-*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",Arial,sans-serif}
-.wrap{max-width:1500px;margin:auto;padding:20px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
-h1{font-size:24px;margin:0 0 4px}.sub{font-size:13px;color:var(--muted)}
-.card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 5px 18px rgba(16,24,40,.05)}
-.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px}.stat{padding:15px}.num{font-size:26px;font-weight:800}.lbl{font-size:12px;color:var(--muted)}
-.toolbar{padding:13px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto auto auto;gap:9px;margin-bottom:14px}
-input,select,button{font:inherit}input[type=text],select{width:100%;padding:10px 11px;border:1px solid #d0d5dd;border-radius:9px;background:#fff}
-button{border:0;border-radius:9px;padding:10px 13px;font-weight:700;cursor:pointer}.secondary{background:#eef2f6;color:var(--accent)}
-.delete{background:#fef3f2;color:var(--bad);border:1px solid #fecdca}.delete:disabled{opacity:.45;cursor:not-allowed}
-.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:1100px}th,td{padding:11px;border-bottom:1px solid var(--line);font-size:13px;text-align:left;vertical-align:top}
-th{background:#f9fafb;color:#475467;font-size:12px}.check{width:18px;height:18px;cursor:pointer}.mono{font:11px ui-monospace,SFMono-Regular,Menlo,monospace}
-.muted{color:var(--muted)}.badge{display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700}.good{background:#ecfdf3;color:var(--good)}.bad{background:#fef3f2;color:var(--bad)}.neutral{background:#f2f4f7;color:#475467}
-.main{cursor:pointer}.main:hover{background:#fbfcfe}.detailrow td{padding:0;background:#fafbfd}.detail{display:none;padding:16px}.detail.open{display:block}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.section{background:#fff;border:1px solid var(--line);border-radius:10px;padding:13px}.section h3{font-size:14px;margin:0 0 10px}
-.kv{display:grid;grid-template-columns:145px 1fr;gap:7px 10px;font-size:12px}.kv b{color:#475467}.mini{min-width:0}.mini th,.mini td{font-size:11px;padding:7px}
-.empty{text-align:center;padding:45px;color:var(--muted)}.status{font-size:12px;color:var(--muted);margin:8px 0}.files button{margin:3px}
-@media(max-width:900px){.stats{grid-template-columns:1fr 1fr}.toolbar{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
-
-
-  :root{
-    --border:#d9dee7;
-    --text:#1f2937;
-    --muted:#6b7280;
-    --bg:#f6f8fb;
-    --card:#ffffff;
-    --primary:#163a70;
-    --primary2:#244f8f;
-    --danger:#b42318;
-    --ok:#067647;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);font-family:Arial,"Noto Sans KR",sans-serif;color:var(--text)}
-  .wrap{max-width:1180px;margin:28px auto;padding:0 18px 60px}
-  .hero{background:linear-gradient(135deg,#153963,#24548e);color:#fff;border-radius:14px;padding:28px 32px;box-shadow:0 6px 20px rgba(15,23,42,.12)}
-  h1{font-size:26px;margin:0 0 10px}
-  .hero p{margin:6px 0;line-height:1.55}
-  .small{font-size:13px;color:var(--muted)}
-  .hero .small{color:#dbe7f5}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-top:18px;padding:22px;box-shadow:0 2px 8px rgba(15,23,42,.04)}
-  h2{font-size:19px;margin:0 0 18px;color:#173b68}
-  h3{font-size:15px;margin:12px 0 8px}
-  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-  .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-  label{font-weight:700;font-size:13px;display:block;margin-bottom:6px}
-  input,select,textarea{width:100%;border:1px solid #cdd4df;border-radius:8px;padding:10px 11px;font-size:14px;background:#fff}
-  textarea{min-height:88px;resize:vertical}
-  input:focus,select:focus,textarea:focus{outline:none;border-color:#4774ad;box-shadow:0 0 0 3px rgba(71,116,173,.12)}
-  .required{color:#c62828}
-  .hint{font-size:13px;color:var(--muted);line-height:1.45;margin:3px 0 12px}
-  .checks{display:flex;flex-wrap:wrap;gap:9px 16px;padding:10px 0}
-  .check{display:flex;align-items:center;gap:7px;font-size:13px}
-  .check input{width:auto}
-  .rowbox{border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:10px;background:#fbfcfe}
-  .rowhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-  button{border:0;border-radius:8px;padding:10px 14px;font-weight:700;cursor:pointer}
-  .btn{background:#e8eef6;color:#163a70}
-  .btn-primary{background:var(--primary);color:#fff}
-  .btn-danger{background:#fff0ee;color:var(--danger);border:1px solid #f2c7c2}
-  .btn-ghost{background:#fff;border:1px solid var(--border);color:#374151}
-  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-  table{width:100%;border-collapse:collapse;margin-top:10px}
-  th,td{border-bottom:1px solid var(--border);padding:8px 7px;vertical-align:middle}
-  th{font-size:12px;background:#f3f6fa;text-align:left}
-  td input{padding:8px}
-  .material-name{min-width:170px}
-  .delete-cell{width:70px}
-  .totalbar{display:flex;gap:12px;align-items:center;justify-content:flex-end;margin-top:12px;font-size:14px}
-  .totalbar strong{font-size:18px}
-  .status{font-weight:700}
-  .status.ok{color:var(--ok)}
-  .status.bad{color:var(--danger)}
-  .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-  .sumitem{border:1px solid var(--border);border-radius:10px;padding:14px;background:#fafbfd}
-  .sumitem span{display:block;font-size:12px;color:var(--muted);margin-bottom:7px}
-  .sumitem strong{font-size:22px;color:#183c69}
-  .notice{background:#fff8e7;border:1px solid #eed999;border-radius:9px;padding:12px 14px;font-size:13px;line-height:1.5;margin-top:12px}
-  .pfas-panel{display:none;margin-top:12px}
-  .footer{text-align:center;color:var(--muted);font-size:12px;margin-top:20px}
-  @media(max-width:760px){.grid,.grid3,.summary{grid-template-columns:1fr}.hero{padding:22px}.card{padding:16px}table{font-size:12px;display:block;overflow:auto}}
-
-.completed-screen{
-  display:none;min-height:72vh;align-items:center;justify-content:center;padding:30px 12px
-}
-.completed-card{
-  width:min(680px,100%);background:#fff;border:1px solid #e4e7ec;border-radius:18px;
-  padding:38px 28px;text-align:center;box-shadow:0 10px 30px rgba(16,24,40,.08)
-}
-.completed-card h2{margin:0 0 12px;color:#173b66;font-size:28px}
-.completed-card p{color:#475467;line-height:1.7}
-.submission-box{
-  margin:22px auto;padding:16px;background:#f8fafc;border:1px solid #e4e7ec;
-  border-radius:12px;max-width:520px
-}
-.submission-box .label{font-size:12px;color:#667085;margin-bottom:6px}
-.submission-box strong{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:16px;word-break:break-all}
-
-
-.edit-modal{display:none;position:fixed;inset:0;background:rgba(16,24,40,.58);z-index:9999;overflow:auto;padding:24px}
-.edit-shell{max-width:1100px;margin:auto;background:#f5f7fb;border-radius:16px;min-height:90vh;position:relative}
-.edit-head{position:sticky;top:0;z-index:5;background:#173b66;color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-radius:16px 16px 0 0}
-.edit-head h2{margin:0;font-size:20px}.edit-head button{background:#fff;color:#173b66}
-.edit-content{padding:18px}.edit-actions-admin{display:flex;gap:10px;justify-content:flex-end;padding:0 18px 24px;flex-wrap:wrap}
-.existing-files-admin{display:grid;gap:8px;margin-top:10px}.existing-file-admin{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:9px;border:1px solid #e4e7ec;border-radius:8px;background:#fff}
-.reviewbox{margin-top:14px;padding:14px;border:1px solid #d0d5dd;border-radius:10px;background:#f8fafc}
-.review-actions{display:flex;gap:14px;flex-wrap:wrap}.review-reason{width:100%;box-sizing:border-box;margin-top:10px;min-height:70px;padding:9px}
-
+:root{--navy:#173b66;--line:#d9e0e8;--bg:#f5f7fa;--red:#b42318;--green:#067647}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);color:#172b4d}
+.wrap{max-width:1500px;margin:auto;padding:24px}.head{margin-bottom:18px}.head h1{margin:0;color:var(--navy);font-size:27px}.head p{margin:6px 0;color:#667085}
+.stats{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin:15px 0}.card{background:white;border:1px solid var(--line);border-radius:12px;padding:14px}
+.stat{text-align:center}.stat b{display:block;font-size:26px;color:var(--navy)}.stat span{font-size:12px;color:#667085}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.toolbar input,.toolbar select{padding:10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;min-width:150px}.toolbar input{flex:1;min-width:240px}
+button{border:0;border-radius:8px;padding:9px 12px;cursor:pointer;font-weight:700}.primary{background:var(--navy);color:white}.secondary{background:#eef2f6;color:#173b66}.danger{background:#fee4e2;color:#b42318}
+.status{font-size:12px;color:#667085;margin:8px 0}.tablebox{overflow:auto;padding:0}table{border-collapse:collapse;width:100%;min-width:1200px}th,td{padding:10px;border-bottom:1px solid #e7ebf0;text-align:left;vertical-align:top;font-size:13px}th{background:#f8fafc;position:sticky;top:0;z-index:1}.mono{font-family:monospace}.muted{font-size:11px;color:#667085}.badge{display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700}.good{background:#dcfae6;color:#067647}.bad{background:#fee4e2;color:#b42318}.neutral{background:#f2f4f7;color:#475467}
+.detail{display:none;background:#fbfcfe;padding:14px}.detail.open{display:block}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.section{border:1px solid #e4e7ec;background:#fff;border-radius:10px;padding:12px}.section h3{margin:0 0 9px;font-size:14px;color:var(--navy)}.full{grid-column:1/-1}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:5px 10px;font-size:12px}.kv b{color:#475467}
+.files{display:grid;gap:6px}.file{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid #e4e7ec;border-radius:7px;padding:7px}
+.review textarea{width:100%;min-height:70px;padding:8px;border:1px solid #cbd5e1;border-radius:7px;margin-top:8px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;padding:20px;overflow:auto}.modal.open{display:block}.modalbox{max-width:1050px;margin:auto;background:var(--bg);border-radius:14px;overflow:hidden}.modalhead{background:var(--navy);color:#fff;padding:15px 18px;display:flex;justify-content:space-between;align-items:center}.modalhead h2{margin:0;font-size:19px}.formbody{padding:16px}.formcard{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}.formcard h3{margin:0 0 12px;color:var(--navy)}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.formgrid label{font-size:12px;font-weight:700}.formgrid input,.formgrid select,.formgrid textarea{width:100%;padding:9px;border:1px solid #cbd5e1;border-radius:7px;margin-top:4px}.formgrid textarea{min-height:70px}.matrow{display:grid;grid-template-columns:1.3fr 1fr .8fr .8fr 1fr auto;gap:6px;margin-bottom:6px}.matrow input{width:100%;padding:7px;border:1px solid #cbd5e1;border-radius:6px}.actions{display:flex;justify-content:flex-end;gap:8px;padding:0 16px 16px}
+@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.grid,.formgrid{grid-template-columns:1fr}.matrow{grid-template-columns:1fr 1fr}.full{grid-column:auto}}
 </style>
 </head>
 <body>
 <div class="wrap">
- <div class="top">
-  <div><h1>PPWR 제출자료 조회</h1><div class="sub">Toray Advanced Materials Korea Inc. · Purchasing Planning Team · v2026.08.18-2</div></div>
-  <button id="refresh" class="secondary">새로고침</button>
- </div>
+ <div class="head"><h1>PPWR 제출자료 관리</h1><p>Toray Advanced Materials Korea Inc. · Purchasing Planning Team</p></div>
  <div class="stats">
-  <div class="card stat"><div id="sTotal" class="num">-</div><div class="lbl">전체 제출건수</div></div>
-  <div class="card stat"><div id="sCompany" class="num">-</div><div class="lbl">협력사 수</div></div>
-  <div class="card stat"><div id="sOk" class="num">-</div><div class="lbl">중금속 적합</div></div>
-  <div class="card stat"><div id="sPfas" class="num">-</div><div class="lbl">PFAS 해당</div></div>
-  <div class="card stat"><div id="sFile" class="num">-</div><div class="lbl">첨부파일 수</div></div>
+  <div class="card stat"><b id="total">-</b><span>전체 제출건수</span></div>
+  <div class="card stat"><b id="companies">-</b><span>협력사 수</span></div>
+  <div class="card stat"><b id="hmOk">-</b><span>중금속 적합</span></div>
+  <div class="card stat"><b id="hmBad">-</b><span>중금속 부적합</span></div>
+  <div class="card stat"><b id="reviewPending">-</b><span>적합성 미검증</span></div>
+  <div class="card stat"><b id="reviewOk">-</b><span>적합성 적합</span></div>
+  <div class="card stat"><b id="reviewReject">-</b><span>적합성 반려</span></div>
  </div>
  <div class="card toolbar">
-  <input id="q" type="text" placeholder="회사명, 품목명, 접수번호 검색">
-  <select id="major"><option value="">대분류 전체</option></select>
-  <select id="assess"><option value="">중금속 판정 전체</option><option value="적합">적합</option><option value="부적합">부적합</option><option value="미입력">미입력</option></select>
-  <select id="pfasFilter"><option value="">PFAS 전체</option><option value="해당">해당</option><option value="비해당">비해당</option><option value="미입력">미입력</option></select>
+  <input id="search" placeholder="회사명, 품목군, 품번, 접수번호 검색">
+  <select id="hmFilter"><option value="">중금속 전체</option><option>적합</option><option>부적합</option><option value="미입력">미입력</option></select>
+  <select id="reviewFilter"><option value="">적합성 검증 전체</option><option value="미검증">미검증</option><option>적합</option><option>반려</option></select>
+  <button id="refresh" class="secondary">새로고침</button>
   <button id="csv" class="secondary">CSV 다운로드</button>
-  <button id="del" class="delete" disabled>선택 삭제 (0건)</button>
-  <button id="clear" class="secondary">필터 초기화</button>
+  <button id="deleteSelected" class="danger">선택 삭제</button>
  </div>
- <div id="status" class="status">데이터를 불러오는 중...</div>
- <div class="card tablewrap">
-  <table>
-   <thead><tr>
-    <th style="width:48px;text-align:center"><input id="all" class="check" type="checkbox" title="전체 선택"></th>
-    <th>접수번호</th><th>협력사</th><th>품목군</th><th>대표 품목/규격</th><th>구성재질</th><th>중금속</th><th>PFAS</th><th>적합성 검증</th><th>첨부</th><th>상세</th>
-   </tr></thead>
-   <tbody id="body"></tbody>
-  </table>
-  <div id="empty" class="empty" style="display:none">조회된 자료가 없습니다.</div>
- </div>
+ <div id="status" class="status">불러오는 중...</div>
+ <div class="card tablebox"><table>
+  <thead><tr><th><input id="checkAll" type="checkbox"></th><th>접수번호</th><th>협력사</th><th>품목군</th><th>대표 규격 / 품번</th><th>중금속</th><th>PFAS</th><th>적합성 검증</th><th>첨부</th><th>관리</th></tr></thead>
+  <tbody id="tbody"></tbody>
+ </table></div>
 </div>
 
-<div id="editModal" class="edit-modal">
-  <div class="edit-shell" style="max-width:1180px;height:94vh;display:flex;flex-direction:column">
-    <div class="edit-head">
-      <h2>제출자료 수정</h2>
-      <button id="editClose">닫기 / Close</button>
-    </div>
-    <iframe id="editFrame" src="./index.html" style="width:100%;flex:1;border:0;background:#f5f7fb"></iframe>
+<div id="editModal" class="modal"><div class="modalbox">
+ <div class="modalhead"><h2>제출자료 수정</h2><button id="closeEdit">닫기</button></div>
+ <div class="formbody">
+  <div class="formcard"><h3>1. 협력사 정보</h3><div class="formgrid">
+   <label>업체명<input id="eCompany"></label><label>담당자<input id="eContact"></label>
+   <label>이메일<input id="eEmail"></label><label>연락처<input id="ePhone"></label>
+  </div></div>
+  <div class="formcard"><h3>2. 품목군</h3><div class="formgrid">
+   <label>대분류<input id="eMajor"></label><label>세부 품목군<input id="eType"></label>
+  </div></div>
+  <div class="formcard"><h3>3. 대표 규격 및 품번</h3><div class="formgrid">
+   <label>대표 규격<input id="eSpec" placeholder="예: 1,000 × 1,200 mm"></label>
+   <label>대표 품번<input id="eCode" placeholder="예: EBG01001"></label>
+  </div></div>
+  <div class="formcard"><h3>4. 실제 구성재질</h3><div id="materialEditor"></div><button id="addMaterial" class="secondary">+ 재질 추가</button></div>
+  <div class="formcard"><h3>5. 규제물질</h3><div class="formgrid">
+   <label>Pb (mg/kg)<input id="ePb" type="number" step="0.001"></label><label>Cd (mg/kg)<input id="eCd" type="number" step="0.001"></label>
+   <label>Hg (mg/kg)<input id="eHg" type="number" step="0.001"></label><label>CrVI (mg/kg)<input id="eCr" type="number" step="0.001"></label>
+   <label>PFAS 적용<input id="ePfasApplicable"></label><label>PFAS Total (mg/kg)<input id="ePfasTotal" type="number" step="0.001"></label>
+   <label style="grid-column:1/-1">개별 PFAS<input id="ePfasIndividual"></label><label style="grid-column:1/-1">PFAS 비고<textarea id="ePfasRemarks"></textarea></label>
+  </div></div>
+  <div class="formcard"><h3>6. 시험성적서 및 증빙자료</h3><div class="formgrid">
+   <label>시험기관<input id="eLab"></label><label>성적서 번호<input id="eReport"></label><label>발행일<input id="eIssue" type="date"></label>
+   <label style="grid-column:1/-1">비고<textarea id="eRemarks"></textarea></label>
   </div>
-</div>
+  <div id="existingFiles" class="files" style="margin-top:12px"></div>
+  <div class="formgrid" style="margin-top:12px">
+   <label>중금속 자료 추가<input id="fHeavy" type="file" multiple></label><label>PFAS 자료 추가<input id="fPfas" type="file" multiple></label>
+   <label>DoC 추가<input id="fDoc" type="file" multiple></label><label>기타 자료 추가<input id="fOther" type="file" multiple></label>
+  </div></div>
+ </div>
+ <div class="actions"><button id="saveEdit" class="primary">수정내용 저장</button><button id="cancelEdit" class="secondary">취소</button></div>
+ <div id="editStatus" class="status" style="padding:0 16px 16px"></div>
+</div></div>
+
 <script type="module">
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2";
-const SUPABASE_URL="https://husxmsxbhdalmubabfbv.supabase.co";
-const KEY="sb_publishable_eTDBSThdDcMahPfXeadm8g_N0wBGHSS";
-const TABLE="ppwr_submissions", BUCKET="ppwr-files";
-const sb=createClient(SUPABASE_URL,KEY);
-const $=x=>document.getElementById(x);
-const A=v=>Array.isArray(v)?v:[];
-const E=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
-const N=v=>(v===null||v===undefined||v==="")?"-":Number(v).toLocaleString();
-let rows=[],filtered=[],selected=new Set();
-
-function reviewBadge(r){
- const v=String(r.quality_review_status||"");
- if(v==="적합")return '<span class="badge good">적합</span>';
- if(v==="반려")return '<span class="badge bad">반려</span>';
- return '<span class="badge neutral">미검증</span>';
+const sb=createClient("https://husxmsxbhdalmubabfbv.supabase.co","sb_publishable_eTDBSThdDcMahPfXeadm8g_N0wBGHSS");
+const TABLE="ppwr_submissions",BUCKET="ppwr-files";
+const $=id=>document.getElementById(id), A=v=>Array.isArray(v)?v:[], esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+let rows=[],view=[],editing=null,editFiles=[];
+const pw=()=>{const p=prompt("비밀번호를 입력해 주세요.");if(p===null)return false;if(p!=="1234"){alert("비밀번호가 올바르지 않습니다.");return false}return true};
+const spec=r=>A(r.specifications)[0]||{};
+const review=r=>r.quality_review_status||"미검증";
+const badge=(v,bad="부적합")=>`<span class="badge ${v==="적합"?"good":v===bad||v==="반려"?"bad":"neutral"}">${esc(v||"미입력")}</span>`;
+function updateStats(){
+ $("total").textContent=rows.length;$("companies").textContent=new Set(rows.map(r=>r.company).filter(Boolean)).size;
+ $("hmOk").textContent=rows.filter(r=>r.heavy_metals_assessment==="적합").length;$("hmBad").textContent=rows.filter(r=>r.heavy_metals_assessment==="부적합").length;
+ $("reviewPending").textContent=rows.filter(r=>!r.quality_review_status).length;$("reviewOk").textContent=rows.filter(r=>r.quality_review_status==="적합").length;$("reviewReject").textContent=rows.filter(r=>r.quality_review_status==="반려").length;
 }
-function dateFromId(id){const m=String(id||"").match(/^PPWR-(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})-/);return m?`${m[1]}-${m[2]}-${m[3]} ${m[4]}:${m[5]}:${m[6]}`:""}
-function cls(v){
- const s=String(v||"").trim().toLowerCase();
- if(!s)return "neutral";
- if(s.includes("부적합")||s.includes("non-compliant")||s.includes("noncompliant")||s.includes("fail"))return "bad";
- if(s.includes("적합")||s.includes("compliant")||s.includes("pass")||s==="ok")return "good";
- return "neutral";
+function apply(){
+ const q=$("search").value.trim().toLowerCase(),hf=$("hmFilter").value,rf=$("reviewFilter").value;
+ view=rows.filter(r=>{
+  const sp=spec(r),text=[r.submission_id,r.company,r.major_category,r.packaging_type,sp.size,sp.code].join(" ").toLowerCase();
+  const hm=r.heavy_metals_assessment||"미입력";
+  return (!q||text.includes(q))&&(!hf||hm===hf)&&(!rf||review(r)===rf);
+ });render();
 }
-function normAssess(v){
- const s=String(v||"").trim().toLowerCase();
- if(!s)return "미입력";
- if(s.includes("부적합")||s.includes("non-compliant")||s.includes("noncompliant")||s.includes("fail"))return "부적합";
- if(s.includes("적합")||s.includes("compliant")||s.includes("pass")||s==="ok")return "적합";
- return s;
+function details(r){
+ const mats=A(r.materials).map((m,i)=>`${i+1}. ${esc(m.material||"-")} / ${esc(m.component||"-")} / 구성비 ${esc(m.composition??"-")}% / 재생원료 ${esc(m.recycled??"-")}%`).join("<br>")||"-";
+ const fs=A(r.uploaded_files).map((f,i)=>`<div class="file"><span>${esc(f.originalName||f.storedName||f.path)}</span><button class="secondary fileDownload" data-path="${esc(f.path||"")}">열기</button></div>`).join("")||"<span class=muted>첨부파일 없음</span>";
+ return `<div class="grid">
+ <div class="section"><h3>협력사 정보</h3><div class="kv"><b>업체명</b><span>${esc(r.company)}</span><b>담당자</b><span>${esc(r.contact_person)}</span><b>이메일</b><span>${esc(r.email)}</span><b>연락처</b><span>${esc(r.phone)}</span></div></div>
+ <div class="section"><h3>포장재 정보</h3><div class="kv"><b>대분류</b><span>${esc(r.major_category)}</span><b>세부 품목군</b><span>${esc(r.packaging_type)}</span><b>대표 규격</b><span>${esc(spec(r).size)}</span><b>대표 품번</b><span>${esc(spec(r).code)}</span></div></div>
+ <div class="section full"><h3>구성재질</h3>${mats}</div>
+ <div class="section"><h3>중금속</h3><div class="kv"><b>Pb</b><span>${esc(r.lead_pb)}</span><b>Cd</b><span>${esc(r.cadmium_cd)}</span><b>Hg</b><span>${esc(r.mercury_hg)}</span><b>CrVI</b><span>${esc(r.chromium_vi)}</span><b>합계</b><span>${esc(r.heavy_metals_total)}</span><b>판정</b><span>${badge(r.heavy_metals_assessment)}</span></div></div>
+ <div class="section"><h3>PFAS / 시험정보</h3><div class="kv"><b>PFAS 적용</b><span>${esc(r.pfas_applicable)}</span><b>Total</b><span>${esc(r.pfas_total)}</span><b>시험기관</b><span>${esc(r.laboratory)}</span><b>성적서</b><span>${esc(r.report_no)}</span><b>발행일</b><span>${esc(r.issue_date)}</span></div></div>
+ <div class="section full"><h3>첨부파일</h3><div class="files">${fs}</div></div>
+ <div class="section full review"><h3>적합성 검증</h3><label><input type="radio" name="rv_${esc(r.submission_id)}" value="적합" ${r.quality_review_status==="적합"?"checked":""}> 적합</label> &nbsp; <label><input type="radio" name="rv_${esc(r.submission_id)}" value="반려" ${r.quality_review_status==="반려"?"checked":""}> 반려</label><textarea class="rejectReason" placeholder="반려 사유">${esc(r.quality_rejection_reason||"")}</textarea><button class="primary saveReview" style="margin-top:8px">적합성 검증 저장</button></div>
+ </div>`;
 }
-function pfasState(r){
- const s=String(r.pfas_applicable||"").trim().toLowerCase();
- if(!s)return "미입력";
- if(s.includes("비해당")||s==="no"||s==="n"||s.includes("not applicable")||s==="n/a")return "비해당";
- if(s.includes("해당")||s==="yes"||s==="y"||s==="applicable")return "해당";
- return "미입력";
+function render(){
+ $("tbody").innerHTML="";
+ view.forEach((r,i)=>{
+  const sp=spec(r),tr=document.createElement("tr"),dr=document.createElement("tr"),id="detail_"+i;
+  tr.innerHTML=`<td><input class="rowCheck" type="checkbox" data-id="${esc(r.submission_id)}"></td><td class="mono">${esc(r.submission_id)}</td><td><b>${esc(r.company||"-")}</b><div class=muted>${esc(r.contact_person||"")}</div></td><td>${esc(r.major_category||"-")}<div class=muted>${esc(r.packaging_type||"")}</div></td><td>${esc(sp.size||"-")}<div class=muted>${esc(sp.code||"-")}</div></td><td>${badge(r.heavy_metals_assessment)}</td><td>${esc(r.pfas_applicable||"-")}</td><td>${badge(review(r),"반려")}</td><td>${A(r.uploaded_files).length}개</td><td><button class="secondary show">상세</button> <button class="primary edit">수정</button></td>`;
+  dr.innerHTML=`<td colspan="10"><div id="${id}" class="detail">${details(r)}</div></td>`;
+  $("tbody").append(tr,dr);
+  tr.querySelector(".show").onclick=()=>$(id).classList.toggle("open");
+  tr.querySelector(".edit").onclick=()=>openEdit(r);
+  bindDetail(dr,r);
+ });
+ $("status").textContent=`전체 ${rows.length}건 / 현재 조회 ${view.length}건`;
 }
-function fc(r){return A(r.uploaded_files).length}
-function shortSpec(v){const a=A(v);if(!a.length)return"-";const x=a[0];return `${E(x.item||"-")}<br><span class="muted">${E(x.size||"")}${x.code?" · "+E(x.code):""}</span>${a.length>1?`<br><span class="muted">외 ${a.length-1}건</span>`:""}`}
-function shortMat(v){const a=A(v).filter(x=>x?.material);if(!a.length)return"-";return a.slice(0,2).map(x=>`${E(x.material)}${x.composition!==""&&x.composition!=null?" "+E(x.composition)+"%":""}`).join("<br>")+(a.length>2?`<br><span class="muted">외 ${a.length-2}건</span>`:"")}
-
+function bindDetail(root,r){
+ root.querySelectorAll(".fileDownload").forEach(b=>b.onclick=async()=>{const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(b.dataset.path,60);if(error)alert(error.message);else window.open(data.signedUrl,"_blank")});
+ const save=root.querySelector(".saveReview");if(save)save.onclick=async()=>{if(!pw())return;const val=root.querySelector(`input[name="rv_${CSS.escape(r.submission_id)}"]:checked`)?.value;if(!val){alert("적합 또는 반려를 선택해 주세요.");return}const reason=root.querySelector(".rejectReason").value.trim();if(val==="반려"&&!reason){alert("반려 사유를 입력해 주세요.");return}const {error}=await sb.from(TABLE).update({quality_review_status:val,quality_rejection_reason:val==="반려"?reason:null,quality_reviewed_at:new Date().toISOString()}).eq("submission_id",r.submission_id);if(error)alert(error.message);else load()};
+}
 async function load(){
  $("status").textContent="데이터를 불러오는 중...";
  const {data,error}=await sb.from(TABLE).select("*").order("submission_id",{ascending:false});
- if(error){$("status").textContent="조회 실패: "+error.message;$("body").innerHTML="";return}
- rows=data||[]; selected.clear(); buildMajor(); apply(); $("status").textContent=`마지막 조회: ${new Date().toLocaleTimeString()}`;
+ if(error){$("status").textContent="조회 실패: "+error.message;return}
+ rows=data||[];updateStats();apply();
 }
-function buildMajor(){const keep=$("major").value;const vals=[...new Set(rows.map(r=>r.major_category).filter(Boolean))].sort();$("major").innerHTML='<option value="">대분류 전체</option>'+vals.map(v=>`<option>${E(v)}</option>`).join("");$("major").value=keep}
-function apply(){
- const q=$("q").value.trim().toLowerCase();
- const m=$("major").value;
- const a=$("assess").value;
- const pf=$("pfasFilter").value;
-
- filtered=rows.filter(r=>{
-  const specs=A(r.specifications).map(x=>`${x.item||""} ${x.size||""} ${x.code||""}`).join(" ");
-  const h=`${r.submission_id||""} ${r.company||""} ${r.contact_person||""} ${r.packaging_type||""} ${specs}`.toLowerCase();
-  if(q&&!h.includes(q))return false;
-  if(m&&r.major_category!==m)return false;
-
-  const av=normAssess(r.heavy_metals_assessment);
-  if(a&&av!==a)return false;
-
-  const pv=pfasState(r);
-  if(pf&&pv!==pf)return false;
-
-  return true;
- });
- render();
+function addMat(m={}){
+ const d=document.createElement("div");d.className="matrow";d.innerHTML=`<input class="mm" placeholder="재질" value="${esc(m.material||"")}"><input class="mc" placeholder="부위" value="${esc(m.component||"")}"><input class="mp" type="number" placeholder="구성비 %" value="${esc(m.composition??"")}"><input class="mr" type="number" placeholder="재생원료 %" value="${esc(m.recycled??"")}"><input class="mn" placeholder="비고" value="${esc(m.remarks||"")}"><button class="danger">삭제</button>`;d.querySelector("button").onclick=()=>d.remove();$("materialEditor").append(d)
 }
-function render(){
- $("sTotal").textContent=rows.length;
- $("sCompany").textContent=new Set(filtered.map(r=>r.company).filter(Boolean)).size;
- $("sOk").textContent=filtered.filter(r=>normAssess(r.heavy_metals_assessment)==="적합").length;
- $("sPfas").textContent=filtered.filter(r=>pfasState(r)==="해당").length;
- $("sFile").textContent=filtered.reduce((n,r)=>n+fc(r),0);
- $("empty").style.display=filtered.length?"none":"block";const tb=$("body");tb.innerHTML="";
- filtered.forEach((r,i)=>{const did="d"+i;const tr=document.createElement("tr");tr.className="main";
- tr.innerHTML=`<td style="text-align:center"><input class="check rowcheck" type="checkbox" data-id="${E(r.submission_id)}"></td>
- <td><div class="mono">${E(r.submission_id)}</div><div class="muted">${E(dateFromId(r.submission_id))}</div></td>
- <td><b>${E(r.company||"-")}</b><br><span class="muted">${E(r.contact_person||"")}</span></td>
- <td>${E(r.major_category||"-")}<br><span class="muted">${E(r.packaging_type||"-")}</span></td>
- <td>${shortSpec(r.specifications)}</td><td>${shortMat(r.materials)}</td>
- <td><span class="badge ${cls(r.heavy_metals_assessment)}">${E(r.heavy_metals_assessment||"미입력")}</span><br><span class="muted">${N(r.heavy_metals_total)} mg/kg</span></td>
- <td>${E(r.pfas_applicable||"-")}<br><span class="muted">${r.pfas_total==null?"":E(r.pfas_total)+" mg/kg"}</span></td><td>${reviewBadge(r)}</td><td>${fc(r)}개</td><td><button class="secondary detailbtn">보기</button></td>`;
- const dr=document.createElement("tr");dr.className="detailrow";dr.innerHTML=`<td colspan="11"><div id="${did}" class="detail">${details(r)}</div></td>`;
- tr.addEventListener("click",e=>{if(e.target.classList.contains("rowcheck"))return;$(did).classList.toggle("open")});
- const cb=tr.querySelector(".rowcheck");cb.checked=selected.has(r.submission_id);cb.addEventListener("click",e=>e.stopPropagation());cb.addEventListener("change",()=>{cb.checked?selected.add(r.submission_id):selected.delete(r.submission_id);selUI()});
- tb.append(tr,dr);bindFiles(dr);bindAdmin(dr,r)});
- selUI()
+function openEdit(r){
+ if(!pw())return;editing=r;editFiles=A(r.uploaded_files).map(x=>({...x}));const sp=spec(r);
+ [["eCompany",r.company],["eContact",r.contact_person],["eEmail",r.email],["ePhone",r.phone],["eMajor",r.major_category],["eType",r.packaging_type],["eSpec",sp.size],["eCode",sp.code],["ePb",r.lead_pb],["eCd",r.cadmium_cd],["eHg",r.mercury_hg],["eCr",r.chromium_vi],["ePfasApplicable",r.pfas_applicable],["ePfasTotal",r.pfas_total],["ePfasIndividual",r.pfas_individual],["ePfasRemarks",r.pfas_remarks],["eLab",r.laboratory],["eReport",r.report_no],["eIssue",r.issue_date],["eRemarks",r.remarks]].forEach(([id,v])=>$(id).value=v??"");
+ $("materialEditor").innerHTML="";A(r.materials).forEach(addMat);drawEditFiles();$("editModal").classList.add("open")
 }
-function details(r){
- const specs=A(r.specifications),mats=A(r.materials),files=A(r.uploaded_files);
- const sr=specs.length?specs.map((x,i)=>`<tr><td>${i+1}</td><td>${E(x.item||"")}</td><td>${E(x.size||"")}</td><td>${E(x.code||"")}</td></tr>`).join(""):'<tr><td colspan="4">-</td></tr>';
- const mr=mats.length?mats.map((x,i)=>`<tr><td>${i+1}</td><td>${E(x.material||"")}</td><td>${E(x.component||"")}</td><td>${E(x.composition||"")}</td><td>${E(x.recycled||"")}</td><td>${E(x.remarks||"")}</td></tr>`).join(""):'<tr><td colspan="6">-</td></tr>';
- const fb=files.length?files.map(f=>`<button class="secondary file" data-path="${E(f.path)}" data-name="${E(f.originalName||"file")}">${E(f.category||"file")} · ${E(f.originalName||"파일")}</button>`).join(""):"-";
- return `<div class="grid"><div class="section"><h3>협력사 / 기본정보</h3><div class="kv"><b>접수번호</b><span class="mono">${E(r.submission_id)}</span><b>회사명</b><span>${E(r.company||"-")}</span><b>담당자</b><span>${E(r.contact_person||"-")}</span><b>이메일</b><span>${E(r.email||"-")}</span><b>연락처</b><span>${E(r.phone||"-")}</span><b>대분류</b><span>${E(r.major_category||"-")}</span><b>세부 품목군</b><span>${E(r.packaging_type||"-")}</span></div></div>
- <div class="section"><h3>유해물질 / 시험정보</h3><div class="kv"><b>Pb</b><span>${N(r.lead_pb)} mg/kg</span><b>Cd</b><span>${N(r.cadmium_cd)} mg/kg</span><b>Hg</b><span>${N(r.mercury_hg)} mg/kg</span><b>Cr(VI)</b><span>${N(r.chromium_vi)} mg/kg</span><b>중금속 합계</b><span>${N(r.heavy_metals_total)} mg/kg</span><b>판정</b><span>${E(r.heavy_metals_assessment||"-")}</span><b>PFAS 적용</b><span>${E(r.pfas_applicable||"-")}</span><b>PFAS Total</b><span>${N(r.pfas_total)} mg/kg</span><b>시험기관</b><span>${E(r.laboratory||"-")}</span><b>성적서 번호</b><span>${E(r.report_no||"-")}</span></div></div>
- <div class="section"><h3>납품 규격 (${specs.length}건)</h3><table class="mini"><tr><th>#</th><th>품목명</th><th>규격</th><th>코드</th></tr>${sr}</table></div>
- <div class="section"><h3>구성재질 (${mats.length}건)</h3><table class="mini"><tr><th>#</th><th>재질</th><th>부위</th><th>구성비%</th><th>재생%</th><th>비고</th></tr>${mr}</table></div>
- <div class="section" style="grid-column:1/-1"><h3>첨부파일 (${files.length}개)</h3><div class="files">${fb}</div><div class="filestatus status"></div></div>
-<div class="section" style="grid-column:1/-1"><h3>관리</h3><button class="open-edit secondary" data-id="${E(r.submission_id)}">수정</button></div>
-<div class="section" style="grid-column:1/-1"><h3>적합성 검증</h3>
- <div class="reviewbox" data-id="${E(r.submission_id)}">
-  <div class="review-actions"><label><input type="radio" name="rv_${E(r.submission_id)}" value="적합" ${r.quality_review_status==="적합"?"checked":""}> 적합</label>
-  <label><input type="radio" name="rv_${E(r.submission_id)}" value="반려" ${r.quality_review_status==="반려"?"checked":""}> 반려</label></div>
-  <textarea class="review-reason" placeholder="반려 사유를 입력해 주세요.">${E(r.quality_rejection_reason||"")}</textarea>
-  <button class="review-save" style="margin-top:8px">적합성 검증 결과 저장</button><div class="review-msg status"></div>
- </div>
-</div></div>`
+function drawEditFiles(){
+ $("existingFiles").innerHTML=editFiles.map((f,i)=>`<div class=file><span>${esc(f.originalName||f.path)}</span><button class="danger efDel" data-i="${i}">삭제</button></div>`).join("")||"<span class=muted>기존 첨부파일 없음</span>";
+ $("existingFiles").querySelectorAll(".efDel").forEach(b=>b.onclick=async()=>{if(!pw())return;const f=editFiles[+b.dataset.i];if(f.path){const {error}=await sb.storage.from(BUCKET).remove([f.path]);if(error){alert(error.message);return}}editFiles.splice(+b.dataset.i,1);drawEditFiles()});
 }
-
-
-let editingRow=null;
-function askPw(){
- const p=prompt("관리자 비밀번호를 입력해 주세요.");
- if(p===null)return false;
- if(p!=="1234"){alert("비밀번호가 올바르지 않습니다.");return false}
- return true;
+async function uploadNew(){
+ for(const [cat,id] of [["heavy-metal","fHeavy"],["pfas","fPfas"],["doc","fDoc"],["other","fOther"]]){let n=0;for(const f of [...$(id).files]){n++;const clean=f.name.replace(/[^\w.\-가-힣]/g,"_"),path=`${editing.submission_id}/${cat}/관리자수정_${Date.now()}_${n}_${clean}`;const {error}=await sb.storage.from(BUCKET).upload(path,f);if(error)throw error;editFiles.push({category:cat,originalName:f.name,path,type:f.type,size:f.size})}}
 }
-function openEditor(r){
- if(!askPw())return;
- editingRow=r;
- const modal=$("editModal"), frame=$("editFrame");
- modal.style.display="block";
- document.body.style.overflow="hidden";
- frame.src="./index.html?admin_edit="+encodeURIComponent(r.submission_id)+"&t="+Date.now();
-}
-function closeEditor(){$("editModal").style.display="none";document.body.style.overflow=""}
-$("editClose").onclick=closeEditor;
-
-window.addEventListener("message",async ev=>{
- const d=ev.data||{};
- if(d.type==="PPWR_ADMIN_EDIT_READY" && editingRow){
-   $("editFrame").contentWindow.postMessage({type:"PPWR_ADMIN_EDIT_LOAD",row:editingRow},"*");
-   return;
- }
- if(d.type==="PPWR_ADMIN_EDIT_SAVE"&&editingRow){
-   if(!askPw()){ev.source.postMessage({type:"PPWR_ADMIN_EDIT_RESULT",ok:false,message:"비밀번호 확인이 취소되었습니다."},"*");return}
-   const payload=d.payload||{};
-   const {error}=await sb.from(TABLE).update(payload).eq("submission_id",editingRow.submission_id);
-   if(error){ev.source.postMessage({type:"PPWR_ADMIN_EDIT_RESULT",ok:false,message:error.message},"*");return}
-   ev.source.postMessage({type:"PPWR_ADMIN_EDIT_RESULT",ok:true,message:"수정되었습니다."},"*");
-   closeEditor();await load();
- }
- if(d.type==="PPWR_ADMIN_FILE_DELETE"&&editingRow){
-   if(!askPw()){ev.source.postMessage({type:"PPWR_ADMIN_FILE_RESULT",ok:false,message:"비밀번호 확인이 취소되었습니다."},"*");return}
-   const f=d.file;
-   if(f?.path){
-     const {error}=await sb.storage.from(BUCKET).remove([f.path]);
-     if(error){ev.source.postMessage({type:"PPWR_ADMIN_FILE_RESULT",ok:false,message:error.message},"*");return}
-   }
-   const files=A(editingRow.uploaded_files).filter(x=>x.path!==f.path);
-   const {error}=await sb.from(TABLE).update({uploaded_files:files}).eq("submission_id",editingRow.submission_id);
-   if(error){ev.source.postMessage({type:"PPWR_ADMIN_FILE_RESULT",ok:false,message:error.message},"*");return}
-   editingRow.uploaded_files=files;
-   ev.source.postMessage({type:"PPWR_ADMIN_FILE_RESULT",ok:true,files},"*");
- }
-});
-function bindFiles(root){root.querySelectorAll(".file").forEach(b=>b.addEventListener("click",async e=>{e.stopPropagation();const s=root.querySelector(".filestatus");s.textContent="파일 불러오는 중...";const {data,error}=await sb.storage.from(BUCKET).download(b.dataset.path);if(error){s.textContent="다운로드 실패: "+error.message;return}const u=globalThis.URL.createObjectURL(data),a=document.createElement("a");a.href=u;a.download=b.dataset.name;a.click();setTimeout(()=>globalThis.URL.revokeObjectURL(u),3000);s.textContent=""}))}
-function selUI(){const ids=filtered.map(r=>r.submission_id),n=ids.filter(id=>selected.has(id)).length;$("all").checked=ids.length>0&&n===ids.length;$("all").indeterminate=n>0&&n<ids.length;$("del").disabled=selected.size===0;$("del").textContent=`선택 삭제 (${selected.size}건)`}
-$("all").addEventListener("change",()=>{filtered.forEach(r=>$("all").checked?selected.add(r.submission_id):selected.delete(r.submission_id));document.querySelectorAll(".rowcheck").forEach(c=>c.checked=$("all").checked);selUI()});
-$("del").addEventListener("click",async()=>{if(!selected.size)return;const targets=rows.filter(r=>selected.has(r.submission_id));if(!confirm(`선택한 ${targets.length}건을 삭제하시겠습니까?\n데이터와 첨부파일이 함께 삭제되며 복구할 수 없습니다.`))return;const pw=prompt("삭제 비밀번호를 입력하세요.");if(pw===null)return;if(pw!=="1234"){alert("비밀번호가 올바르지 않습니다.");return}
- $("del").disabled=true;$("del").textContent="삭제 중...";
- const paths=targets.flatMap(r=>A(r.uploaded_files).map(f=>f?.path).filter(Boolean));if(paths.length){const {error}=await sb.storage.from(BUCKET).remove(paths);if(error){alert("첨부파일 삭제 실패: "+error.message);selUI();return}}
- const {error}=await sb.from(TABLE).delete().in("submission_id",[...selected]);if(error){alert("데이터 삭제 실패: "+error.message);selUI();return}selected.clear();alert(`${targets.length}건이 삭제되었습니다.`);await load()
-});
-$("refresh").addEventListener("click",load);$("q").addEventListener("input",apply);$("major").addEventListener("change",apply);$("assess").addEventListener("change",apply);$("pfasFilter").addEventListener("change",apply);
-$("clear").addEventListener("click",()=>{$("q").value="";$("major").value="";$("assess").value="";$("pfasFilter").value="";apply()});
-$("csv").addEventListener("click",()=>{
- try{
-  const H=[
-   "접수번호","제출일시","회사명","담당자","이메일","연락처","대분류","세부품목군",
-   "납품규격 상세","구성재질 상세",
-   "Pb (mg/kg)","Cd (mg/kg)","Hg (mg/kg)","CrVI (mg/kg)",
-   "중금속합계 (mg/kg)","중금속판정",
-   "PFAS 적용","PFAS Total (mg/kg)","개별 PFAS","PFAS 비고",
-   "시험기관","성적서번호","발행일","첨부파일 상세","비고"
-  ];
-  const Q=v=>`"${String(v??"").replace(/"/g,'""').replace(/\r?\n/g," ")}"`;
-  const L=[H.map(Q).join(",")];
-
-  filtered.forEach(r=>{
-   const specs=A(r.specifications).map((x,i)=>
-    `${i+1}. 품목명:${x.item||"-"} / 규격:${x.size||"-"} / 코드:${x.code||"-"}`
-   ).join(" | ");
-   const materials=A(r.materials).map((x,i)=>
-    `${i+1}. 재질:${x.material||"-"} / 부위:${x.component||"-"} / 구성비:${x.composition??"-"}% / 재생원료:${x.recycled??"-"}% / 비고:${x.remarks||"-"}`
-   ).join(" | ");
-   const files=A(r.uploaded_files).map((f,i)=>
-    `${i+1}. ${f.category||"file"}: ${f.originalName||f.path||"-"}`
-   ).join(" | ");
-
-   L.push([
-    r.submission_id,dateFromId(r.submission_id),r.company,r.contact_person,r.email,r.phone,
-    r.major_category,r.packaging_type,specs,materials,
-    r.lead_pb,r.cadmium_cd,r.mercury_hg,r.chromium_vi,
-    r.heavy_metals_total,r.heavy_metals_assessment,
-    r.pfas_applicable,r.pfas_total,r.pfas_individual,r.pfas_remarks,
-    r.laboratory,r.report_no,r.issue_date,files,r.remarks
-   ].map(Q).join(","));
-  });
-
-  // Data URI 방식: URL.createObjectURL을 전혀 사용하지 않음
-  const csvText="\uFEFF"+L.join("\r\n");
-  const dataUri="data:text/csv;charset=utf-8,"+encodeURIComponent(csvText);
-  const a=document.createElement("a");
-  a.href=dataUri;
-  a.download=`PPWR_submissions_${new Date().toISOString().slice(0,10)}.csv`;
-  a.style.display="none";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
- }catch(err){
-  alert("CSV 다운로드 오류: "+(err?.message||err));
- }
-});
-
+$("saveEdit").onclick=async()=>{if(!editing||!pw())return;$("editStatus").textContent="저장 중...";try{await uploadNew();const num=id=>$(id).value===""?null:Number($(id).value),vals=[num("ePb"),num("eCd"),num("eHg"),num("eCr")],has=vals.some(v=>v!==null),total=has?vals.reduce((a,v)=>a+(v||0),0):null,mats=[...$("materialEditor").children].map(d=>({material:d.querySelector(".mm").value,component:d.querySelector(".mc").value,composition:d.querySelector(".mp").value,recycled:d.querySelector(".mr").value,remarks:d.querySelector(".mn").value}));
+ const payload={company:$("eCompany").value,contact_person:$("eContact").value,email:$("eEmail").value,phone:$("ePhone").value,major_category:$("eMajor").value,packaging_type:$("eType").value,specifications:[{item:$("eType").value,size:$("eSpec").value,code:$("eCode").value}],materials:mats,lead_pb:vals[0],cadmium_cd:vals[1],mercury_hg:vals[2],chromium_vi:vals[3],heavy_metals_total:total,heavy_metals_assessment:total===null?null:(total<=100?"적합":"부적합"),pfas_applicable:$("ePfasApplicable").value,pfas_total:num("ePfasTotal"),pfas_individual:$("ePfasIndividual").value,pfas_remarks:$("ePfasRemarks").value,laboratory:$("eLab").value,report_no:$("eReport").value,issue_date:$("eIssue").value||null,remarks:$("eRemarks").value,uploaded_files:editFiles};
+ const {error}=await sb.from(TABLE).update(payload).eq("submission_id",editing.submission_id);if(error)throw error;$("editModal").classList.remove("open");$("editStatus").textContent="";await load()}catch(e){$("editStatus").textContent="저장 실패: "+e.message}};
+$("addMaterial").onclick=()=>addMat();$("closeEdit").onclick=$("cancelEdit").onclick=()=>$("editModal").classList.remove("open");
+$("refresh").onclick=load;["search","hmFilter","reviewFilter"].forEach(id=>$(id).addEventListener(id==="search"?"input":"change",apply));
+$("checkAll").onchange=e=>document.querySelectorAll(".rowCheck").forEach(c=>c.checked=e.target.checked);
+$("deleteSelected").onclick=async()=>{const ids=[...document.querySelectorAll(".rowCheck:checked")].map(x=>x.dataset.id);if(!ids.length){alert("삭제할 건을 선택해 주세요.");return}if(!pw()||!confirm(`${ids.length}건을 삭제할까요?`))return;const {error}=await sb.from(TABLE).delete().in("submission_id",ids);if(error)alert(error.message);else load()};
+$("csv").onclick=()=>{const H=["접수번호","회사명","담당자","대분류","품목군","대표규격","대표품번","중금속합계","중금속판정","PFAS","적합성검증","반려사유"],Q=v=>`"${String(v??"").replace(/"/g,'""')}"`,L=[H.map(Q).join(",")];view.forEach(r=>{const s=spec(r);L.push([r.submission_id,r.company,r.contact_person,r.major_category,r.packaging_type,s.size,s.code,r.heavy_metals_total,r.heavy_metals_assessment,r.pfas_applicable,review(r),r.quality_rejection_reason].map(Q).join(","))});const a=document.createElement("a");a.href="data:text/csv;charset=utf-8,"+encodeURIComponent("\uFEFF"+L.join("\r\n"));a.download="PPWR_submissions.csv";a.click()};
 await load();
 </script>
 </body></html>
