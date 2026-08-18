@@ -91,7 +91,7 @@
     <p><strong>PPWR Packaging Material Composition & Regulatory Substance Survey</strong></p>
     <p>EU 포장 및 포장폐기물 규정(PPWR) 대응을 위해 당사에 공급되는 포장재의 <strong>구성재질, 구성비, 재생원료 함량 및 규제물질 정보</strong>를 조사하고 있습니다.</p>
     <p>Please provide the material composition, composition ratio, recycled content, and regulated substance information for packaging materials supplied to our company.</p>
-    <p class="small"><strong>작성 기준 / Submission Guide</strong><br>동일한 재질 및 구성비를 사용하는 규격은 복수 등록할 수 있으며, 시험성적서 등 관련 증빙자료가 있는 경우 함께 첨부해 주시기 바랍니다.<br>Multiple specifications using the same material composition may be registered together. Please attach relevant test reports or supporting documents where available.</p>
+    <p class="small"><strong>작성 기준 / Submission Guide</strong><br>본 양식은 PPWR 대응을 위한 포장재 관련 자료 취합을 목적으로 합니다. 대표 규격 및 대표 품번을 기준으로 정보를 입력해 주시고, 각 구성재질별 시험성적서 등 관련 증빙자료를 함께 첨부해 주시기 바랍니다. 제출해 주신 자료는 PPWR 적합성 검토 및 관련 문서 관리에 활용될 예정입니다. 원활한 자료 취합을 위해 정확한 정보 입력 및 관련 자료 첨부에 협조 부탁드립니다.<br>Multiple specifications using the same material composition may be registered together. Please attach relevant test reports or supporting documents where available.</p>
     <p class="small">Toray Advanced Materials Korea Inc. · 구매기획팀 / Purchasing Planning Team</p>
   </section>
 
@@ -212,9 +212,10 @@
     <h2>7. 기타 증빙자료 / Other Supporting Documents</h2>
     <div class="grid">
       <div>
-        <label>DoC / Declaration of Conformity <span style="font-weight:400;color:#667085">(선택 / Optional)</span></label>
-        <input id="docFiles" type="file" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
-      </div>
+<label>DoC / Declaration of Conformity <span style="color:#d92d20;font-weight:700">* 필수 / Required</span></label>
+<input id="docFiles" type="file" multiple required accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+<div class="hint">DoC를 1개 이상 반드시 첨부해 주세요. / At least one DoC must be attached.</div>
+</div>
       <div>
         <label>기타 참고자료 / Other Documents <span style="font-weight:400;color:#667085">(선택 / Optional)</span></label>
         <input id="otherFiles" type="file" multiple accept=".pdf,.xls,.xlsx,.csv,.doc,.docx,.jpg,.jpeg,.png">
@@ -317,6 +318,13 @@ function storedFileName(company, packagingType, group, submissionId, originalNam
 }
 
 window.submitToSupabase = async function() {
+  const docInput=document.getElementById("docFiles");
+  if(!docInput?.files?.length){
+    alert("DoC는 필수 첨부자료입니다. DoC 파일을 1개 이상 첨부해 주세요.\nDoC is required. Please attach at least one DoC file.");
+    docInput?.focus();
+    return;
+  }
+
   const d = window.collectData();
 
   if(!d.company || !d.contact || !d.major || !d.type) {
