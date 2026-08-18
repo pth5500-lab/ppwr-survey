@@ -61,10 +61,10 @@ th{background:#f9fafb;color:#475467;font-size:12px}.check{width:18px;height:18px
 </div>
 <script type="module">
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2";
-const URL="https://husxmsxbhdalmubabfbv.supabase.co";
+const SUPABASE_URL="https://husxmsxbhdalmubabfbv.supabase.co";
 const KEY="sb_publishable_eTDBSThdDcMahPfXeadm8g_N0wBGHSS";
 const TABLE="ppwr_submissions", BUCKET="ppwr-files";
-const sb=createClient(URL,KEY);
+const sb=createClient(SUPABASE_URL,KEY);
 const $=x=>document.getElementById(x);
 const A=v=>Array.isArray(v)?v:[];
 const E=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
