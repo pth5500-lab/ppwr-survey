@@ -232,7 +232,7 @@ function apply(){
  render();
 }
 function render(){
- $("sTotal").textContent=filtered.length;
+ $("sTotal").textContent=rows.length;
  $("sCompany").textContent=new Set(filtered.map(r=>r.company).filter(Boolean)).size;
  $("sOk").textContent=filtered.filter(r=>normAssess(r.heavy_metals_assessment)==="적합").length;
  $("sPfas").textContent=filtered.filter(r=>pfasState(r)==="해당").length;
@@ -246,7 +246,7 @@ function render(){
  <td>${shortSpec(r.specifications)}</td><td>${shortMat(r.materials)}</td>
  <td><span class="badge ${cls(r.heavy_metals_assessment)}">${E(r.heavy_metals_assessment||"미입력")}</span><br><span class="muted">${N(r.heavy_metals_total)} mg/kg</span></td>
  <td>${E(r.pfas_applicable||"-")}<br><span class="muted">${r.pfas_total==null?"":E(r.pfas_total)+" mg/kg"}</span></td><td>${reviewBadge(r)}</td><td>${fc(r)}개</td><td><button class="secondary detailbtn">보기</button></td>`;
- const dr=document.createElement("tr");dr.className="detailrow";dr.innerHTML=`<td colspan="10"><div id="${did}" class="detail">${details(r)}</div></td>`;
+ const dr=document.createElement("tr");dr.className="detailrow";dr.innerHTML=`<td colspan="11"><div id="${did}" class="detail">${details(r)}</div></td>`;
  tr.addEventListener("click",e=>{if(e.target.classList.contains("rowcheck"))return;$(did).classList.toggle("open")});
  const cb=tr.querySelector(".rowcheck");cb.checked=selected.has(r.submission_id);cb.addEventListener("click",e=>e.stopPropagation());cb.addEventListener("change",()=>{cb.checked?selected.add(r.submission_id):selected.delete(r.submission_id);selUI()});
  tb.append(tr,dr);bindFiles(dr);bindAdmin(dr,r)});
@@ -285,15 +285,19 @@ function openEditor(r){
  if(!askPw())return;
  editingRow=r;
  const modal=$("editModal"), frame=$("editFrame");
- modal.style.display="block";document.body.style.overflow="hidden";
- const send=()=>frame.contentWindow.postMessage({type:"PPWR_ADMIN_EDIT_LOAD",row:r},"*");
- if(frame.contentDocument?.readyState==="complete")send(); else frame.onload=send;
+ modal.style.display="block";
+ document.body.style.overflow="hidden";
+ frame.src="./index.html?admin_edit="+encodeURIComponent(r.submission_id)+"&t="+Date.now();
 }
 function closeEditor(){$("editModal").style.display="none";document.body.style.overflow=""}
 $("editClose").onclick=closeEditor;
 
 window.addEventListener("message",async ev=>{
  const d=ev.data||{};
+ if(d.type==="PPWR_ADMIN_EDIT_READY" && editingRow){
+   $("editFrame").contentWindow.postMessage({type:"PPWR_ADMIN_EDIT_LOAD",row:editingRow},"*");
+   return;
+ }
  if(d.type==="PPWR_ADMIN_EDIT_SAVE"&&editingRow){
    if(!askPw()){ev.source.postMessage({type:"PPWR_ADMIN_EDIT_RESULT",ok:false,message:"비밀번호 확인이 취소되었습니다."},"*");return}
    const payload=d.payload||{};
