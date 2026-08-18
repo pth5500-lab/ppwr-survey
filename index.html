@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PPWR Packaging Material Composition & Regulatory Substance Survey</title>
+<style>
+  :root{
+    --border:#d9dee7;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --bg:#f6f8fb;
+    --card:#ffffff;
+    --primary:#163a70;
+    --primary2:#244f8f;
+    --danger:#b42318;
+    --ok:#067647;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);font-family:Arial,"Noto Sans KR",sans-serif;color:var(--text)}
+  .wrap{max-width:1180px;margin:28px auto;padding:0 18px 60px}
+  .hero{background:linear-gradient(135deg,#153963,#24548e);color:#fff;border-radius:14px;padding:28px 32px;box-shadow:0 6px 20px rgba(15,23,42,.12)}
+  h1{font-size:26px;margin:0 0 10px}
+  .hero p{margin:6px 0;line-height:1.55}
+  .small{font-size:13px;color:var(--muted)}
+  .hero .small{color:#dbe7f5}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-top:18px;padding:22px;box-shadow:0 2px 8px rgba(15,23,42,.04)}
+  h2{font-size:19px;margin:0 0 18px;color:#173b68}
+  h3{font-size:15px;margin:12px 0 8px}
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  label{font-weight:700;font-size:13px;display:block;margin-bottom:6px}
+  input,select,textarea{width:100%;border:1px solid #cdd4df;border-radius:8px;padding:10px 11px;font-size:14px;background:#fff}
+  textarea{min-height:88px;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:#4774ad;box-shadow:0 0 0 3px rgba(71,116,173,.12)}
+  .required{color:#c62828}
+  .hint{font-size:13px;color:var(--muted);line-height:1.45;margin:3px 0 12px}
+  .checks{display:flex;flex-wrap:wrap;gap:9px 16px;padding:10px 0}
+  .check{display:flex;align-items:center;gap:7px;font-size:13px}
+  .check input{width:auto}
+  .rowbox{border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:10px;background:#fbfcfe}
+  .rowhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  button{border:0;border-radius:8px;padding:10px 14px;font-weight:700;cursor:pointer}
+  .btn{background:#e8eef6;color:#163a70}
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-danger{background:#fff0ee;color:var(--danger);border:1px solid #f2c7c2}
+  .btn-ghost{background:#fff;border:1px solid var(--border);color:#374151}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  table{width:100%;border-collapse:collapse;margin-top:10px}
+  th,td{border-bottom:1px solid var(--border);padding:8px 7px;vertical-align:middle}
+  th{font-size:12px;background:#f3f6fa;text-align:left}
+  td input{padding:8px}
+  .material-name{min-width:170px}
+  .delete-cell{width:70px}
+  .totalbar{display:flex;gap:12px;align-items:center;justify-content:flex-end;margin-top:12px;font-size:14px}
+  .totalbar strong{font-size:18px}
+  .status{font-weight:700}
+  .status.ok{color:var(--ok)}
+  .status.bad{color:var(--danger)}
+  .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .sumitem{border:1px solid var(--border);border-radius:10px;padding:14px;background:#fafbfd}
+  .sumitem span{display:block;font-size:12px;color:var(--muted);margin-bottom:7px}
+  .sumitem strong{font-size:22px;color:#183c69}
+  .notice{background:#fff8e7;border:1px solid #eed999;border-radius:9px;padding:12px 14px;font-size:13px;line-height:1.5;margin-top:12px}
+  .pfas-panel{display:none;margin-top:12px}
+  .footer{text-align:center;color:var(--muted);font-size:12px;margin-top:20px}
+  @media(max-width:760px){.grid,.grid3,.summary{grid-template-columns:1fr}.hero{padding:22px}.card{padding:16px}table{font-size:12px;display:block;overflow:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <h1>PPWR 포장재 구성정보 및 규제물질 조사</h1>
+    <p><strong>PPWR Packaging Material Composition & Regulatory Substance Survey</strong></p>
+    <p>EU 포장 및 포장폐기물 규정(PPWR) 대응을 위해 당사에 공급되는 포장재의 <strong>구성재질, 구성비, 재생원료 함량 및 규제물질 정보</strong>를 조사하고 있습니다.</p>
+    <p>Please provide the material composition, composition ratio, recycled content, and regulated substance information for packaging materials supplied to our company.</p>
+    <p class="small"><strong>작성 기준 / Submission Guide</strong><br>동일한 재질 및 구성비를 사용하는 규격은 복수 등록할 수 있으며, 시험성적서 등 관련 증빙자료가 있는 경우 함께 첨부해 주시기 바랍니다.<br>Multiple specifications using the same material composition may be registered together. Please attach relevant test reports or supporting documents where available.</p>
+    <p class="small">Toray Advanced Materials Korea Inc. · 구매기획팀 / Purchasing Planning Team</p>
+  </section>
+
+  <section class="card">
+    <h2>1. 협력사 정보 / Supplier Information</h2>
+    <div class="grid">
+      <div><label>회사명 / Company <span class="required">*</span></label><input id="company"></div>
+      <div><label>담당자 / Contact Person <span class="required">*</span></label><input id="contact"></div>
+      <div><label>이메일 / E-mail</label><input id="email" type="email"></div>
+      <div><label>연락처 / Phone</label><input id="phone"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2. 품목군 / Packaging Category</h2>
+    <p class="hint">품목군을 선택하면 예상 구성재질이 표시됩니다.</p>
+    <div class="grid">
+      <div>
+        <label>대분류 / Major Category <span class="required">*</span></label>
+        <select id="major"><option value="">선택 / Select</option></select>
+      </div>
+      <div>
+        <label>세부 품목군 / Packaging Type <span class="required">*</span></label>
+        <select id="type"><option value="">선택 / Select</option></select>
+      </div>
+    </div>
+    <p class="hint" style="margin-top:14px">예상 재질은 참고용입니다. 실제 납품품의 구성과 다르면 체크를 해제하고, 기타 재질을 직접 추가해 주세요.</p>
+    <div id="expectedMaterials" class="checks"></div>
+  </section>
+
+  <section class="card">
+    <h2>3. 납품 규격 / Specifications</h2>
+    <p class="hint">아래 규격들은 <strong>동일 재질·동일 구성비가 적용되는 품목</strong>만 묶어서 입력해 주세요. 재질구성이 다른 규격이 있다면 별도 설문으로 작성하는 것을 권장합니다.</p>
+    <div id="specs"></div>
+    <div class="actions"><button class="btn" onclick="addSpec()">+ 규격 추가 / Add Specification</button></div>
+  </section>
+
+  <section class="card">
+    <h2>4. 실제 구성재질 / Actual Material Composition</h2>
+    <div class="grid">
+      <div>
+        <label>기타 재질 직접 입력 / Add Other Material</label>
+        <input id="otherMaterial" placeholder="예: EVA, Ink, Adhesive...">
+      </div>
+      <div style="display:flex;align-items:end"><button class="btn" style="width:100%" onclick="addOtherMaterial()">+ 재질 추가 / Add Material</button></div>
+    </div>
+    <div style="overflow:auto">
+      <table>
+        <thead><tr>
+          <th>구성재질 / Material</th><th>부위 / Component</th><th>구성비(%) / Composition</th><th>재생원료 함량(%) / Recycled Content</th><th>비고 / Remarks</th><th>삭제</th>
+        </tr></thead>
+        <tbody id="materialsBody"></tbody>
+      </table>
+    </div>
+    <div class="totalbar">구성비 합계 / Total Composition: <strong id="compositionTotal">0%</strong> <span id="compositionStatus" class="status bad">100%가 되도록 입력해 주세요. / Total must equal 100%.</span></div>
+  </section>
+
+  <section class="card">
+    <h2>5. 유해물질 함량 / Restricted Substance Content</h2>
+    <p class="hint">4대 중금속은 시험성적서 또는 공급사 보증자료에 기재된 <strong>농도(mg/kg)</strong>를 입력해 주세요. 포장재 총중량은 입력하지 않습니다.</p>
+    <div class="grid3">
+      <div><label>납 / Lead (Pb) mg/kg</label><input class="metal" id="pb" type="number" min="0" step="0.001"></div>
+      <div><label>카드뮴 / Cadmium (Cd) mg/kg</label><input class="metal" id="cd" type="number" min="0" step="0.001"></div>
+      <div><label>수은 / Mercury (Hg) mg/kg</label><input class="metal" id="hg" type="number" min="0" step="0.001"></div>
+      <div><label>6가 크롬 / Cr(VI) mg/kg</label><input class="metal" id="cr6" type="number" min="0" step="0.001"></div>
+      <div><label>4대 중금속 합계 / Total Heavy Metals</label><input id="metalTotal" readonly></div>
+      <div><label>판정 / Assessment</label><input id="metalAssessment" readonly></div>
+    </div>
+
+    <h3>PFAS — 식품접촉 포장재 해당 시 / For Food-contact Packaging Only</h3>
+    <p class="hint">해당 여부를 선택하고, 해당 시 시험값을 입력해 주세요.</p>
+    <div>
+      <label>PFAS 적용 여부 / PFAS Applicable?</label>
+      <select id="pfasApplicable">
+        <option value="Not applicable">해당 없음 / Not applicable</option>
+        <option value="Applicable">해당 / Applicable</option>
+        <option value="To be confirmed">확인 필요 / To be confirmed</option>
+      </select>
+    </div>
+    <div id="pfasPanel" class="pfas-panel grid3">
+      <div><label>PFAS Total (mg/kg)</label><input id="pfasTotal" type="number" min="0" step="0.001"></div>
+      <div><label>PFAS 개별값 / Individual PFAS</label><input id="pfasIndividual" placeholder="예: PFOA ..."></div>
+      <div><label>비고 / Remarks</label><input id="pfasRemarks"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>6. 시험성적서 및 증빙자료 / Test Reports & Supporting Documents</h2>
+    <div class="grid3">
+      <div><label>시험기관 / Laboratory</label><input id="lab"></div>
+      <div><label>성적서 번호 / Report No.</label><input id="reportNo"></div>
+      <div><label>발행일 / Issue Date</label><input id="issueDate" type="date"></div>
+    </div>
+    <div class="grid" style="margin-top:14px">
+      <div><label>4대 중금속 시험성적서 / Heavy Metal Test Report</label><input id="heavyFiles" type="file" multiple accept=".pdf,.xls,.xlsx,.csv,.jpg,.jpeg,.png"></div>
+      <div><label>PFAS 시험성적서 / PFAS Test Report</label><input id="pfasFiles" type="file" multiple accept=".pdf,.xls,.xlsx,.csv,.jpg,.jpeg,.png"></div>
+      <div><label>기타 증빙자료 / Other Supporting Documents</label><input id="otherFiles" type="file" multiple accept=".pdf,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.doc,.docx"></div>
+      <div><label>비고 / Remarks</label><textarea id="remarks"></textarea></div>
+    </div>
+    <div class="notice">CSV 저장 시에는 첨부파일명만 기록됩니다. <strong>제출 / Submit</strong> 버튼을 사용하면 설문 데이터는 Supabase Database에, 실제 첨부파일은 Supabase Storage의 <code>ppwr-files</code> 버킷에 저장됩니다.</div>
+  </section>
+
+  <section class="card">
+    <h2>7. 입력 현황 / Summary</h2>
+    <div class="summary">
+      <div class="sumitem"><span>규격 수 / Specifications</span><strong id="sumSpecs">1</strong></div>
+      <div class="sumitem"><span>구성재질 수 / Materials</span><strong id="sumMaterials">0</strong></div>
+      <div class="sumitem"><span>구성비 합계 / Composition</span><strong id="sumComposition">0%</strong></div>
+      <div class="sumitem"><span>중금속 합계 / Heavy Metals</span><strong id="sumMetals">0 mg/kg</strong></div>
+    </div>
+    <div id="submitStatus" class="notice" style="display:none"></div>
+    <div class="actions">
+      <button class="btn-primary" id="submitBtn" onclick="submitToSupabase()">제출 / Submit</button>
+      <button class="btn-ghost" onclick="exportCSV()">CSV 저장 / Export CSV</button>
+      <button class="btn" onclick="saveDraft()">임시저장 / Save Draft</button>
+      <button class="btn-ghost" onclick="loadDraft()">불러오기 / Load Draft</button>
+      <button class="btn-danger" onclick="resetForm()">초기화 / Reset</button>
+    </div>
+  </section>
+
+  <div class="footer">Toray Advanced Materials Korea Inc. · Purchasing Planning Team</div>
+</div>
+
+
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const SUPABASE_URL = "https://husxmsxbhdalmubabfbv.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_eTDBSThdDcMahPfXeadm8g_N0wBGHSS";
+const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+function safeFileName(name) {
+  return name.replace(/[^\w.\-가-힣]+/g, "_");
+}
+
+function makeSubmissionId() {
+  const d = new Date();
+  const p = n => String(n).padStart(2, "0");
+  const stamp = `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+  const rnd = Math.random().toString(36).slice(2, 7).toUpperCase();
+  return `PPWR-${stamp}-${rnd}`;
+}
+
+window.submitToSupabase = async function() {
+  const d = window.collectData();
+
+  if(!d.company || !d.contact || !d.major || !d.type) {
+    alert("필수 항목(회사명, 담당자, 대분류, 세부 품목군)을 입력해 주세요.");
+    return;
+  }
+
+  const composition = Number((document.getElementById("compositionTotal").textContent || "0").replace("%","")) || 0;
+  if(Math.abs(composition - 100) > 0.001) {
+    if(!confirm("구성비 합계가 100%가 아닙니다. 그래도 제출하시겠습니까?")) return;
+  }
+
+  const btn = document.getElementById("submitBtn");
+  const status = document.getElementById("submitStatus");
+  btn.disabled = true;
+  btn.textContent = "제출 중... / Submitting...";
+  status.style.display = "block";
+  status.textContent = "Supabase에 데이터를 저장하고 있습니다...";
+
+  const submissionId = makeSubmissionId();
+  let currentStage = "초기화 / Initializing";
+
+  try {
+    const row = {
+      submission_id: submissionId,
+      company: d.company,
+      contact_person: d.contact,
+      email: d.email || null,
+      phone: d.phone || null,
+      major_category: d.major,
+      packaging_type: d.type,
+      specifications: d.specs || [],
+      materials: d.materials || [],
+      lead_pb: d.pb === "" ? null : Number(d.pb),
+      cadmium_cd: d.cd === "" ? null : Number(d.cd),
+      mercury_hg: d.hg === "" ? null : Number(d.hg),
+      chromium_vi: d.cr6 === "" ? null : Number(d.cr6),
+      heavy_metals_total: (d.metalTotal || "").replace(" mg/kg","") === "" ? null : Number((d.metalTotal || "").replace(" mg/kg","")),
+      heavy_metals_assessment: d.metalAssessment || null,
+      pfas_applicable: d.pfasApplicable || null,
+      pfas_total: d.pfasTotal === "" ? null : Number(d.pfasTotal),
+      pfas_individual: d.pfasIndividual || null,
+      pfas_remarks: d.pfasRemarks || null,
+      laboratory: d.lab || null,
+      report_no: d.reportNo || null,
+      issue_date: d.issueDate || null,
+      uploaded_files: [],
+      remarks: d.remarks || null
+    };
+
+    const uploaded = [];
+    const groups = [
+      ["heavy-metal", document.getElementById("heavyFiles").files],
+      ["pfas", document.getElementById("pfasFiles").files],
+      ["other", document.getElementById("otherFiles").files]
+    ];
+
+    // Upload files first, then insert the submission once with all file metadata.
+    currentStage = "첨부파일 업로드 / File upload";
+    for (const [group, fileList] of groups) {
+      for (const file of fileList) {
+        const path = `${submissionId}/${group}/${Date.now()}_${safeFileName(file.name)}`;
+
+        const { error: uploadError } = await supabase
+          .storage
+          .from("ppwr-files")
+          .upload(path, file, {
+            cacheControl: "3600",
+            upsert: false,
+            contentType: file.type || undefined
+          });
+
+        if (uploadError) {
+          throw {
+            stage: currentStage,
+            group,
+            fileName: file.name,
+            message: uploadError.message,
+            statusCode: uploadError.statusCode || uploadError.status,
+            error: uploadError.error,
+            raw: uploadError
+          };
+        }
+
+        uploaded.push({
+          category: group,
+          originalName: file.name,
+          path,
+          size: file.size,
+          contentType: file.type || ""
+        });
+      }
+    }
+
+    row.uploaded_files = uploaded;
+
+    currentStage = "설문 DB 저장 / Database insert";
+    const { error: insertError } = await supabase
+      .from("ppwr_submissions")
+      .insert(row);
+
+    if (insertError) {
+      throw {
+        stage: currentStage,
+        message: insertError.message,
+        code: insertError.code,
+        details: insertError.details,
+        hint: insertError.hint,
+        raw: insertError
+      };
+    }
+
+    status.innerHTML =
+      `<strong>제출 완료 / Submitted</strong><br>` +
+      `접수번호 / Submission ID: <strong>${submissionId}</strong>`;
+    alert(`제출이 완료되었습니다.\n접수번호: ${submissionId}`);
+
+  } catch (err) {
+    console.error("PPWR submission error:", err);
+
+    const details = [
+      `단계: ${err.stage || currentStage || "-"}`,
+      err.group ? `파일 구분: ${err.group}` : "",
+      err.fileName ? `파일명: ${err.fileName}` : "",
+      err.message ? `오류: ${err.message}` : "",
+      err.code ? `코드: ${err.code}` : "",
+      err.statusCode ? `상태코드: ${err.statusCode}` : "",
+      err.details ? `상세: ${err.details}` : "",
+      err.hint ? `힌트: ${err.hint}` : "",
+      err.error ? `Error: ${err.error}` : ""
+    ].filter(Boolean);
+
+    let fallback = "";
+    try {
+      fallback = JSON.stringify(err.raw || err, null, 2);
+    } catch(e) {
+      fallback = String(err);
+    }
+
+    status.innerHTML =
+      `<strong style="color:#b42318">제출 실패 / Submission Failed</strong><br>` +
+      details.map(x => `<div>${x}</div>`).join("") +
+      `<details style="margin-top:8px"><summary>상세 오류 보기 / Show details</summary>` +
+      `<pre style="white-space:pre-wrap;word-break:break-all;background:#f7f7f7;padding:8px;border-radius:6px">${fallback.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</pre></details>` +
+      `<div style="margin-top:8px">필요 시 CSV 저장 기능으로 데이터를 백업해 주세요.</div>`;
+
+    alert("제출에 실패했습니다. 화면 하단의 상세 오류를 확인해 주세요.");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "제출 / Submit";
+  }
+};
+</script>
+
+<script>
+const data = {
+ "종이 포장재 / Paper Packaging": {
+   types:["골판지 박스 / Corrugated Box","종이 지관 / Paper Core","종이 패드·시트 / Paper Pad & Sheet","기타 / Other"],
+   mats:["종이·판지 / Paper & Board","접착제 / Adhesive","잉크 / Ink"]
+ },
+ "목재 포장재 / Wood Packaging": {
+   types:["목재 팔레트 / Wooden Pallet","합판 / Plywood","목재 박스 / Wooden Box","기타 / Other"],
+   mats:["원목 / Wood","합판 / Plywood","금속 체결재 / Metal Fastener","접착제 / Adhesive"]
+ },
+ "플라스틱 필름·봉투 / Plastic Films & Bags": {
+   types:["PE Film·Bag","PP Film·Bag","PET Film","방습·보호필름 / Protective Film","기타 / Other"],
+   mats:["PE / Polyethylene","PP / Polypropylene","PET / Polyethylene Terephthalate","첨가제 / Additive","잉크 / Ink"]
+ },
+ "직조 포장재·톤백 / Woven Packaging & FIBC": {
+   types:["PP Woven Bag","FIBC / Ton Bag","기타 / Other"],
+   mats:["PP / Polypropylene","PE Liner","봉제사 / Sewing Thread","잉크 / Ink"]
+ },
+ "플라스틱 성형 포장재 / Rigid Plastic Packaging": {
+   types:["플라스틱 팔레트 / Plastic Pallet","Cap·Plug","Tray","Bobbin·Reel","기타 / Other"],
+   mats:["PP / Polypropylene","PE / Polyethylene","PET / Polyethylene Terephthalate","PS / Polystyrene","ABS","첨가제 / Additive"]
+ },
+ "완충·보호재 / Cushioning & Protective Materials": {
+   types:["PE Foam","EVA Foam","PU Foam","Sponge","기타 / Other"],
+   mats:["PE Foam","EVA","PU / Polyurethane","고무 / Rubber","접착제 / Adhesive"]
+ },
+ "결속·테이프류 / Strapping & Tapes": {
+   types:["PET Band","PP Band","Adhesive Tape","기타 / Other"],
+   mats:["PET / Polyethylene Terephthalate","PP / Polypropylene","PE / Polyethylene","접착제 / Adhesive"]
+ },
+ "라벨·인쇄재 / Labels & Printing": {
+   types:["Paper Label","PET Label","PE·PP Label","Ribbon","기타 / Other"],
+   mats:["종이 / Paper","PET / Polyethylene Terephthalate","PE / Polyethylene","PP / Polypropylene","접착제 / Adhesive","잉크 / Ink"]
+ },
+ "금속·배리어·복합 포장재 / Metal, Barrier & Composite": {
+   types:["알루미늄 시트·포일 / Aluminum Sheet & Foil","증착·배리어 필름 / Barrier Film","FRP·FWP 지관 / Composite Cores","복합 조립 포장재 / Multi-material Assembly","금속 팔레트·보빈 / Metal Pallets & Bobbins","기타 / Other"],
+   mats:["PET / Polyethylene Terephthalate","증착 PET / Metallized PET","알루미늄 / Aluminum","PE·PP 실링층 / PE & PP Sealant Layer","PA·Nylon / Polyamide","라미네이션 접착제 / Laminating Adhesive"]
+ },
+ "방습제·기타 / Desiccants & Others": {
+   types:["Silica Gel","Clay Desiccant","Absorbent","기타 / Other"],
+   mats:["실리카겔 / Silica Gel","Clay","부직포 / Nonwoven","종이 / Paper","PE / Polyethylene"]
+ },
+ "기타 / Other": {
+   types:["기타 / Other"],
+   mats:[]
+ }
+};
+
+let specCount=0;
+
+function init(){
+  const major=document.getElementById('major');
+  Object.keys(data).forEach(k=>{ const o=document.createElement('option');o.value=k;o.textContent=k;major.appendChild(o); });
+  major.addEventListener('change',updateCategory);
+  document.querySelectorAll('.metal').forEach(x=>x.addEventListener('input',calcMetals));
+  document.getElementById('pfasApplicable').addEventListener('change',()=> {
+    document.getElementById('pfasPanel').style.display=document.getElementById('pfasApplicable').value==='Applicable'?'grid':'none';
+  });
+  addSpec();
+  updateSummary();
+}
+
+function updateCategory(){
+  const major=document.getElementById('major').value;
+  const type=document.getElementById('type');
+  type.innerHTML='<option value="">선택 / Select</option>';
+  const box=document.getElementById('expectedMaterials'); box.innerHTML='';
+  if(!major || !data[major]) return;
+  data[major].types.forEach(t=>{let o=document.createElement('option');o.value=t;o.textContent=t;type.appendChild(o)});
+  data[major].mats.forEach(m=>{
+    const lab=document.createElement('label');lab.className='check';
+    lab.innerHTML=`<input type="checkbox" checked value="${esc(m)}" onchange="syncExpectedMaterial(this)"> ${m}`;
+    box.appendChild(lab);
+    addMaterial(m, true);
+  });
+}
+function esc(s){return String(s).replace(/"/g,'&quot;')}
+
+function syncExpectedMaterial(cb){
+  if(cb.checked) addMaterial(cb.value, true);
+  else removeMaterialByName(cb.value);
+}
+
+function addSpec(values={}){
+  specCount++;
+  const div=document.createElement('div'); div.className='rowbox spec-row';
+  div.innerHTML=`
+    <div class="rowhead"><strong>Specification ${specCount}</strong><button class="btn-danger" onclick="this.closest('.spec-row').remove();renumberSpecs();updateSummary()">삭제</button></div>
+    <div class="grid3">
+      <div><label>품명 / Item Name</label><input class="spec-item" value="${esc(values.item||'')}"></div>
+      <div><label>규격 / Size · Specification</label><input class="spec-size" value="${esc(values.size||'')}"></div>
+      <div><label>품번 / Item Code</label><input class="spec-code" value="${esc(values.code||'')}"></div>
+    </div>`;
+  document.getElementById('specs').appendChild(div);
+  updateSummary();
+}
+function renumberSpecs(){
+  document.querySelectorAll('.spec-row').forEach((r,i)=>r.querySelector('.rowhead strong').textContent='Specification '+(i+1));
+}
+
+function materialExists(name){
+  return [...document.querySelectorAll('.material-name')].some(x=>x.value===name);
+}
+function addMaterial(name='', auto=false, values={}){
+  if(name && materialExists(name)) return;
+  const tr=document.createElement('tr'); tr.className='material-row';
+  tr.dataset.auto=auto?'1':'0';
+  tr.innerHTML=`
+    <td><input class="material-name" value="${esc(name)}" oninput="updateSummary()"></td>
+    <td><input class="material-component" value="${esc(values.component||'')}"></td>
+    <td><input class="material-composition" type="number" min="0" max="100" step="0.01" value="${esc(values.composition??'')}" oninput="calcComposition()"></td>
+    <td><input class="material-recycled" type="number" min="0" max="100" step="0.01" value="${esc(values.recycled??'')}"></td>
+    <td><input class="material-remarks" value="${esc(values.remarks||'')}"></td>
+    <td class="delete-cell"><button class="btn-danger" onclick="this.closest('tr').remove();calcComposition();updateSummary()">삭제</button></td>`;
+  document.getElementById('materialsBody').appendChild(tr);
+  updateSummary();
+}
+function removeMaterialByName(name){
+  [...document.querySelectorAll('.material-row')].forEach(r=>{if(r.querySelector('.material-name').value===name && r.dataset.auto==='1')r.remove()});
+  calcComposition(); updateSummary();
+}
+function addOtherMaterial(){
+  const el=document.getElementById('otherMaterial');
+  const name=el.value.trim();
+  if(!name) return alert('재질명을 입력해 주세요.');
+  addMaterial(name,false);
+  el.value='';
+}
+function calcComposition(){
+  let total=0;
+  document.querySelectorAll('.material-composition').forEach(x=>total += Number(x.value)||0);
+  total=Math.round(total*100)/100;
+  document.getElementById('compositionTotal').textContent=total+'%';
+  const st=document.getElementById('compositionStatus');
+  if(Math.abs(total-100)<0.001){st.textContent='OK / Total 100%';st.className='status ok'}
+  else {st.textContent='100%가 되도록 입력해 주세요. / Total must equal 100%.';st.className='status bad'}
+  updateSummary();
+}
+function calcMetals(){
+  const ids=['pb','cd','hg','cr6'];
+  let total=ids.reduce((s,id)=>s+(Number(document.getElementById(id).value)||0),0);
+  total=Math.round(total*1000)/1000;
+  document.getElementById('metalTotal').value=total+' mg/kg';
+  document.getElementById('metalAssessment').value=total<=100?'PASS (≤ 100 mg/kg)':'FAIL (> 100 mg/kg)';
+  updateSummary();
+}
+function updateSummary(){
+  document.getElementById('sumSpecs').textContent=document.querySelectorAll('.spec-row').length;
+  document.getElementById('sumMaterials').textContent=document.querySelectorAll('.material-row').length;
+  document.getElementById('sumComposition').textContent=document.getElementById('compositionTotal').textContent;
+  document.getElementById('sumMetals').textContent=document.getElementById('metalTotal').value || '0 mg/kg';
+}
+function filenames(id){return [...document.getElementById(id).files].map(f=>f.name).join('; ')}
+
+window.collectData = function collectData(){
+  const specs=[...document.querySelectorAll('.spec-row')].map(r=>({
+    item:r.querySelector('.spec-item').value,size:r.querySelector('.spec-size').value,code:r.querySelector('.spec-code').value
+  }));
+  const materials=[...document.querySelectorAll('.material-row')].map(r=>({
+    material:r.querySelector('.material-name').value,component:r.querySelector('.material-component').value,
+    composition:r.querySelector('.material-composition').value,recycled:r.querySelector('.material-recycled').value,
+    remarks:r.querySelector('.material-remarks').value
+  }));
+  return {
+    company:company.value,contact:contact.value,email:email.value,phone:phone.value,
+    major:major.value,type:type.value,specs,materials,
+    pb:pb.value,cd:cd.value,hg:hg.value,cr6:cr6.value,metalTotal:metalTotal.value,metalAssessment:metalAssessment.value,
+    pfasApplicable:pfasApplicable.value,pfasTotal:pfasTotal.value,pfasIndividual:pfasIndividual.value,pfasRemarks:pfasRemarks.value,
+    lab:lab.value,reportNo:reportNo.value,issueDate:issueDate.value,
+    heavyFiles:filenames('heavyFiles'),pfasFiles:filenames('pfasFiles'),otherFiles:filenames('otherFiles'),remarks:remarks.value
+  };
+}
+
+function saveDraft(){
+  localStorage.setItem('ppwrSurveyDraft',JSON.stringify(collectData()));
+  alert('임시저장되었습니다. / Draft saved.');
+}
+function loadDraft(){
+  const raw=localStorage.getItem('ppwrSurveyDraft'); if(!raw)return alert('저장된 임시자료가 없습니다.');
+  const d=JSON.parse(raw);
+  ['company','contact','email','phone','pb','cd','hg','cr6','pfasTotal','pfasIndividual','pfasRemarks','lab','reportNo','issueDate','remarks'].forEach(id=>{if(d[id]!=null)document.getElementById(id).value=d[id]});
+  major.value=d.major||''; updateCategory(); type.value=d.type||'';
+  document.getElementById('specs').innerHTML=''; (d.specs||[]).forEach(x=>addSpec(x)); if(!(d.specs||[]).length)addSpec();
+  document.getElementById('materialsBody').innerHTML=''; (d.materials||[]).forEach(x=>addMaterial(x.material,false,x));
+  pfasApplicable.value=d.pfasApplicable||'Not applicable'; pfasApplicable.dispatchEvent(new Event('change'));
+  calcComposition();calcMetals();updateSummary();
+  alert('임시저장 자료를 불러왔습니다. 첨부파일은 보안상 브라우저가 다시 불러올 수 없습니다.');
+}
+function resetForm(){
+  if(!confirm('모든 입력값을 초기화하시겠습니까?'))return;
+  localStorage.removeItem('ppwrSurveyDraft'); location.reload();
+}
+function csvEscape(v){v=v==null?'':String(v);return '"'+v.replace(/"/g,'""')+'"'}
+function exportCSV(){
+  const d=collectData();
+  if(!d.company || !d.contact || !d.major || !d.type) {
+    if(!confirm('필수 항목 일부가 비어 있습니다. 그래도 CSV를 저장하시겠습니까?')) return;
+  }
+  const rows=[['Section','Field','Value']];
+  const add=(s,f,v)=>rows.push([s,f,v]);
+  add('Supplier','Company',d.company);add('Supplier','Contact Person',d.contact);add('Supplier','E-mail',d.email);add('Supplier','Phone',d.phone);
+  add('Category','Major Category',d.major);add('Category','Packaging Type',d.type);
+  d.specs.forEach((x,i)=>{add('Specification '+(i+1),'Item Name',x.item);add('Specification '+(i+1),'Specification',x.size);add('Specification '+(i+1),'Item Code',x.code)});
+  d.materials.forEach((x,i)=>{add('Material '+(i+1),'Material',x.material);add('Material '+(i+1),'Component',x.component);add('Material '+(i+1),'Composition (%)',x.composition);add('Material '+(i+1),'Recycled Content (%)',x.recycled);add('Material '+(i+1),'Remarks',x.remarks)});
+  add('Restricted Substance','Pb (mg/kg)',d.pb);add('Restricted Substance','Cd (mg/kg)',d.cd);add('Restricted Substance','Hg (mg/kg)',d.hg);add('Restricted Substance','Cr(VI) (mg/kg)',d.cr6);add('Restricted Substance','Total Heavy Metals',d.metalTotal);add('Restricted Substance','Assessment',d.metalAssessment);
+  add('PFAS','Applicable',d.pfasApplicable);add('PFAS','PFAS Total (mg/kg)',d.pfasTotal);add('PFAS','Individual PFAS',d.pfasIndividual);add('PFAS','Remarks',d.pfasRemarks);
+  add('Evidence','Laboratory',d.lab);add('Evidence','Report No.',d.reportNo);add('Evidence','Issue Date',d.issueDate);add('Evidence','Heavy Metal Files',d.heavyFiles);add('Evidence','PFAS Files',d.pfasFiles);add('Evidence','Other Files',d.otherFiles);add('Evidence','Remarks',d.remarks);
+  const csv='\uFEFF'+rows.map(r=>r.map(csvEscape).join(',')).join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  const safe=(d.company||'Supplier').replace(/[\\/:*?"<>|]/g,'_');
+  a.download='PPWR_Packaging_Survey_'+safe+'.csv';a.click();URL.revokeObjectURL(a.href);
+}
+init();
+</script>
+</body>
+</html>
