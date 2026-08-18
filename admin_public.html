@@ -21,7 +21,10 @@
     input,select{width:100%;padding:11px 12px;border:1px solid #d0d5dd;border-radius:9px;background:#fff}
     button{border:0;border-radius:9px;padding:10px 14px;cursor:pointer;font-weight:650}
     .secondary{background:#eef2f6;color:var(--accent)}
-    .toolbar{padding:14px;display:grid;grid-template-columns:2fr 1.2fr 1.2fr auto auto;gap:10px;margin-bottom:14px}
+    .bulk-delete{background:#fef3f2;color:#b42318;border:1px solid #fecdca}
+    .bulk-delete:disabled{opacity:.45;cursor:not-allowed}
+    .row-check,.head-check{width:18px;height:18px;cursor:pointer}
+    .toolbar{padding:14px;display:grid;grid-template-columns:2fr 1.2fr 1.2fr auto auto auto;gap:10px;margin-bottom:14px}
     .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
     .stat{padding:16px}
     .stat .n{font-size:26px;font-weight:800}
@@ -100,6 +103,7 @@
       <table>
         <thead>
           <tr>
+            <th style="width:52px;text-align:center"><input id="selectAll" class="head-check" type="checkbox" title="전체 선택"></th>
             <th>접수번호</th>
             <th>협력사</th>
             <th>품목군</th>
@@ -130,6 +134,7 @@ const BUCKET = "ppwr-files";
 
 let rows = [];
 let filtered = [];
+let selectedIds = new Set();
 
 const $ = id => document.getElementById(id);
 const esc = v => String(v ?? "").replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
@@ -163,10 +168,10 @@ function shortSpec(specs){
 function fileCount(r){ return arr(r.uploaded_files).length; }
 
 async function loadData(){
-  $("tbody").innerHTML=`<tr><td colspan="9" class="empty">불러오는 중...</td></tr>`;
+  $("tbody").innerHTML=`<tr><td colspan="10" class="empty">불러오는 중...</td></tr>`;
   const {data,error}=await supabase.from(TABLE).select("*").order("submission_id",{ascending:false});
   if(error){
-    $("tbody").innerHTML=`<tr><td colspan="9" class="empty">조회 실패: ${esc(error.message)}<br><span class="muted">Supabase의 anon SELECT 정책을 확인하세요.</span></td></tr>`;
+    $("tbody").innerHTML=`<tr><td colspan="10" class="empty">조회 실패: ${esc(error.message)}<br><span class="muted">Supabase의 anon SELECT 정책을 확인하세요.</span></td></tr>`;
     return;
   }
   rows=data||[];
@@ -218,6 +223,7 @@ function renderTable(){
     const main=document.createElement("tr");
     main.className="main-row clickable";
     main.innerHTML=`
+      <td style="text-align:center"><input class="row-check" type="checkbox" data-id="${esc(r.submission_id)}" ${selectedIds.has(r.submission_id)?"checked":""}></td>
       <td><div class="mono">${esc(r.submission_id)}</div><div class="muted">${esc(parseSubmissionDate(r.submission_id))}</div></td>
       <td><strong>${esc(r.company)}</strong><br><span class="muted">${esc(r.contact_person||"")}</span></td>
       <td>${esc(r.major_category||"-")}<br><span class="muted">${esc(r.packaging_type||"-")}</span></td>
@@ -229,11 +235,24 @@ function renderTable(){
       <td><button class="secondary" type="button">보기</button></td>`;
     const detailTr=document.createElement("tr");
     detailTr.className="detail-row";
-    detailTr.innerHTML=`<td colspan="9"><div id="${rid}" class="detail">${detailHtml(r)}</div></td>`;
-    main.addEventListener("click",()=>$(rid).classList.toggle("open"));
+    detailTr.innerHTML=`<td colspan="10"><div id="${rid}" class="detail">${detailHtml(r)}</div></td>`;
+    main.addEventListener("click",(e)=>{
+      if(e.target.classList.contains("row-check") || e.target.tagName==="BUTTON") return;
+      $(rid).classList.toggle("open");
+    });
+
+    const cb=main.querySelector(".row-check");
+    cb.addEventListener("click",e=>e.stopPropagation());
+    cb.addEventListener("change",()=>{
+      if(cb.checked) selectedIds.add(r.submission_id);
+      else selectedIds.delete(r.submission_id);
+      updateSelectionUI();
+    });
+
     tb.appendChild(main); tb.appendChild(detailTr);
     bindFileButtons(detailTr);
   });
+  updateSelectionUI();
 }
 
 function detailHtml(r){
@@ -319,6 +338,73 @@ function bindFileButtons(root){
   });
 }
 
+
+function updateSelectionUI(){
+  const visibleIds=filtered.map(r=>r.submission_id);
+  const visibleSelected=visibleIds.filter(id=>selectedIds.has(id)).length;
+  const all=visibleIds.length>0 && visibleSelected===visibleIds.length;
+  const some=visibleSelected>0 && !all;
+
+  $("selectAll").checked=all;
+  $("selectAll").indeterminate=some;
+  $("bulkDeleteBtn").disabled=selectedIds.size===0;
+  $("bulkDeleteBtn").textContent=`선택 삭제 (${selectedIds.size}건)`;
+}
+
+function toggleSelectAll(){
+  const checked=$("selectAll").checked;
+  filtered.forEach(r=>{
+    if(checked) selectedIds.add(r.submission_id);
+    else selectedIds.delete(r.submission_id);
+  });
+  document.querySelectorAll(".row-check").forEach(cb=>cb.checked=checked);
+  updateSelectionUI();
+}
+
+async function bulkDelete(){
+  if(!selectedIds.size) return;
+
+  const targets=rows.filter(r=>selectedIds.has(r.submission_id));
+  const count=targets.length;
+
+  const ok=confirm(`선택한 ${count}건을 삭제하시겠습니까?\n\n제출 데이터와 첨부파일이 함께 삭제되며 복구할 수 없습니다.`);
+  if(!ok) return;
+
+  const password=prompt("삭제 비밀번호를 입력하세요.");
+  if(password===null) return;
+  if(password!=="1234"){
+    alert("비밀번호가 올바르지 않습니다.");
+    return;
+  }
+
+  const btn=$("bulkDeleteBtn");
+  btn.disabled=true;
+  btn.textContent="삭제 중...";
+
+  const paths=targets.flatMap(r=>arr(r.uploaded_files).map(f=>f?.path).filter(Boolean));
+
+  if(paths.length){
+    const {error:fileError}=await supabase.storage.from(BUCKET).remove(paths);
+    if(fileError){
+      alert("첨부파일 삭제 실패: "+fileError.message);
+      updateSelectionUI();
+      return;
+    }
+  }
+
+  const ids=[...selectedIds];
+  const {error:rowError}=await supabase.from(TABLE).delete().in("submission_id",ids);
+  if(rowError){
+    alert("제출 데이터 삭제 실패: "+rowError.message);
+    updateSelectionUI();
+    return;
+  }
+
+  selectedIds.clear();
+  alert(`${count}건이 삭제되었습니다.`);
+  await loadData();
+}
+
 function exportCSV(){
   const head=["접수번호","제출일시","회사명","담당자","이메일","연락처","대분류","세부품목군","규격수","구성재질수","Pb","Cd","Hg","CrVI","중금속합계","중금속판정","PFAS적용","PFAS Total","시험기관","성적서번호","첨부파일수","비고"];
   const csvEsc=v=>`"${String(v??"").replace(/"/g,'""')}"`;
@@ -338,6 +424,8 @@ function exportCSV(){
 
 $("refreshBtn").addEventListener("click",loadData);
 $("exportBtn").addEventListener("click",exportCSV);
+$("selectAll").addEventListener("change",toggleSelectAll);
+$("bulkDeleteBtn").addEventListener("click",bulkDelete);
 $("searchInput").addEventListener("input",applyFilters);
 $("majorFilter").addEventListener("change",applyFilters);
 $("assessmentFilter").addEventListener("change",applyFilters);
