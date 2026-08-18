@@ -19,6 +19,17 @@ button{border:0;border-radius:8px;padding:9px 12px;cursor:pointer;font-weight:70
 .review textarea{width:100%;min-height:70px;padding:8px;border:1px solid #cbd5e1;border-radius:7px;margin-top:8px}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;padding:20px;overflow:auto}.modal.open{display:block}.modalbox{max-width:1050px;margin:auto;background:var(--bg);border-radius:14px;overflow:hidden}.modalhead{background:var(--navy);color:#fff;padding:15px 18px;display:flex;justify-content:space-between;align-items:center}.modalhead h2{margin:0;font-size:19px}.formbody{padding:16px}.formcard{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}.formcard h3{margin:0 0 12px;color:var(--navy)}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.formgrid label{font-size:12px;font-weight:700}.formgrid input,.formgrid select,.formgrid textarea{width:100%;padding:9px;border:1px solid #cbd5e1;border-radius:7px;margin-top:4px}.formgrid textarea{min-height:70px}.matrow{display:grid;grid-template-columns:1.3fr 1fr .8fr .8fr 1fr auto;gap:6px;margin-bottom:6px}.matrow input{width:100%;padding:7px;border:1px solid #cbd5e1;border-radius:6px}.actions{display:flex;justify-content:flex-end;gap:8px;padding:0 16px 16px}
 @media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.grid,.formgrid{grid-template-columns:1fr}.matrow{grid-template-columns:1fr 1fr}.full{grid-column:auto}}
+
+.detail-table{width:100%;border-collapse:collapse;margin-top:8px;min-width:0}
+.detail-table th,.detail-table td{border:1px solid #e4e7ec;padding:8px 9px;font-size:12px;vertical-align:top}
+.detail-table th{background:#f8fafc;color:#475467;position:static}
+.detail-table .num{text-align:right;white-space:nowrap}
+.detail-table .filecell{min-width:220px}
+.copybar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.copybar h3{margin:0}
+.copy-btn{background:#eef2f6;color:#173b66}
+.copy-msg{font-size:11px;color:#667085;margin-left:6px}
+
 </style>
 </head>
 <body>
@@ -124,23 +135,62 @@ function apply(){
 function details(r){
  const allFiles=A(r.uploaded_files);
  const by=cat=>allFiles.filter(f=>String(f.category||"").toLowerCase()===cat);
- const fh=(files,empty="첨부파일 없음")=>files.length?files.map(f=>`<div class="file"><span>${esc(f.storedName||f.originalName||f.path||"file")}</span><button class="secondary fileDownload" data-path="${esc(f.path||"")}">보기</button></div>`).join(""):`<span class="muted">${esc(empty)}</span>`;
+ const fh=(files,empty="첨부파일 없음")=>files.length
+   ? files.map(f=>`<div class="file"><span>${esc(f.storedName||f.originalName||f.path||"file")}</span><button class="secondary fileDownload" data-path="${esc(f.path||"")}">보기</button></div>`).join("")
+   : `<span class="muted">${esc(empty)}</span>`;
  const reports=by("material-report");
- const mats=A(r.materials).map((m,i)=>{
+ const mats=A(r.materials);
+ const matRows=mats.map((m,i)=>{
    const mf=reports.filter(f=>Number(f.materialIndex)===i);
-   return `<div style="padding:10px 0;border-bottom:1px solid #e7ebf0"><div><b>${i+1}. ${esc(m.material||"-")}</b> · 부위 ${esc(m.component||"-")} · 구성비 ${esc(m.composition??"-")}% · 재생원료 ${esc(m.recycled??"-")}%</div><div class="files" style="margin-top:7px">${fh(mf,"재질별 성적서 없음")}</div></div>`;
- }).join("")||"<span class=muted>구성재질 없음</span>";
+   const names=mf.length?mf.map(f=>esc(f.storedName||f.originalName||f.path||"file")).join("<br>"):'<span class="muted">없음</span>';
+   const buttons=mf.length?mf.map(f=>`<button class="secondary fileDownload" data-path="${esc(f.path||"")}">보기</button>`).join(" "):"";
+   return `<tr><td class="num">${i+1}</td><td>${esc(m.material||"-")}</td><td class="num">${esc(m.composition??"-")}</td><td class="num">${esc(m.recycled??"-")}</td><td>${esc(m.remarks||"-")}</td><td class="filecell">${names}<div style="margin-top:5px">${buttons}</div></td></tr>`;
+ }).join("")||`<tr><td colspan="6" class="muted">구성재질 정보 없음</td></tr>`;
  const pfas=by("pfas"),doc=by("doc"),other=by("other"),photos=by("product-photo");
+ const ps=typeof pfasStatus==="function"?pfasStatus(r):(r.pfas_applicable||"미확인");
+ const hm=typeof hmAssess==="function"?hmAssess(r):(r.heavy_metals_assessment||"-");
+ const kvtable=(rows)=>`<table class="detail-table"><tbody>${rows.map(x=>`<tr><th style="width:34%">${x[0]}</th><td>${x[1]}</td></tr>`).join("")}</tbody></table>`;
  return `<div class="grid">
- <div class="section"><h3>1. 협력사 정보</h3><div class="kv"><b>업체명</b><span>${esc(r.company)}</span><b>담당자</b><span>${esc(r.contact_person)}</span><b>이메일</b><span>${esc(r.email)}</span><b>연락처</b><span>${esc(r.phone)}</span></div></div>
- <div class="section"><h3>2~3. 포장재 정보</h3><div class="kv"><b>대분류</b><span>${esc(r.major_category)}</span><b>세부 품목군</b><span>${esc(r.packaging_type)}</span><b>대표 규격</b><span>${esc(spec(r).size)}</span><b>대표 품번</b><span>${esc(spec(r).code)}</span></div></div>
- <div class="section full"><h3>4. 구성재질 및 재질별 증빙</h3>${mats}</div>
- <div class="section"><h3>5. 4대 중금속</h3><div class="kv"><b>Pb</b><span>${esc(r.lead_pb)}</span><b>Cd</b><span>${esc(r.cadmium_cd)}</span><b>Hg</b><span>${esc(r.mercury_hg)}</span><b>CrVI</b><span>${esc(r.chromium_vi)}</span><b>합계</b><span>${r.heavy_metals_total==null?"-":esc(r.heavy_metals_total)+" mg/kg"}</span><b>판정</b><span>${badge(hmAssess(r))}</span></div></div>
- <div class="section"><h3>5. PFAS</h3><div class="kv"><b>상태</b><span>${badge(pfasStatus(r),"비해당")}</span><b>Total</b><span>${r.pfas_total==null?"-":esc(r.pfas_total)+" mg/kg"}</span><b>개별 PFAS</b><span>${esc(r.pfas_individual||"-")}</span><b>비고</b><span>${esc(r.pfas_remarks||"-")}</span></div><div class="files" style="margin-top:8px">${fh(pfas,pfasStatus(r)==="비해당"?"해당 없음":"PFAS 성적서 없음")}</div></div>
- <div class="section full"><h3>6. 포장재 제품 사진</h3><div class="files">${fh(photos,"제품 사진 없음")}</div></div>
- <div class="section"><h3>7. DoC</h3><div class="files">${fh(doc)}</div></div>
- <div class="section"><h3>7. 기타 참고자료</h3><div class="files">${fh(other)}</div></div>
- <div class="section full review"><h3>적합성 검증</h3><label><input type="radio" name="rv_${esc(r.submission_id)}" value="적합" ${r.quality_review_status==="적합"?"checked":""}> 적합</label> &nbsp; <label><input type="radio" name="rv_${esc(r.submission_id)}" value="반려" ${r.quality_review_status==="반려"?"checked":""}> 반려</label><textarea class="rejectReason" placeholder="반려 사유">${esc(r.quality_rejection_reason||"")}</textarea><button class="primary saveReview" style="margin-top:8px">적합성 검증 저장</button></div>
+ <div class="section full" style="padding:10px 14px">
+   <div class="copybar" style="margin:0">
+     <div><b>상세정보 전체 복사</b><span class="muted" style="margin-left:8px">Excel / 메일 붙여넣기용</span></div>
+     <div><button class="copy-btn copyAllDetail">전체 표 복사</button><span class="copy-all-msg copy-msg"></span></div>
+   </div>
+ </div>
+ <div class="section">${`<h3>협력사 정보</h3>`+kvtable([["업체명",esc(r.company)],["담당자",esc(r.contact_person)],["이메일",esc(r.email)],["연락처",esc(r.phone)]])}</div>
+ <div class="section">${`<h3>포장재 정보</h3>`+kvtable([["대분류",esc(r.major_category)],["세부 품목군",esc(r.packaging_type)],["대표 규격",esc(spec(r).size)],["대표 품번",esc(spec(r).code)]])}</div>
+
+ <div class="section full">
+   <div class="copybar"><h3>구성재질 및 재질별 증빙</h3><div><button class="copy-btn materialCopy">표 복사</button><span class="copy-msg"></span></div></div>
+   <div style="overflow:auto"><table class="detail-table materialEvidenceTable"><thead><tr><th>No.</th><th>구성재질</th><th>구성비(%)</th><th>재생원료(%)</th><th>비고</th><th>성적서 / 증빙</th></tr></thead><tbody>${matRows}</tbody></table></div>
+ </div>
+
+ <div class="section"><h3>4대 중금속</h3>
+   <table class="detail-table"><thead><tr><th>Pb</th><th>Cd</th><th>Hg</th><th>CrVI</th><th>합계</th><th>판정</th></tr></thead>
+   <tbody><tr><td class="num">${esc(r.lead_pb)}</td><td class="num">${esc(r.cadmium_cd)}</td><td class="num">${esc(r.mercury_hg)}</td><td class="num">${esc(r.chromium_vi)}</td><td class="num">${r.heavy_metals_total==null?"-":esc(r.heavy_metals_total)+" mg/kg"}</td><td>${badge(hm)}</td></tr></tbody></table>
+ </div>
+
+ <div class="section"><h3>PFAS</h3>
+   <table class="detail-table"><thead><tr><th>상태</th><th>Total</th><th>개별 PFAS</th><th>비고</th></tr></thead>
+   <tbody><tr><td>${badge(ps,"비해당")}</td><td class="num">${r.pfas_total==null?"-":esc(r.pfas_total)+" mg/kg"}</td><td>${esc(r.pfas_individual||"-")}</td><td>${esc(r.pfas_remarks||"-")}</td></tr></tbody></table>
+   <div class="files" style="margin-top:8px">${fh(pfas,ps==="비해당"?"해당 없음":"PFAS 성적서 없음")}</div>
+ </div>
+
+ <div class="section full"><h3>첨부자료</h3>
+   <table class="detail-table"><thead><tr><th style="width:22%">구분</th><th>첨부파일</th></tr></thead><tbody>
+    <tr><th>포장재 제품 사진</th><td><div class="files">${fh(photos,"제품 사진 없음")}</div></td></tr>
+    <tr><th>DoC</th><td><div class="files">${fh(doc)}</div></td></tr>
+    <tr><th>기타 참고자료</th><td><div class="files">${fh(other)}</div></td></tr>
+   </tbody></table>
+ </div>
+
+ <div class="section full review"><h3>적합성 검증</h3>
+   <table class="detail-table"><tbody>
+    <tr><th style="width:22%">검증 결과</th><td><label><input type="radio" name="rv_${esc(r.submission_id)}" value="적합" ${r.quality_review_status==="적합"?"checked":""}> 적합</label> &nbsp; <label><input type="radio" name="rv_${esc(r.submission_id)}" value="반려" ${r.quality_review_status==="반려"?"checked":""}> 반려</label></td></tr>
+    <tr><th>반려 사유</th><td><textarea class="rejectReason" placeholder="반려 시 사유를 입력해 주세요.">${esc(r.quality_rejection_reason||"")}</textarea></td></tr>
+   </tbody></table>
+   <button class="primary saveReview" style="margin-top:8px">적합성 검증 저장</button>
+ </div>
  </div>`;
 }
 function render(){
@@ -159,6 +209,69 @@ function render(){
 function bindDetail(root,r){
  root.querySelectorAll(".fileDownload").forEach(b=>b.onclick=async()=>{const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(b.dataset.path,60);if(error)alert(error.message);else window.open(data.signedUrl,"_blank")});
  const save=root.querySelector(".saveReview");if(save)save.onclick=async()=>{if(!pw())return;const val=root.querySelector(`input[name="rv_${CSS.escape(r.submission_id)}"]:checked`)?.value;if(!val){alert("적합 또는 반려를 선택해 주세요.");return}const reason=root.querySelector(".rejectReason").value.trim();if(val==="반려"&&!reason){alert("반려 사유를 입력해 주세요.");return}const {error}=await sb.from(TABLE).update({quality_review_status:val,quality_rejection_reason:val==="반려"?reason:null,quality_reviewed_at:new Date().toISOString()}).eq("submission_id",r.submission_id);if(error)alert(error.message);else load()};
+
+ const copyBtn=root.querySelector(".materialCopy");
+ if(copyBtn)copyBtn.onclick=async()=>{
+   const reports=A(r.uploaded_files).filter(f=>String(f.category||"").toLowerCase()==="material-report");
+   const header=["No.","구성재질","구성비(%)","재생원료(%)","비고","성적서/증빙"];
+   const lines=[header.join("\t")];
+   A(r.materials).forEach((m,i)=>{
+     const names=reports.filter(f=>Number(f.materialIndex)===i).map(f=>f.storedName||f.originalName||f.path||"").join(" / ");
+     lines.push([i+1,m.material||"",m.composition??"",m.recycled??"",m.remarks||"",names].join("\t"));
+   });
+   const text=lines.join("\n");
+   try{
+     await navigator.clipboard.writeText(text);
+     const msg=root.querySelector(".copy-msg");if(msg){msg.textContent="복사됨";setTimeout(()=>msg.textContent="",1500)}
+   }catch(e){
+     const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();
+     const msg=root.querySelector(".copy-msg");if(msg){msg.textContent="복사됨";setTimeout(()=>msg.textContent="",1500)}
+   }
+ };
+
+
+ const allBtn=root.querySelector(".copyAllDetail");
+ if(allBtn)allBtn.onclick=async()=>{
+   const reports=A(r.uploaded_files).filter(f=>String(f.category||"").toLowerCase()==="material-report");
+   const by=cat=>A(r.uploaded_files).filter(f=>String(f.category||"").toLowerCase()===cat);
+   const names=cat=>by(cat).map(f=>f.storedName||f.originalName||f.path||"").join(" / ");
+   const ps=typeof pfasStatus==="function"?pfasStatus(r):(r.pfas_applicable||"미확인");
+   const hm=typeof hmAssess==="function"?hmAssess(r):(r.heavy_metals_assessment||"-");
+   const sp=spec(r);
+   const L=[];
+   L.push(["[협력사 정보]",""].join("\t"));
+   L.push(["업체명",r.company||""].join("\t"),["담당자",r.contact_person||""].join("\t"),["이메일",r.email||""].join("\t"),["연락처",r.phone||""].join("\t"));
+   L.push("");
+   L.push(["[포장재 정보]",""].join("\t"));
+   L.push(["대분류",r.major_category||""].join("\t"),["세부 품목군",r.packaging_type||""].join("\t"),["대표 규격",sp.size||""].join("\t"),["대표 품번",sp.code||""].join("\t"));
+   L.push("");
+   L.push("[구성재질 및 재질별 증빙]");
+   L.push(["No.","구성재질","구성비(%)","재생원료(%)","비고","성적서/증빙"].join("\t"));
+   A(r.materials).forEach((m,i)=>{
+     const fs=reports.filter(f=>Number(f.materialIndex)===i).map(f=>f.storedName||f.originalName||f.path||"").join(" / ");
+     L.push([i+1,m.material||"",m.composition??"",m.recycled??"",m.remarks||"",fs].join("\t"));
+   });
+   L.push("");
+   L.push("[4대 중금속]");
+   L.push(["Pb","Cd","Hg","CrVI","합계(mg/kg)","판정"].join("\t"));
+   L.push([r.lead_pb??"",r.cadmium_cd??"",r.mercury_hg??"",r.chromium_vi??"",r.heavy_metals_total??"",hm].join("\t"));
+   L.push("");
+   L.push("[PFAS]");
+   L.push(["상태","Total(mg/kg)","개별 PFAS","비고","성적서"].join("\t"));
+   L.push([ps,r.pfas_total??"",r.pfas_individual||"",r.pfas_remarks||"",names("pfas")].join("\t"));
+   L.push("");
+   L.push("[첨부자료]");
+   L.push(["구분","파일명"].join("\t"));
+   L.push(["제품사진",names("product-photo")].join("\t"),["DoC",names("doc")].join("\t"),["기타 참고자료",names("other")].join("\t"));
+   L.push("");
+   L.push("[적합성 검증]");
+   L.push(["검증 결과",r.quality_review_status||"미검증"].join("\t"),["반려 사유",r.quality_rejection_reason||""].join("\t"),["검증 일시",r.quality_reviewed_at||""].join("\t"));
+   const text=L.join("\n");
+   try{await navigator.clipboard.writeText(text)}
+   catch(e){const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove()}
+   const msg=root.querySelector(".copy-all-msg");if(msg){msg.textContent="전체 복사됨";setTimeout(()=>msg.textContent="",1600)}
+ };
+
 }
 async function load(){
  $("status").textContent="데이터를 불러오는 중...";
