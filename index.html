@@ -603,11 +603,21 @@ function addMaterial(name='', auto=false, values={}){
     <td><input class="material-composition" type="number" min="0" max="100" step="0.01" value="${esc(values.composition??'')}" oninput="calcComposition()"></td>
     <td><input class="material-recycled" type="number" min="0" max="100" step="0.01" value="${esc(values.recycled??'')}"></td>
     <td><input class="material-remarks" value="${esc(values.remarks||'')}"></td>
-    <td><input class="material-report" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp"><div class="hint">해당 재질 자료 / Material evidence</div></td>
+    <td>
+      <input class="material-report" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp">
+      <div class="material-file-list hint">선택된 파일 없음 / No file selected</div>
+    </td>
     <td class="delete-cell"><button type="button" class="btn-danger" onclick="this.closest('tr').remove();calcComposition();updateSummary()">삭제</button></td>`;
   document.getElementById('materialsBody').appendChild(tr);
   updateSummary();
 }
+document.getElementById('materialsBody').addEventListener('change',e=>{
+  if(!e.target.classList.contains('material-report')) return;
+  const box=e.target.closest('td').querySelector('.material-file-list');
+  const names=[...e.target.files].map(f=>f.name);
+  box.textContent=names.length?names.join(' / '):'선택된 파일 없음 / No file selected';
+});
+
 function removeMaterialByName(name){
   [...document.querySelectorAll('.material-row')].forEach(r=>{if(r.querySelector('.material-name').value===name && r.dataset.auto==='1')r.remove()});
   calcComposition(); updateSummary();
