@@ -185,7 +185,39 @@ $("addMaterial").onclick=()=>addMat();$("closeEdit").onclick=$("cancelEdit").onc
 $("refresh").onclick=load;["search","hmFilter","pfasFilter","reviewFilter"].forEach(id=>$(id).addEventListener(id==="search"?"input":"change",apply));
 $("checkAll").onchange=e=>document.querySelectorAll(".rowCheck").forEach(c=>c.checked=e.target.checked);
 $("deleteSelected").onclick=async()=>{const ids=[...document.querySelectorAll(".rowCheck:checked")].map(x=>x.dataset.id);if(!ids.length){alert("삭제할 건을 선택해 주세요.");return}if(!pw()||!confirm(`${ids.length}건을 삭제할까요?`))return;const {error}=await sb.from(TABLE).delete().in("submission_id",ids);if(error)alert(error.message);else load()};
-$("csv").onclick=()=>{const H=["접수번호","회사명","담당자","대분류","품목군","대표규격","대표품번","중금속합계","중금속판정","PFAS","적합성검증","반려사유"],Q=v=>`"${String(v??"").replace(/"/g,'""')}"`,L=[H.map(Q).join(",")];view.forEach(r=>{const s=spec(r);L.push([r.submission_id,r.company,r.contact_person,r.major_category,r.packaging_type,s.size,s.code,r.heavy_metals_total,r.heavy_metals_assessment,r.pfas_applicable,review(r),r.quality_rejection_reason].map(Q).join(","))});const a=document.createElement("a");a.href="data:text/csv;charset=utf-8,"+encodeURIComponent("\uFEFF"+L.join("\r\n"));a.download="PPWR_submissions.csv";a.click()};
+$("csv").onclick=()=>{
+ const H=[
+  "접수번호","회사명","담당자","이메일","연락처",
+  "대분류","세부 품목군","대표규격","대표품번",
+  "구성재질 상세",
+  "Pb (mg/kg)","Cd (mg/kg)","Hg (mg/kg)","CrVI (mg/kg)","4대중금속 합계 (mg/kg)","중금속 판정",
+  "PFAS 상태","PFAS Total (mg/kg)","개별 PFAS","PFAS 비고",
+  "시험기관","성적서번호","발행일",
+  "중금속 첨부파일","PFAS 첨부파일","DoC 첨부파일","기타 첨부파일",
+  "적합성 검증","반려사유","검증일시","비고"
+ ];
+ const Q=v=>`"${String(v??"").replace(/"/g,'""')}"`;
+ const materialText=r=>A(r.materials).map((m,i)=>`${i+1}) 재질:${m.material||""} / 부위:${m.component||""} / 구성비:${m.composition??""}% / 재생원료:${m.recycled??""}% / 비고:${m.remarks||""}`).join(" | ");
+ const fileText=(r,cat)=>A(r.uploaded_files).filter(f=>String(f.category||"").toLowerCase()===cat).map(f=>f.storedName||f.originalName||f.path||"").join(" | ");
+ const L=[H.map(Q).join(",")];
+ rows.forEach(r=>{
+   const sp=spec(r);
+   L.push([
+    r.submission_id,r.company,r.contact_person,r.email,r.phone,
+    r.major_category,r.packaging_type,sp.size,sp.code,
+    materialText(r),
+    r.lead_pb,r.cadmium_cd,r.mercury_hg,r.chromium_vi,r.heavy_metals_total,hmAssess(r),
+    pfasStatus(r),r.pfas_total,r.pfas_individual,r.pfas_remarks,
+    r.laboratory,r.report_no,r.issue_date,
+    fileText(r,"heavy-metal"),fileText(r,"pfas"),fileText(r,"doc"),fileText(r,"other"),
+    review(r),r.quality_rejection_reason,r.quality_reviewed_at,r.remarks
+   ].map(Q).join(","));
+ });
+ const a=document.createElement("a");
+ a.href="data:text/csv;charset=utf-8,"+encodeURIComponent("\uFEFF"+L.join("\r\n"));
+ a.download="PPWR_All_Submissions.csv";
+ document.body.appendChild(a);a.click();a.remove();
+};
 await load();
 </script>
 </body></html>
