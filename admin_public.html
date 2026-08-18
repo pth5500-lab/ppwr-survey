@@ -10,8 +10,8 @@
 .wrap{max-width:1500px;margin:auto;padding:20px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
 h1{font-size:24px;margin:0 0 4px}.sub{font-size:13px;color:var(--muted)}
 .card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 5px 18px rgba(16,24,40,.05)}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}.stat{padding:15px}.num{font-size:26px;font-weight:800}.lbl{font-size:12px;color:var(--muted)}
-.toolbar{padding:13px;display:grid;grid-template-columns:2fr 1fr 1fr auto auto auto;gap:9px;margin-bottom:14px}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px}.stat{padding:15px}.num{font-size:26px;font-weight:800}.lbl{font-size:12px;color:var(--muted)}
+.toolbar{padding:13px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto auto auto;gap:9px;margin-bottom:14px}
 input,select,button{font:inherit}input[type=text],select{width:100%;padding:10px 11px;border:1px solid #d0d5dd;border-radius:9px;background:#fff}
 button{border:0;border-radius:9px;padding:10px 13px;font-weight:700;cursor:pointer}.secondary{background:#eef2f6;color:var(--accent)}
 .delete{background:#fef3f2;color:var(--bad);border:1px solid #fecdca}.delete:disabled{opacity:.45;cursor:not-allowed}
@@ -35,12 +35,14 @@ th{background:#f9fafb;color:#475467;font-size:12px}.check{width:18px;height:18px
   <div class="card stat"><div id="sTotal" class="num">-</div><div class="lbl">전체 제출건수</div></div>
   <div class="card stat"><div id="sCompany" class="num">-</div><div class="lbl">협력사 수</div></div>
   <div class="card stat"><div id="sOk" class="num">-</div><div class="lbl">중금속 적합</div></div>
+  <div class="card stat"><div id="sPfas" class="num">-</div><div class="lbl">PFAS 해당</div></div>
   <div class="card stat"><div id="sFile" class="num">-</div><div class="lbl">첨부파일 수</div></div>
  </div>
  <div class="card toolbar">
   <input id="q" type="text" placeholder="회사명, 품목명, 접수번호 검색">
   <select id="major"><option value="">대분류 전체</option></select>
   <select id="assess"><option value="">중금속 판정 전체</option><option value="적합">적합</option><option value="부적합">부적합</option><option value="미입력">미입력</option></select>
+  <select id="pfasFilter"><option value="">PFAS 전체</option><option value="해당">해당</option><option value="비해당">비해당</option><option value="미입력">미입력</option></select>
   <button id="csv" class="secondary">CSV 다운로드</button>
   <button id="del" class="delete" disabled>선택 삭제 (0건)</button>
   <button id="clear" class="secondary">필터 초기화</button>
@@ -70,7 +72,27 @@ const N=v=>(v===null||v===undefined||v==="")?"-":Number(v).toLocaleString();
 let rows=[],filtered=[],selected=new Set();
 
 function dateFromId(id){const m=String(id||"").match(/^PPWR-(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})-/);return m?`${m[1]}-${m[2]}-${m[3]} ${m[4]}:${m[5]}:${m[6]}`:""}
-function cls(v){const s=String(v||"");if(s.includes("부적합"))return"bad";if(s.includes("적합"))return"good";return"neutral"}
+function cls(v){
+ const s=String(v||"").trim().toLowerCase();
+ if(!s)return "neutral";
+ if(s.includes("부적합")||s.includes("non-compliant")||s.includes("noncompliant")||s.includes("fail"))return "bad";
+ if(s.includes("적합")||s.includes("compliant")||s.includes("pass")||s==="ok")return "good";
+ return "neutral";
+}
+function normAssess(v){
+ const s=String(v||"").trim().toLowerCase();
+ if(!s)return "미입력";
+ if(s.includes("부적합")||s.includes("non-compliant")||s.includes("noncompliant")||s.includes("fail"))return "부적합";
+ if(s.includes("적합")||s.includes("compliant")||s.includes("pass")||s==="ok")return "적합";
+ return s;
+}
+function pfasState(r){
+ const s=String(r.pfas_applicable||"").trim().toLowerCase();
+ if(!s)return "미입력";
+ if(s.includes("비해당")||s==="no"||s==="n"||s.includes("not applicable")||s==="n/a")return "비해당";
+ if(s.includes("해당")||s==="yes"||s==="y"||s==="applicable")return "해당";
+ return "미입력";
+}
 function fc(r){return A(r.uploaded_files).length}
 function shortSpec(v){const a=A(v);if(!a.length)return"-";const x=a[0];return `${E(x.item||"-")}<br><span class="muted">${E(x.size||"")}${x.code?" · "+E(x.code):""}</span>${a.length>1?`<br><span class="muted">외 ${a.length-1}건</span>`:""}`}
 function shortMat(v){const a=A(v).filter(x=>x?.material);if(!a.length)return"-";return a.slice(0,2).map(x=>`${E(x.material)}${x.composition!==""&&x.composition!=null?" "+E(x.composition)+"%":""}`).join("<br>")+(a.length>2?`<br><span class="muted">외 ${a.length-2}건</span>`:"")}
@@ -83,11 +105,33 @@ async function load(){
 }
 function buildMajor(){const keep=$("major").value;const vals=[...new Set(rows.map(r=>r.major_category).filter(Boolean))].sort();$("major").innerHTML='<option value="">대분류 전체</option>'+vals.map(v=>`<option>${E(v)}</option>`).join("");$("major").value=keep}
 function apply(){
- const q=$("q").value.trim().toLowerCase(),m=$("major").value,a=$("assess").value;
- filtered=rows.filter(r=>{const specs=A(r.specifications).map(x=>`${x.item||""} ${x.size||""} ${x.code||""}`).join(" ");const h=`${r.submission_id||""} ${r.company||""} ${r.contact_person||""} ${r.packaging_type||""} ${specs}`.toLowerCase();if(q&&!h.includes(q))return false;if(m&&r.major_category!==m)return false;const av=String(r.heavy_metals_assessment||"");if(a==="미입력"&&av.trim())return false;if(a&&a!=="미입력"&&!av.includes(a))return false;return true});render()
+ const q=$("q").value.trim().toLowerCase();
+ const m=$("major").value;
+ const a=$("assess").value;
+ const pf=$("pfasFilter").value;
+
+ filtered=rows.filter(r=>{
+  const specs=A(r.specifications).map(x=>`${x.item||""} ${x.size||""} ${x.code||""}`).join(" ");
+  const h=`${r.submission_id||""} ${r.company||""} ${r.contact_person||""} ${r.packaging_type||""} ${specs}`.toLowerCase();
+  if(q&&!h.includes(q))return false;
+  if(m&&r.major_category!==m)return false;
+
+  const av=normAssess(r.heavy_metals_assessment);
+  if(a&&av!==a)return false;
+
+  const pv=pfasState(r);
+  if(pf&&pv!==pf)return false;
+
+  return true;
+ });
+ render();
 }
 function render(){
- $("sTotal").textContent=filtered.length;$("sCompany").textContent=new Set(filtered.map(r=>r.company).filter(Boolean)).size;$("sOk").textContent=filtered.filter(r=>cls(r.heavy_metals_assessment)==="good").length;$("sFile").textContent=filtered.reduce((n,r)=>n+fc(r),0);
+ $("sTotal").textContent=filtered.length;
+ $("sCompany").textContent=new Set(filtered.map(r=>r.company).filter(Boolean)).size;
+ $("sOk").textContent=filtered.filter(r=>normAssess(r.heavy_metals_assessment)==="적합").length;
+ $("sPfas").textContent=filtered.filter(r=>pfasState(r)==="해당").length;
+ $("sFile").textContent=filtered.reduce((n,r)=>n+fc(r),0);
  $("empty").style.display=filtered.length?"none":"block";const tb=$("body");tb.innerHTML="";
  filtered.forEach((r,i)=>{const did="d"+i;const tr=document.createElement("tr");tr.className="main";
  tr.innerHTML=`<td style="text-align:center"><input class="check rowcheck" type="checkbox" data-id="${E(r.submission_id)}"></td>
@@ -122,49 +166,56 @@ $("del").addEventListener("click",async()=>{if(!selected.size)return;const targe
  const paths=targets.flatMap(r=>A(r.uploaded_files).map(f=>f?.path).filter(Boolean));if(paths.length){const {error}=await sb.storage.from(BUCKET).remove(paths);if(error){alert("첨부파일 삭제 실패: "+error.message);selUI();return}}
  const {error}=await sb.from(TABLE).delete().in("submission_id",[...selected]);if(error){alert("데이터 삭제 실패: "+error.message);selUI();return}selected.clear();alert(`${targets.length}건이 삭제되었습니다.`);await load()
 });
-$("refresh").addEventListener("click",load);$("q").addEventListener("input",apply);$("major").addEventListener("change",apply);$("assess").addEventListener("change",apply);
-$("clear").addEventListener("click",()=>{$("q").value="";$("major").value="";$("assess").value="";apply()});
+$("refresh").addEventListener("click",load);$("q").addEventListener("input",apply);$("major").addEventListener("change",apply);$("assess").addEventListener("change",apply);$("pfasFilter").addEventListener("change",apply);
+$("clear").addEventListener("click",()=>{$("q").value="";$("major").value="";$("assess").value="";$("pfasFilter").value="";apply()});
 $("csv").addEventListener("click",()=>{
- const H=[
-  "접수번호","제출일시","회사명","담당자","이메일","연락처","대분류","세부품목군",
-  "납품규격 상세","구성재질 상세",
-  "Pb (mg/kg)","Cd (mg/kg)","Hg (mg/kg)","CrVI (mg/kg)",
-  "중금속합계 (mg/kg)","중금속판정",
-  "PFAS 적용","PFAS Total (mg/kg)","개별 PFAS","PFAS 비고",
-  "시험기관","성적서번호","발행일","첨부파일 상세","비고"
- ];
- const Q=v=>`"${String(v??"").replace(/"/g,'""')}"`;
- const L=[H.map(Q).join(",")];
+ try{
+  const H=[
+   "접수번호","제출일시","회사명","담당자","이메일","연락처","대분류","세부품목군",
+   "납품규격 상세","구성재질 상세",
+   "Pb (mg/kg)","Cd (mg/kg)","Hg (mg/kg)","CrVI (mg/kg)",
+   "중금속합계 (mg/kg)","중금속판정",
+   "PFAS 적용","PFAS Total (mg/kg)","개별 PFAS","PFAS 비고",
+   "시험기관","성적서번호","발행일","첨부파일 상세","비고"
+  ];
+  const Q=v=>`"${String(v??"").replace(/"/g,'""').replace(/\r?\n/g," ")}"`;
+  const L=[H.map(Q).join(",")];
 
- filtered.forEach(r=>{
-  const specs=A(r.specifications).map((x,i)=>
-   `${i+1}. 품목명:${x.item||"-"} / 규격:${x.size||"-"} / 코드:${x.code||"-"}`
-  ).join(" | ");
+  filtered.forEach(r=>{
+   const specs=A(r.specifications).map((x,i)=>
+    `${i+1}. 품목명:${x.item||"-"} / 규격:${x.size||"-"} / 코드:${x.code||"-"}`
+   ).join(" | ");
+   const materials=A(r.materials).map((x,i)=>
+    `${i+1}. 재질:${x.material||"-"} / 부위:${x.component||"-"} / 구성비:${x.composition??"-"}% / 재생원료:${x.recycled??"-"}% / 비고:${x.remarks||"-"}`
+   ).join(" | ");
+   const files=A(r.uploaded_files).map((f,i)=>
+    `${i+1}. ${f.category||"file"}: ${f.originalName||f.path||"-"}`
+   ).join(" | ");
 
-  const materials=A(r.materials).map((x,i)=>
-   `${i+1}. 재질:${x.material||"-"} / 부위:${x.component||"-"} / 구성비:${x.composition??"-"}% / 재생원료:${x.recycled??"-"}% / 비고:${x.remarks||"-"}`
-  ).join(" | ");
+   L.push([
+    r.submission_id,dateFromId(r.submission_id),r.company,r.contact_person,r.email,r.phone,
+    r.major_category,r.packaging_type,specs,materials,
+    r.lead_pb,r.cadmium_cd,r.mercury_hg,r.chromium_vi,
+    r.heavy_metals_total,r.heavy_metals_assessment,
+    r.pfas_applicable,r.pfas_total,r.pfas_individual,r.pfas_remarks,
+    r.laboratory,r.report_no,r.issue_date,files,r.remarks
+   ].map(Q).join(","));
+  });
 
-  const files=A(r.uploaded_files).map((f,i)=>
-   `${i+1}. ${f.category||"file"}: ${f.originalName||f.path||"-"}`
-  ).join(" | ");
-
-  L.push([
-   r.submission_id,dateFromId(r.submission_id),r.company,r.contact_person,r.email,r.phone,
-   r.major_category,r.packaging_type,
-   specs,materials,
-   r.lead_pb,r.cadmium_cd,r.mercury_hg,r.chromium_vi,
-   r.heavy_metals_total,r.heavy_metals_assessment,
-   r.pfas_applicable,r.pfas_total,r.pfas_individual,r.pfas_remarks,
-   r.laboratory,r.report_no,r.issue_date,files,r.remarks
-  ].map(Q).join(","));
- });
-
- const b=new Blob(["\uFEFF"+L.join("\r\n")],{type:"text/csv;charset=utf-8"});
- const u=URL.createObjectURL(b),a=document.createElement("a");
- a.href=u;a.download="PPWR_submissions_detail.csv";a.click();
- setTimeout(()=>URL.revokeObjectURL(u),3000);
+  const blob=new Blob(["\uFEFF"+L.join("\r\n")],{type:"text/csv;charset=utf-8;"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=`PPWR_submissions_${new Date().toISOString().slice(0,10)}.csv`;
+  a.style.display="none";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},1000);
+ }catch(err){
+  alert("CSV 다운로드 오류: "+(err?.message||err));
+ }
 });
+
 await load();
 </script>
 </body></html>
