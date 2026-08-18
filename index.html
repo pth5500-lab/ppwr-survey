@@ -523,7 +523,6 @@ document.getElementById('representativeSpec').addEventListener('input', updateSu
   document.getElementById('pfasApplicable').addEventListener('change',()=> {
     document.getElementById('pfasPanel').style.display=document.getElementById('pfasApplicable').value==='Applicable'?'grid':'none';
   });
-  addSpec();
   updateSummary();
 }
 
@@ -604,9 +603,11 @@ function updateSummary(){
 function filenames(id){return [...document.getElementById(id).files].map(f=>f.name).join('; ')}
 
 window.collectData = function collectData(){
-  const specs=[...document.querySelectorAll('.spec-row')].map(r=>({
-    item:r.querySelector('.spec-item').value,size:r.querySelector('.spec-size').value,code:r.querySelector('.spec-code').value
-  }));
+  const specs=[{
+    item:document.getElementById('type')?.value||'',
+    size:document.getElementById('representativeSpec')?.value||'',
+    code:document.getElementById('representativeCode')?.value||''
+  }];
   const materials=[...document.querySelectorAll('.material-row')].map(r=>({
     material:r.querySelector('.material-name').value,component:r.querySelector('.material-component').value,
     composition:r.querySelector('.material-composition').value,recycled:r.querySelector('.material-recycled').value,
@@ -631,7 +632,7 @@ function loadDraft(){
   const d=JSON.parse(raw);
   ['company','contact','email','phone','representativeSpec','representativeCode','pb','cd','hg','cr6','pfasTotal','pfasIndividual','pfasRemarks','lab','reportNo','issueDate','remarks'].forEach(id=>{if(d[id]!=null)document.getElementById(id).value=d[id]});
   major.value=d.major||''; updateCategory(); type.value=d.type||'';
-  document.getElementById('specs').innerHTML=''; (d.specs||[]).forEach(x=>addSpec(x)); if(!(d.specs||[]).length)addSpec();
+  const sp=(d.specs||[])[0]||{}; representativeSpec.value=d.representativeSpec||sp.size||''; representativeCode.value=d.representativeCode||sp.code||'';
   document.getElementById('materialsBody').innerHTML=''; (d.materials||[]).forEach(x=>addMaterial(x.material,false,x));
   pfasApplicable.value=d.pfasApplicable||'Not applicable'; pfasApplicable.dispatchEvent(new Event('change'));
   calcComposition();calcMetals();updateSummary();
@@ -746,6 +747,8 @@ async function aeSave(){
  }catch(e){if(status)status.textContent="수정 실패: "+(e.message||e)}
 }
 
+parent.postMessage({type:"PPWR_ADMIN_EDIT_READY"},"*");
+
 window.addEventListener("message",async ev=>{
  const d=ev.data||{};
  if(d.type==="PPWR_ADMIN_EDIT_LOAD"){
@@ -760,9 +763,13 @@ window.addEventListener("message",async ev=>{
    aeSet("pfasApplicable",aeRow.pfas_applicable);aeSet("pfasTotal",aeRow.pfas_total);aeSet("pfasIndividual",aeRow.pfas_individual);aeSet("pfasRemarks",aeRow.pfas_remarks);
    aeSet("lab",aeRow.laboratory);aeSet("reportNo",aeRow.report_no);aeSet("issueDate",aeRow.issue_date);aeSet("remarks",aeRow.remarks);
    aeRenderExisting();
-   const submit=[...document.querySelectorAll("button")].find(b=>/제출\s*\/\s*Submit/.test(b.textContent));
-   if(submit){submit.textContent="수정내용 저장 / Save Changes";submit.onclick=(e)=>{e.preventDefault();e.stopImmediatePropagation();aeSave()}}
+   const submit=document.getElementById("submitBtn") || [...document.querySelectorAll("button")].find(b=>/제출\s*\/\s*Submit/.test(b.textContent));
+   if(submit){
+     submit.textContent="수정내용 저장 / Save Changes";
+     submit.onclick=(e)=>{e.preventDefault();e.stopImmediatePropagation();aeSave();return false};
+   }
    [...document.querySelectorAll("button")].filter(b=>/초기화\s*\/\s*Reset/.test(b.textContent)).forEach(b=>b.style.display="none");
+   if(window.submitToSupabase) window.__originalSubmitToSupabase=window.submitToSupabase;
    window.scrollTo(0,0);
  }
  if(d.type==="PPWR_ADMIN_EDIT_RESULT"){
