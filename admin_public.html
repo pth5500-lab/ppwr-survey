@@ -30,21 +30,63 @@ button{border:0;border-radius:8px;padding:9px 12px;cursor:pointer;font-weight:70
 .copy-btn{background:#eef2f6;color:#173b66}
 .copy-msg{font-size:11px;color:#667085;margin-left:6px}
 
+
+.file{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 10px;border:1px solid #e4e7ec;border-radius:8px;background:#fff;margin:5px 0}
+.file>span{flex:1;min-width:0;word-break:break-all;font-size:12px;color:#344054}
+.file-actions{display:flex;gap:6px;flex:0 0 auto}
+.fileViewBtn,.fileSaveBtn{min-width:72px;padding:7px 10px;border-radius:7px;font-size:12px;font-weight:700;line-height:1;border:1px solid transparent;cursor:pointer}
+.fileViewBtn{background:#eef4ff;color:#1849a9;border-color:#c7d7fe}
+.fileSaveBtn{background:#f2f4f7;color:#344054;border-color:#d0d5dd}
+.fileViewBtn:hover{background:#dbe8ff}
+.fileSaveBtn:hover{background:#e4e7ec}
+.material-file-actions{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+
+
+body{background:#eef2f6!important}
+.wrap{max-width:1480px!important;padding:28px!important}
+.head{display:none!important}
+.admin-shell{margin-bottom:18px}
+.dashboard-hero{background:linear-gradient(120deg,#173b66,#245b92);color:#fff;border-radius:18px;padding:24px 26px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 10px 28px rgba(23,59,102,.16)}
+.dashboard-hero h1{font-size:26px;margin:4px 0 5px;color:#fff}
+.dashboard-hero p{margin:0;color:rgba(255,255,255,.75);font-size:12px}
+.eyebrow{font-size:10px;letter-spacing:1.8px;font-weight:800;color:#a9c7e8}
+.hero-refresh{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;padding:10px 14px}
+.dashboard{margin-top:-1px;padding-top:14px}
+.metric-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.metric{background:#fff;border:0;border-radius:14px;padding:17px 18px;box-shadow:0 4px 15px rgba(16,24,40,.06);position:relative;overflow:hidden}
+.metric:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:#6f98c8}
+.metric-label{font-size:11px;color:#667085;font-weight:700}
+.metric-value{font-size:29px;font-weight:850;color:#173b66;margin-top:7px}
+.metric-sub{font-size:10px;color:#98a2b3;margin-top:5px}
+.dash-grid{display:grid;grid-template-columns:1.35fr .65fr;gap:12px;margin-top:12px}
+.chart-card{background:#fff;border:0;border-radius:14px;padding:18px;box-shadow:0 4px 15px rgba(16,24,40,.05)}
+.chart-title{font-size:13px;font-weight:800;color:#344054;margin-bottom:15px}
+.bar-list{display:grid;gap:11px}.bar-row{display:grid;grid-template-columns:140px 1fr 36px;gap:10px;align-items:center;font-size:11px}
+.bar-track{height:9px;background:#edf1f5;border-radius:99px;overflow:hidden}.bar-fill{height:100%;background:linear-gradient(90deg,#4d78aa,#8aabd0);border-radius:99px}
+.bar-num{text-align:right;font-weight:800}.status-list{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.status-box{background:#f7f9fc;border:1px solid #e8ecf2;border-radius:11px;padding:14px 8px;text-align:center}.status-box b{display:block;font-size:22px;color:#173b66}.status-box span{font-size:10px;color:#667085}
+.toolbar{border:0!important;box-shadow:0 3px 12px rgba(16,24,40,.05)!important;border-radius:13px!important;padding:12px!important}
+.tablebox{border:0!important;border-radius:14px!important;box-shadow:0 4px 16px rgba(16,24,40,.05)!important;overflow:hidden}
+.tablebox>table{margin:0}
+.tablebox>table thead th{background:#173b66!important;color:#fff!important;border-color:#274e78!important;font-size:11px}
+.tablebox>table tbody tr:hover{background:#f5f8fc}
+.tablebox>table td{border-color:#edf0f4!important}
+button{border-radius:8px!important}
+@media(max-width:950px){.metric-grid{grid-template-columns:repeat(2,1fr)}.dash-grid{grid-template-columns:1fr}.dashboard-hero{align-items:flex-start;gap:14px;flex-direction:column}}
+
 </style>
 </head>
 <body>
 <div class="wrap">
  <div class="head"><h1>PPWR 제출자료 관리</h1><p>Toray Advanced Materials Korea Inc. · Purchasing Planning Team</p></div>
- <div class="stats">
-  <div class="card stat"><b id="total">-</b><span>전체 제출건수</span></div>
-  <div class="card stat"><b id="companies">-</b><span>협력사 수</span></div>
-  <div class="card stat"><b id="hmOk">-</b><span>중금속 적합</span></div>
-  <div class="card stat"><b id="hmBad">-</b><span>중금속 부적합</span></div>
-  <div class="card stat"><b id="reviewPending">-</b><span>적합성 미검증</span></div>
-  <div class="card stat"><b id="reviewOk">-</b><span>적합성 적합</span></div>
-  <div class="card stat"><b id="reviewReject">-</b><span>적합성 반려</span></div>
- </div>
- <div class="card toolbar">
+ <div class="admin-shell">
+  <div class="dashboard-hero">
+    <div><div class="eyebrow">PPWR CONTROL CENTER</div><h1>포장재 제출·검증 현황</h1><p>협력사 자료 취합부터 적합성 검증까지 한 화면에서 관리합니다.</p></div>
+    <button id="refreshTop" class="hero-refresh">↻ 데이터 새로고침</button>
+  </div>
+  <div id="dashboard" class="dashboard"></div>
+</div>
+<div class="card toolbar">
   <input id="search" placeholder="회사명, 품목군, 품번, 접수번호 검색">
   <select id="hmFilter"><option value="">중금속 전체</option><option>적합</option><option>부적합</option><option value="미입력">미입력</option></select>
   <select id="pfasFilter"><option value="">PFAS 전체</option><option>해당</option><option>비해당</option><option>미확인</option></select>
@@ -136,14 +178,14 @@ function details(r){
  const allFiles=A(r.uploaded_files);
  const by=cat=>allFiles.filter(f=>String(f.category||"").toLowerCase()===cat);
  const fh=(files,empty="첨부파일 없음")=>files.length
-   ? files.map(f=>`<div class="file"><span>${esc(f.storedName||f.originalName||f.path||"file")}</span><button class="secondary fileDownload" data-path="${esc(f.path||"")}">보기</button></div>`).join("")
+   ? files.map(f=>`<div class="file"><span>${esc(f.storedName||f.originalName||f.path||"file")}</span><div class="file-actions"><button class="fileViewBtn fileDownload" data-path="${esc(f.path||"")}">👁 보기</button><button class="fileSaveBtn fileSave" data-path="${esc(f.path||"")}" data-name="${esc(f.storedName||f.originalName||"download")}">↓ 저장</button></div></div>`).join("")
    : `<span class="muted">${esc(empty)}</span>`;
  const reports=by("material-report");
  const mats=A(r.materials);
  const matRows=mats.map((m,i)=>{
    const mf=reports.filter(f=>Number(f.materialIndex)===i);
    const names=mf.length?mf.map(f=>esc(f.storedName||f.originalName||f.path||"file")).join("<br>"):'<span class="muted">없음</span>';
-   const buttons=mf.length?mf.map(f=>`<button class="secondary fileDownload" data-path="${esc(f.path||"")}">보기</button>`).join(" "):"";
+   const buttons=mf.length?mf.map(f=>`<span class="material-file-actions"><button class="fileViewBtn fileDownload" data-path="${esc(f.path||"")}">👁 보기</button><button class="fileSaveBtn fileSave" data-path="${esc(f.path||"")}" data-name="${esc(f.storedName||f.originalName||"download")}">↓ 저장</button></span>`).join(" "):"";
    return `<tr><td class="num">${i+1}</td><td>${esc(m.material||"-")}</td><td class="num">${esc(m.composition??"-")}</td><td class="num">${esc(m.recycled??"-")}</td><td>${esc(m.remarks||"-")}</td><td class="filecell">${names}<div style="margin-top:5px">${buttons}</div></td></tr>`;
  }).join("")||`<tr><td colspan="6" class="muted">구성재질 정보 없음</td></tr>`;
  const pfas=by("pfas"),doc=by("doc"),other=by("other"),photos=by("product-photo");
@@ -193,7 +235,28 @@ function details(r){
  </div>
  </div>`;
 }
+function renderDashboard(){
+ const host=document.getElementById("dashboard");if(!host)return;
+ const rows=all||[], total=rows.length;
+ const companies=new Set(rows.map(r=>(r.company||"").trim()).filter(Boolean)).size;
+ const pass=rows.filter(r=>r.quality_review_status==="적합").length;
+ const reject=rows.filter(r=>r.quality_review_status==="반려").length;
+ const reviewed=pass+reject,pending=Math.max(0,total-reviewed);
+ const docs=rows.filter(r=>A(r.uploaded_files).some(f=>String(f.category||"").toLowerCase()==="doc")).length;
+ const reviewRate=total?Math.round(reviewed/total*100):0,docRate=total?Math.round(docs/total*100):0;
+ const cats={};rows.forEach(r=>{const k=(r.major_category||"미분류").split(" / ")[0];cats[k]=(cats[k]||0)+1});
+ const top=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,7),mx=Math.max(1,...top.map(x=>x[1]));
+ host.innerHTML=`<div class="metric-grid">
+ <div class="metric"><div class="metric-label">전체 제출 건수</div><div class="metric-value">${total}</div><div class="metric-sub">Total submissions</div></div>
+ <div class="metric"><div class="metric-label">협력사 수</div><div class="metric-value">${companies}</div><div class="metric-sub">Suppliers</div></div>
+ <div class="metric"><div class="metric-label">적합성 검증률</div><div class="metric-value">${reviewRate}%</div><div class="metric-sub">${reviewed}건 검증 완료</div></div>
+ <div class="metric"><div class="metric-label">DoC 확보율</div><div class="metric-value">${docRate}%</div><div class="metric-sub">${docs} / ${total}</div></div>
+ <div class="metric"><div class="metric-label">검증 대기</div><div class="metric-value">${pending}</div><div class="metric-sub">Pending review</div></div></div>
+ <div class="dash-grid"><div class="chart-card"><div class="chart-title">포장재 대분류별 제출 현황</div><div class="bar-list">${top.length?top.map(([k,v])=>`<div class="bar-row"><span title="${esc(k)}">${esc(k)}</span><div class="bar-track"><div class="bar-fill" style="width:${v/mx*100}%"></div></div><div class="bar-num">${v}</div></div>`).join(""):'<span class="muted">데이터 없음</span>'}</div></div>
+ <div class="chart-card"><div class="chart-title">적합성 검증 현황</div><div class="status-list"><div class="status-box"><b>${pass}</b><span>적합</span></div><div class="status-box"><b>${reject}</b><span>반려</span></div><div class="status-box"><b>${pending}</b><span>미검증</span></div></div><div style="margin-top:16px"><div class="bar-row"><span>검증 진행률</span><div class="bar-track"><div class="bar-fill" style="width:${reviewRate}%"></div></div><b>${reviewRate}%</b></div><div class="bar-row" style="margin-top:12px"><span>DoC 확보율</span><div class="bar-track"><div class="bar-fill" style="width:${docRate}%"></div></div><b>${docRate}%</b></div></div></div></div>`;
+}
 function render(){
+ renderDashboard();
  $("tbody").innerHTML="";
  view.forEach((r,i)=>{
   const sp=spec(r),tr=document.createElement("tr"),dr=document.createElement("tr"),id="detail_"+i;
@@ -208,6 +271,15 @@ function render(){
 }
 function bindDetail(root,r){
  root.querySelectorAll(".fileDownload").forEach(b=>b.onclick=async()=>{const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(b.dataset.path,60);if(error)alert(error.message);else window.open(data.signedUrl,"_blank")});
+ root.querySelectorAll(".fileSave").forEach(b=>b.onclick=async()=>{
+   try{
+     const {data,error}=await sb.storage.from(BUCKET).download(b.dataset.path);
+     if(error)throw error;
+     const url=URL.createObjectURL(data);
+     const a=document.createElement("a");a.href=url;a.download=b.dataset.name||"download";document.body.appendChild(a);a.click();a.remove();
+     setTimeout(()=>URL.revokeObjectURL(url),1000);
+   }catch(e){alert("파일 다운로드에 실패했습니다.\n"+(e?.message||e))}
+ });
  const save=root.querySelector(".saveReview");if(save)save.onclick=async()=>{if(!pw())return;const val=root.querySelector(`input[name="rv_${CSS.escape(r.submission_id)}"]:checked`)?.value;if(!val){alert("적합 또는 반려를 선택해 주세요.");return}const reason=root.querySelector(".rejectReason").value.trim();if(val==="반려"&&!reason){alert("반려 사유를 입력해 주세요.");return}const {error}=await sb.from(TABLE).update({quality_review_status:val,quality_rejection_reason:val==="반려"?reason:null,quality_reviewed_at:new Date().toISOString()}).eq("submission_id",r.submission_id);if(error)alert(error.message);else load()};
 
  const copyBtn=root.querySelector(".materialCopy");
@@ -308,7 +380,8 @@ $("saveEdit").onclick=async()=>{if(!editing||!pw())return;$("editStatus").textCo
  const payload={company:$("eCompany").value,contact_person:$("eContact").value,email:$("eEmail").value,phone:$("ePhone").value,major_category:$("eMajor").value,packaging_type:$("eType").value,specifications:[{item:$("eType").value,size:$("eSpec").value,code:$("eCode").value}],materials:mats,lead_pb:vals[0],cadmium_cd:vals[1],mercury_hg:vals[2],chromium_vi:vals[3],heavy_metals_total:total,heavy_metals_assessment:total===null?null:(total<=100?"적합":"부적합"),pfas_applicable:$("ePfasApplicable").value,pfas_total:num("ePfasTotal"),pfas_individual:$("ePfasIndividual").value,pfas_remarks:$("ePfasRemarks").value,laboratory:$("eLab").value,report_no:$("eReport").value,issue_date:$("eIssue").value||null,remarks:$("eRemarks").value,uploaded_files:editFiles};
  const {error}=await sb.from(TABLE).update(payload).eq("submission_id",editing.submission_id);if(error)throw error;$("editModal").classList.remove("open");$("editStatus").textContent="";await load()}catch(e){$("editStatus").textContent="저장 실패: "+e.message}};
 $("addMaterial").onclick=()=>addMat();$("closeEdit").onclick=$("cancelEdit").onclick=()=>$("editModal").classList.remove("open");
-$("refresh").onclick=load;["search","hmFilter","pfasFilter","reviewFilter"].forEach(id=>$(id).addEventListener(id==="search"?"input":"change",apply));
+$("refresh").onclick=load;
+$("refreshTop").onclick=load;["search","hmFilter","pfasFilter","reviewFilter"].forEach(id=>$(id).addEventListener(id==="search"?"input":"change",apply));
 $("checkAll").onchange=e=>document.querySelectorAll(".rowCheck").forEach(c=>c.checked=e.target.checked);
 $("deleteSelected").onclick=async()=>{const ids=[...document.querySelectorAll(".rowCheck:checked")].map(x=>x.dataset.id);if(!ids.length){alert("삭제할 건을 선택해 주세요.");return}if(!pw()||!confirm(`${ids.length}건을 삭제할까요?`))return;const {error}=await sb.from(TABLE).delete().in("submission_id",ids);if(error)alert(error.message);else load()};
 $("csv").onclick=()=>{
