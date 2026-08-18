@@ -202,7 +202,23 @@
   </section>
 
   <section class="card">
-    <h2>7. 입력 현황 / Summary</h2>
+    <h2>8. 기타 증빙자료 / Other Supporting Documents</h2>
+    <div class="grid2">
+      <div>
+        <label>DoC / Declaration of Conformity</label>
+        <input id="docFiles" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp" multiple>
+        <div class="hint">선택사항 / Optional</div>
+      </div>
+      <div>
+        <label>기타 참고자료 / Other Documents</label>
+        <input id="otherFiles" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp" multiple>
+        <div class="hint">선택사항 / Optional</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>9. 입력 현황 / Summary</h2>
     <div class="summary">
       <div class="sumitem"><span>대표 규격 / Representative Spec.</span><strong id="sumSpecs">-</strong></div>
       <div class="sumitem"><span>구성재질 수 / Materials</span><strong id="sumMaterials">0</strong></div>
@@ -347,10 +363,10 @@ window.submitToSupabase = async function() {
 
     const uploaded = [];
     const groups = [
-      ["pfas", document.getElementById("pfasFiles").files],
-      ["doc", document.getElementById("docFiles").files],
-      ["other", document.getElementById("otherFiles").files],
-      ["product-photo", document.getElementById("productPhotos").files]
+      ["pfas", document.getElementById("pfasFiles")?.files || []],
+      ["doc", document.getElementById("docFiles")?.files || []],
+      ["other", document.getElementById("otherFiles")?.files || []],
+      ["product-photo", document.getElementById("productPhotos")?.files || []]
     ];
 
     // Upload files first, then insert the submission once with all file metadata.
