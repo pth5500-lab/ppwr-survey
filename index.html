@@ -138,7 +138,7 @@
   </section>
 
   <section class="card">
-    <h2>4. 실제 구성재질 / Actual Material Composition</h2>
+    <h2>4. 구성재질 및 재질별 증빙 / Materials & Material-specific Evidence</h2>
     <div class="grid">
       <div>
         <label>기타 재질 직접 입력 / Add Other Material</label>
@@ -149,7 +149,7 @@
     <div style="overflow:auto">
       <table>
         <thead><tr>
-          <th>구성재질 / Material</th><th>부위 / Component</th><th>구성비(%) / Composition</th><th>재생원료 함량(%) / Recycled Content</th><th>비고 / Remarks</th><th>삭제</th>
+          <th>구성재질 / Material</th><th>부위 / Component</th><th>구성비(%) / Composition</th><th>재생원료 함량(%) / Recycled Content</th><th>비고 / Remarks</th><th>재질별 성적서 / Material Report</th><th>삭제</th>
         </tr></thead>
         <tbody id="materialsBody"></tbody>
       </table>
@@ -186,21 +186,19 @@
     </div>
   </section>
 
+  <section class="card" id="pfasEvidenceCard">
+    <h2>6. PFAS 증빙 / PFAS Evidence</h2>
+    <p class="hint">PFAS가 해당되는 경우에만 시험성적서를 첨부해 주세요. / Attach a PFAS report only when applicable.</p>
+    <div>
+      <label>PFAS 시험성적서 / PFAS Test Report</label>
+      <input id="pfasFiles" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp" multiple>
+    </div>
+  </section>
+
   <section class="card">
-    <h2>6. 시험성적서 및 증빙자료 / Test Reports & Supporting Documents</h2>
-    <div class="grid3">
-      <div><label>시험기관 / Laboratory</label><input id="lab"></div>
-      <div><label>성적서 번호 / Report No.</label><input id="reportNo"></div>
-      <div><label>발행일 / Issue Date</label><input id="issueDate" type="date"></div>
-    </div>
-    <div class="grid" style="margin-top:14px">
-      <div><label>4대 중금속 시험성적서 / Heavy Metal Test Report</label><input id="heavyFiles" type="file" multiple accept=".pdf,.xls,.xlsx,.csv,.jpg,.jpeg,.png"></div>
-      <div><label>PFAS 시험성적서 / PFAS Test Report</label><input id="pfasFiles" type="file" multiple accept=".pdf,.xls,.xlsx,.csv,.jpg,.jpeg,.png"></div>
-      <div><label>DoC / Declaration of Conformity <span style="font-weight:400;color:#667085">(선택 / Optional)</span></label><input id="docFiles" type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"></div>
-      <div><label>기타 증빙자료 / Other Supporting Documents</label><input id="otherFiles" type="file" multiple accept=".pdf,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.doc,.docx"></div>
-      <div><label>비고 / Remarks</label><textarea id="remarks"></textarea></div>
-    </div>
-    
+    <h2>7. 포장재 제품 사진 / Packaging Photo</h2>
+    <p class="hint">해당 포장재를 식별할 수 있는 제품 사진을 첨부해 주세요. / Please attach a photo identifying the packaging.</p>
+    <input id="productPhotos" type="file" accept=".png,.jpg,.jpeg,.webp" multiple>
   </section>
 
   <section class="card">
@@ -290,7 +288,7 @@ function fileExtension(name) {
 
 function storedFileName(company, packagingType, group, submissionId, originalName, sequence) {
   const ext=fileExtension(originalName);
-  const groupNames={"heavy-metal":"HeavyMetal","pfas":"PFAS","doc":"DoC","other":"Other"};
+  const groupNames={"heavy-metal":"HeavyMetal","pfas":"PFAS","doc":"DoC","other":"Other","product-photo":"Photo","material-report":"MaterialReport"};
   const groupPart=groupNames[group]||"File";
   const seq=sequence>1?`_${sequence}`:"";
   return `${submissionId}_${groupPart}${seq}${ext}`;
@@ -349,10 +347,10 @@ window.submitToSupabase = async function() {
 
     const uploaded = [];
     const groups = [
-      ["heavy-metal", document.getElementById("heavyFiles").files],
       ["pfas", document.getElementById("pfasFiles").files],
       ["doc", document.getElementById("docFiles").files],
-      ["other", document.getElementById("otherFiles").files]
+      ["other", document.getElementById("otherFiles").files],
+      ["product-photo", document.getElementById("productPhotos").files]
     ];
 
     // Upload files first, then insert the submission once with all file metadata.
@@ -362,7 +360,7 @@ window.submitToSupabase = async function() {
       for (const file of fileList) {
         sequence += 1;
         const renamedFile = storedFileName(d.company, d.type, group, submissionId, file.name, sequence);
-        const folderNames={"heavy-metal":"heavy_metal","pfas":"pfas","doc":"doc","other":"other"};
+        const folderNames={"heavy-metal":"heavy_metal","pfas":"pfas","doc":"doc","other":"other","product-photo":"product_photo","material-report":"material_report"};
         const folder=folderNames[group]||"file";
         const path = `${submissionId}/${folder}/${renamedFile}`;
 
@@ -395,6 +393,25 @@ window.submitToSupabase = async function() {
           size: file.size,
           contentType: file.type || ""
         });
+      }
+    }
+
+    // Upload a separate report for each material row so material and evidence stay matched.
+    const materialRows=[...document.querySelectorAll(".material-row")];
+    for(let mi=0;mi<materialRows.length;mi++){
+      const mr=materialRows[mi];
+      const materialName=mr.querySelector(".material-name")?.value?.trim()||`Material${mi+1}`;
+      const reportInput=mr.querySelector(".material-report");
+      let sequence=0;
+      for(const file of [...(reportInput?.files||[])]){
+        sequence+=1;
+        const ext=fileExtension(file.name);
+        const suffix=sequence>1?`_${sequence}`:"";
+        const renamedFile=`${submissionId}_Material${mi+1}_Report${suffix}${ext}`;
+        const path=`${submissionId}/material_report/${renamedFile}`;
+        const {error:uploadError}=await supabase.storage.from("ppwr-files").upload(path,file,{cacheControl:"3600",upsert:false,contentType:file.type||undefined});
+        if(uploadError)throw {stage:currentStage,group:"material-report",fileName:file.name,message:uploadError.message,statusCode:uploadError.statusCode||uploadError.status,raw:uploadError};
+        uploaded.push({category:"material-report",materialIndex:mi,materialName,originalName:file.name,storedName:renamedFile,path,size:file.size,contentType:file.type||""});
       }
     }
 
@@ -457,6 +474,14 @@ window.submitToSupabase = async function() {
     btn.textContent = "제출 / Submit";
   }
 };
+
+function syncPfasEvidence(){
+  const v=document.getElementById("pfasApplicable")?.value||"";
+  const card=document.getElementById("pfasEvidenceCard");
+  if(card) card.style.display=/^Applicable$/i.test(v)?"block":"none";
+}
+document.getElementById("pfasApplicable")?.addEventListener("change",syncPfasEvidence);
+syncPfasEvidence();
 </script>
 
 <script>
@@ -565,6 +590,7 @@ function addMaterial(name='', auto=false, values={}){
     <td><input class="material-composition" type="number" min="0" max="100" step="0.01" value="${esc(values.composition??'')}" oninput="calcComposition()"></td>
     <td><input class="material-recycled" type="number" min="0" max="100" step="0.01" value="${esc(values.recycled??'')}"></td>
     <td><input class="material-remarks" value="${esc(values.remarks||'')}"></td>
+    <td><input class="material-report" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.webp"><div class="hint">해당 재질 성적서</div></td>
     <td class="delete-cell"><button class="btn-danger" onclick="this.closest('tr').remove();calcComposition();updateSummary()">삭제</button></td>`;
   document.getElementById('materialsBody').appendChild(tr);
   updateSummary();
