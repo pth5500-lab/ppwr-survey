@@ -803,9 +803,26 @@ window.loadExistingSubmission = async function(){
     set("email",row.email);
     set("phone",row.phone);
 
-    set("major",row.major_category);
+    // 과거 제출값과 현재 Master 명칭이 달라도 대분류/세부품목군을 반드시 복원합니다.
+    function setSelectIncludingLegacy(id,value){
+      const el=document.getElementById(id);
+      if(!el)return;
+      const v=String(value??"").trim();
+      if(!v){el.value="";return;}
+      let option=[...el.options].find(o=>o.value===v);
+      if(!option){
+        option=document.createElement("option");
+        option.value=v;
+        option.textContent=v+" (기존 제출값 / Previous value)";
+        el.appendChild(option);
+      }
+      el.value=v;
+    }
+
+    setSelectIncludingLegacy("major",row.major_category);
     if(typeof window.updateCategory==="function") window.updateCategory();
-    set("type",row.packaging_type);
+    setSelectIncludingLegacy("type",row.packaging_type);
+    document.getElementById("type")?.dispatchEvent(new Event("change",{bubbles:true}));
 
     const sp=Array.isArray(row.specifications)?(row.specifications[0]||{}):{};
     set("representativeSpec",sp.size);
