@@ -143,6 +143,33 @@ const sb=createClient("https://husxmsxbhdalmubabfbv.supabase.co","sb_publishable
 const TABLE="ppwr_submissions",BUCKET="ppwr-files";
 const $=id=>document.getElementById(id), A=v=>Array.isArray(v)?v:[], esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 let rows=[],view=[],editing=null,editFiles=[];
+
+function safeFileToken(v){
+  return String(v??"")
+    .normalize("NFKC")
+    .replace(/\s*\/\s*/g,"_")
+    .replace(/&/g,"_")
+    .replace(/[\\/:*?"<>|#%{}[\]~`]+/g,"_")
+    .replace(/\s+/g,"_")
+    .replace(/_+/g,"_")
+    .replace(/^_+|_+$/g,"") || "NA";
+}
+function englishLabel(v){
+  const raw=String(v??"").trim();
+  const parts=raw.split(/\s*\/\s*/);
+  return safeFileToken(parts.length>1 ? parts[parts.length-1] : raw);
+}
+function fileExt(name){return (String(name||"").match(/\.[A-Za-z0-9]+$/)||[""])[0].toLowerCase();}
+function standardFileName(submissionId,packagingType,category,index=1,materialName="",materialIndex=0){
+  const sid=safeFileToken(submissionId);
+  const type=englishLabel(packagingType);
+  const no=String(index).padStart(2,"0");
+  if(category==="material-report"){
+    return `${sid}_${type}_${englishLabel(materialName)}_Material${String(Number(materialIndex)+1).padStart(2,"0")}_Report${no}`;
+  }
+  const label={"heavy-metal":"HeavyMetal","pfas":"PFAS","doc":"DoC","other":"Other","product-photo":"Photo"}[category]||"File";
+  return `${sid}_${type}_${label}${no}`;
+}
 const pw=()=>{const p=prompt("비밀번호를 입력해 주세요.");if(p===null)return false;if(p!=="1234"){alert("비밀번호가 올바르지 않습니다.");return false}return true};
 const spec=r=>A(r.specifications)[0]||{};
 const review=r=>r.quality_review_status||"미검증";
@@ -161,6 +188,14 @@ const pfasStatus=r=>{
   return "미확인";
 };
 const badge=(v,bad="부적합")=>`<span class="badge ${v==="적합"?"good":v===bad||v==="반려"?"bad":"neutral"}">${esc(v||"미입력")}</span>`;
+
+function standardizedDownloadName(r,f){
+  const files=A(r.uploaded_files),cat=String(f.category||"");
+  const same=files.filter(x=>String(x.category||"")===cat && (cat!=="material-report" || Number(x.materialIndex)===Number(f.materialIndex)));
+  const idx=Math.max(0,same.indexOf(f))+1;
+  const mat=cat==="material-report" ? (A(r.materials)[Number(f.materialIndex)]?.material || f.materialName || "Material") : "";
+  return standardFileName(r.submission_id,r.packaging_type,cat,idx,mat,f.materialIndex||0)+fileExt(f.originalName||f.storedName||f.path);
+}
 function updateStats(){
   // 기존 통계 카드 DOM은 대시보드 리디자인에서 제거됨.
   // 통계는 renderDashboard()에서 직접 계산합니다.
@@ -178,14 +213,14 @@ function details(r){
  const allFiles=A(r.uploaded_files);
  const by=cat=>allFiles.filter(f=>String(f.category||"").toLowerCase()===cat);
  const fh=(files,empty="첨부파일 없음")=>files.length
-   ? files.map(f=>`<div class="file"><span>${esc(f.storedName||f.originalName||f.path||"file")}</span><div class="file-actions"><button class="fileViewBtn fileDownload" data-path="${esc(f.path||"")}">👁 보기</button><button class="fileSaveBtn fileSave" data-path="${esc(f.path||"")}" data-name="${esc(f.storedName||f.originalName||"download")}">↓ 저장</button></div></div>`).join("")
+   ? files.map(f=>`<div class="file"><span>${esc(f.storedName||f.originalName||f.path||"file")}</span><div class="file-actions"><button class="fileViewBtn fileDownload" data-path="${esc(f.path||"")}">👁 보기</button><button class="fileSaveBtn fileSave" data-path="${esc(f.path||"")}" data-name="${esc(standardizedDownloadName(r,f))}">↓ 저장</button></div></div>`).join("")
    : `<span class="muted">${esc(empty)}</span>`;
  const reports=by("material-report");
  const mats=A(r.materials);
  const matRows=mats.map((m,i)=>{
    const mf=reports.filter(f=>Number(f.materialIndex)===i);
    const names=mf.length?mf.map(f=>esc(f.storedName||f.originalName||f.path||"file")).join("<br>"):'<span class="muted">없음</span>';
-   const buttons=mf.length?mf.map(f=>`<span class="material-file-actions"><button class="fileViewBtn fileDownload" data-path="${esc(f.path||"")}">👁 보기</button><button class="fileSaveBtn fileSave" data-path="${esc(f.path||"")}" data-name="${esc(f.storedName||f.originalName||"download")}">↓ 저장</button></span>`).join(" "):"";
+   const buttons=mf.length?mf.map(f=>`<span class="material-file-actions"><button class="fileViewBtn fileDownload" data-path="${esc(f.path||"")}">👁 보기</button><button class="fileSaveBtn fileSave" data-path="${esc(f.path||"")}" data-name="${esc(standardizedDownloadName(r,f))}">↓ 저장</button></span>`).join(" "):"";
    return `<tr><td class="num">${i+1}</td><td>${esc(m.material||"-")}</td><td class="num">${esc(m.composition??"-")}</td><td class="num">${esc(m.recycled??"-")}</td><td>${esc(m.remarks||"-")}</td><td class="filecell">${names}<div style="margin-top:5px">${buttons}</div></td></tr>`;
  }).join("")||`<tr><td colspan="6" class="muted">구성재질 정보 없음</td></tr>`;
  const pfas=by("pfas"),doc=by("doc"),other=by("other"),photos=by("product-photo");
@@ -371,12 +406,24 @@ function drawEditFiles(){
  $("existingFiles").querySelectorAll(".efDel").forEach(b=>b.onclick=async()=>{if(!pw())return;const f=editFiles[+b.dataset.i];if(f.path){const {error}=await sb.storage.from(BUCKET).remove([f.path]);if(error){alert(error.message);return}}editFiles.splice(+b.dataset.i,1);drawEditFiles()});
 }
 async function uploadNew(){
- for(const [cat,id] of [["heavy-metal","fHeavy"],["pfas","fPfas"],["doc","fDoc"],["other","fOther"]]){let n=0;for(const f of [...$(id).files]){n++;const clean=f.name.replace(/[^\w.\-가-힣]/g,"_"),path=`${editing.submission_id}/${cat}/관리자수정_${Date.now()}_${n}_${clean}`;const {error}=await sb.storage.from(BUCKET).upload(path,f);if(error)throw error;editFiles.push({category:cat,originalName:f.name,path,type:f.type,size:f.size})}}
+ for(const [cat,id] of [["heavy-metal","fHeavy"],["pfas","fPfas"],["doc","fDoc"],["other","fOther"]]){
+   let baseCount=editFiles.filter(x=>String(x.category||"")===cat).length,n=0;
+   for(const f of [...$(id).files]){
+     n++;
+     const stored=standardFileName(editing.submission_id,$("eType").value,cat,baseCount+n)+fileExt(f.name);
+     const path=`${editing.submission_id}/${cat}/${stored}`;
+     const {error}=await sb.storage.from(BUCKET).upload(path,f);
+     if(error)throw error;
+     editFiles.push({category:cat,originalName:f.name,storedName:stored,path,type:f.type,size:f.size});
+   }
+ }
 }
 $("saveEdit").onclick=async()=>{if(!editing||!pw())return;$("editStatus").textContent="저장 중...";try{
  for(const d of [...$("materialEditor").children]){
    const mi=Number(d.dataset.materialIndex), name=d.querySelector(".mm").value||`Material${mi+1}`, input=d.querySelector(".mfile");let n=0;
-   for(const f of [...(input?.files||[])]){n++;const ext=(f.name.match(/\.[A-Za-z0-9]+$/)||[""])[0];const stored=`${editing.submission_id}_Material${String(mi+1).padStart(2,"0")}_Report${n>1?"_"+n:""}${ext}`;const path=`${editing.submission_id}/material_report/${stored}`;const {error}=await sb.storage.from(BUCKET).upload(path,f);if(error)throw error;editFiles.push({category:"material-report",materialIndex:mi,materialName:name,originalName:f.name,storedName:stored,path,type:f.type,size:f.size})}
+   for(const f of [...(input?.files||[])]){n++;const ext=(f.name.match(/\.[A-Za-z0-9]+$/)||[""])[0];const prior=editFiles.filter(x=>String(x.category||"")==="material-report" && Number(x.materialIndex)===mi).length;
+   const stored=standardFileName(editing.submission_id,$("eType").value,"material-report",prior+n,name,mi)+ext;
+   const path=`${editing.submission_id}/material_report/${stored}`;const {error}=await sb.storage.from(BUCKET).upload(path,f);if(error)throw error;editFiles.push({category:"material-report",materialIndex:mi,materialName:name,originalName:f.name,storedName:stored,path,type:f.type,size:f.size})}
  }
  await uploadNew();const num=id=>$(id).value===""?null:Number($(id).value),vals=[num("ePb"),num("eCd"),num("eHg"),num("eCr")],has=vals.some(v=>v!==null),total=has?vals.reduce((a,v)=>a+(v||0),0):null,mats=[...$("materialEditor").children].map(d=>({material:d.querySelector(".mm").value,component:d.querySelector(".mc").value,composition:d.querySelector(".mp").value,recycled:d.querySelector(".mr").value,remarks:d.querySelector(".mn").value}));
  const payload={company:$("eCompany").value,contact_person:$("eContact").value,email:$("eEmail").value,phone:$("ePhone").value,major_category:$("eMajor").value,packaging_type:$("eType").value,specifications:[{item:$("eType").value,size:$("eSpec").value,code:$("eCode").value}],materials:mats,lead_pb:vals[0],cadmium_cd:vals[1],mercury_hg:vals[2],chromium_vi:vals[3],heavy_metals_total:total,heavy_metals_assessment:total===null?null:(total<=100?"적합":"부적합"),pfas_applicable:$("ePfasApplicable").value,pfas_total:num("ePfasTotal"),pfas_individual:$("ePfasIndividual").value,pfas_remarks:$("ePfasRemarks").value,laboratory:$("eLab").value,report_no:$("eReport").value,issue_date:$("eIssue").value||null,remarks:$("eRemarks").value,uploaded_files:editFiles};
