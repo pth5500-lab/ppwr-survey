@@ -640,29 +640,105 @@ function renderExistingFiles(){
 function escapeHtml(v){return String(v??"").replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 
 window.loadExistingSubmission = async function(){
-  const sid=document.getElementById("loadSubmissionId").value.trim();
-  const mail=document.getElementById("loadEmail").value.trim().toLowerCase();
-  const status=document.getElementById("loadStatus"), btn=document.getElementById("loadBtn");
-  if(!sid||!mail){alert("접수번호와 제출 당시 이메일을 모두 입력해 주세요. / Enter both Submission ID and e-mail.");return;}
-  btn.disabled=true;status.style.display="block";status.textContent="기존 제출자료를 확인하고 있습니다... / Loading...";
+  const sid=(document.getElementById("loadSubmissionId")?.value||"").trim();
+  const mail=(document.getElementById("loadEmail")?.value||"").trim().toLowerCase();
+  const status=document.getElementById("loadStatus");
+  const btn=document.getElementById("loadBtn");
+
+  const showError=(title,e)=>{
+    const parts=[
+      e?.message ? `오류: ${e.message}` : "",
+      e?.code ? `상태코드: ${e.code}` : "",
+      e?.details ? `상세: ${e.details}` : "",
+      e?.hint ? `Hint: ${e.hint}` : ""
+    ].filter(Boolean);
+    status.style.display="block";
+    status.innerHTML=`<strong style="color:#b42318">${title}</strong><br>${parts.map(escapeHtml).join("<br>")}`;
+  };
+
+  if(!sid||!mail){
+    status.style.display="block";
+    status.innerHTML='<strong style="color:#b42318">입력 확인 / Check Input</strong><br>접수번호와 제출 당시 이메일을 모두 입력해 주세요.';
+    return;
+  }
+
+  btn.disabled=true;
+  status.style.display="block";
+  status.innerHTML="기존 제출자료를 확인하고 있습니다... / Loading...";
+
   try{
-    const {data:row,error}=await supabase.from("ppwr_submissions").select("*").eq("submission_id",sid).maybeSingle();
-    if(error)throw error;
-    if(!row || String(row.email||"").trim().toLowerCase()!==mail){throw new Error("접수번호 또는 이메일이 일치하지 않습니다. / Submission ID or e-mail does not match.");}
-    editingSubmissionId=row.submission_id; existingUploadedFiles=Array.isArray(row.uploaded_files)?row.uploaded_files:[]; originalReviewStatus=row.quality_review_status||null;
-    document.getElementById("company").value=row.company||"";document.getElementById("contact").value=row.contact_person||"";document.getElementById("email").value=row.email||"";document.getElementById("phone").value=row.phone||"";
-    document.getElementById("major").value=row.major_category||""; window.updateCategory?.(); document.getElementById("type").value=row.packaging_type||"";
-    const sp=Array.isArray(row.specifications)?(row.specifications[0]||{}):{};document.getElementById("representativeSpec").value=sp.size||"";document.getElementById("representativeCode").value=sp.code||"";
-    document.getElementById("materialsBody").innerHTML="";(Array.isArray(row.materials)?row.materials:[]).forEach(x=>window.addMaterial?window.addMaterial(x.material||"",false,x):null);
-    document.getElementById("pb").value=row.lead_pb??"";document.getElementById("cd").value=row.cadmium_cd??"";document.getElementById("hg").value=row.mercury_hg??"";document.getElementById("cr6").value=row.chromium_vi??"";
-    document.getElementById("pfasApplicable").value=row.pfas_applicable||"Not applicable";document.getElementById("pfasTotal").value=row.pfas_total??"";document.getElementById("pfasIndividual").value=row.pfas_individual||"";document.getElementById("pfasRemarks").value=row.pfas_remarks||"";document.getElementById("remarks").value=row.remarks||"";
-    document.getElementById("pfasApplicable").dispatchEvent(new Event("change")); window.calcComposition?.();window.calcMetals?.();window.updateSummary?.();renderExistingFiles();
-    const badge=document.getElementById("editModeBadge");badge.style.display="inline-block";badge.textContent=`수정 모드 / Edit Mode · ${editingSubmissionId}`;
-    document.getElementById("submitBtn").textContent="수정 제출 / Update Submission";
-    status.innerHTML=`<strong>불러오기 완료 / Loaded</strong><br>${escapeHtml(editingSubmissionId)} · 기존 첨부파일은 유지되며 새 파일을 추가할 수 있습니다.`;
-    document.getElementById("company").scrollIntoView({behavior:"smooth",block:"center"});
-  }catch(e){status.innerHTML=`<strong style="color:#b42318">불러오기 실패 / Load Failed</strong><br>${escapeHtml(e.message||e)}`;}finally{btn.disabled=false;}
+    if(typeof supabase==="undefined" || !supabase?.from){
+      throw new Error("Supabase 연결이 초기화되지 않았습니다. GitHub Pages에서 다시 접속해 주세요.");
+    }
+
+    // 접수번호와 이메일을 모두 조건으로 사용하여 일치 건만 요청합니다.
+    const {data:rows,error}=await supabase
+      .from("ppwr_submissions")
+      .select("*")
+      .eq("submission_id",sid)
+      .ilike("email",mail)
+      .limit(1);
+
+    if(error) throw error;
+    const row=Array.isArray(rows)?rows[0]:null;
+
+    if(!row){
+      throw new Error("일치하는 제출자료를 찾지 못했습니다. 접수번호와 제출 당시 이메일을 확인해 주세요. Supabase의 SELECT 권한이 차단된 경우에도 동일하게 조회되지 않을 수 있습니다.");
+    }
+
+    editingSubmissionId=row.submission_id;
+    existingUploadedFiles=Array.isArray(row.uploaded_files)?row.uploaded_files:[];
+    originalReviewStatus=row.quality_review_status||null;
+
+    const set=(id,v)=>{const el=document.getElementById(id); if(el) el.value=v??"";};
+    set("company",row.company);
+    set("contact",row.contact_person);
+    set("email",row.email);
+    set("phone",row.phone);
+
+    set("major",row.major_category);
+    if(typeof window.updateCategory==="function") window.updateCategory();
+    set("type",row.packaging_type);
+
+    const sp=Array.isArray(row.specifications)?(row.specifications[0]||{}):{};
+    set("representativeSpec",sp.size);
+    set("representativeCode",sp.code);
+
+    const body=document.getElementById("materialsBody");
+    if(body) body.innerHTML="";
+    (Array.isArray(row.materials)?row.materials:[]).forEach(x=>{
+      if(typeof window.addMaterial==="function") window.addMaterial(x.material||"",false,x);
+    });
+
+    set("pb",row.lead_pb); set("cd",row.cadmium_cd); set("hg",row.mercury_hg); set("cr6",row.chromium_vi);
+    set("pfasApplicable",row.pfas_applicable||"Not applicable");
+    set("pfasTotal",row.pfas_total); set("pfasIndividual",row.pfas_individual); set("pfasRemarks",row.pfas_remarks);
+    set("remarks",row.remarks);
+
+    document.getElementById("pfasApplicable")?.dispatchEvent(new Event("change"));
+    if(typeof window.calcComposition==="function") window.calcComposition();
+    if(typeof window.calcMetals==="function") window.calcMetals();
+    if(typeof window.updateSummary==="function") window.updateSummary();
+    if(typeof renderExistingFiles==="function") renderExistingFiles();
+
+    const badge=document.getElementById("editModeBadge");
+    if(badge){
+      badge.style.display="inline-block";
+      badge.textContent=`수정 모드 / Edit Mode · ${editingSubmissionId}`;
+    }
+    const submitBtn=document.getElementById("submitBtn");
+    if(submitBtn) submitBtn.textContent="수정 제출 / Update Submission";
+
+    status.innerHTML=`<strong style="color:#067647">불러오기 완료 / Loaded</strong><br>${escapeHtml(editingSubmissionId)}<br>기존 첨부파일은 유지되며 누락된 파일을 추가할 수 있습니다.`;
+    document.getElementById("company")?.scrollIntoView({behavior:"smooth",block:"center"});
+  }catch(e){
+    console.error("PPWR load existing submission error:",e);
+    showError("불러오기 실패 / Load Failed",e);
+  }finally{
+    btn.disabled=false;
+  }
 };
+
 };
 
 const toggleExistingEdit=document.getElementById("toggleExistingEdit");
