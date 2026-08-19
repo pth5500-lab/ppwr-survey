@@ -162,9 +162,9 @@ const pfasStatus=r=>{
 };
 const badge=(v,bad="부적합")=>`<span class="badge ${v==="적합"?"good":v===bad||v==="반려"?"bad":"neutral"}">${esc(v||"미입력")}</span>`;
 function updateStats(){
- $("total").textContent=rows.length;$("companies").textContent=new Set(rows.map(r=>r.company).filter(Boolean)).size;
- $("hmOk").textContent=rows.filter(r=>hmAssess(r)==="적합").length;$("hmBad").textContent=rows.filter(r=>hmAssess(r)==="부적합").length;
- $("reviewPending").textContent=rows.filter(r=>!r.quality_review_status).length;$("reviewOk").textContent=rows.filter(r=>r.quality_review_status==="적합").length;$("reviewReject").textContent=rows.filter(r=>r.quality_review_status==="반려").length;
+  // 기존 통계 카드 DOM은 대시보드 리디자인에서 제거됨.
+  // 통계는 renderDashboard()에서 직접 계산합니다.
+  return;
 }
 function apply(){
  const q=$("search").value.trim().toLowerCase(),hf=$("hmFilter").value,pf=$("pfasFilter").value,rf=$("reviewFilter").value;
@@ -349,7 +349,9 @@ async function load(){
  $("status").textContent="데이터를 불러오는 중...";
  const {data,error}=await sb.from(TABLE).select("*").order("submission_id",{ascending:false});
  if(error){$("status").textContent="조회 실패: "+error.message;return}
- rows=data||[];updateStats();apply();
+ rows=data||[];
+ try{updateStats()}catch(e){console.warn("updateStats skipped:",e)}
+ apply();
 }
 function addMat(m={},idx=null){
  const d=document.createElement("div");d.className="matrow";d.dataset.materialIndex=idx??$("materialEditor").children.length;
