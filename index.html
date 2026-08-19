@@ -621,9 +621,9 @@ window.submitToSupabase = async function() {
     alert("제출에 실패했습니다. 화면 하단의 상세 오류를 확인해 주세요.");
   } finally {
     btn.disabled = false;
-    btn.textContent = "제출 / Submit";
+    btn.textContent = editingSubmissionId ? "수정 제출 / Update Submission" : "제출 / Submit";
   }
-
+};
 
 function renderExistingFiles(){
   const map={pfas:"existingPfasFiles",doc:"existingDocFiles",other:"existingOtherFiles","product-photo":"existingProductPhotos"};
@@ -737,8 +737,6 @@ window.loadExistingSubmission = async function(){
   }finally{
     btn.disabled=false;
   }
-};
-
 };
 
 const toggleExistingEdit=document.getElementById("toggleExistingEdit");
