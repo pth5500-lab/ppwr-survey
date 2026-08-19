@@ -158,6 +158,19 @@
   .existing-edit-link{width:100%;text-align:center}
 }
 
+
+.existing-file{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:7px 0;padding:9px 10px;background:#fff;border:1px solid #d9e2ec;border-radius:9px}
+.existing-file .existing-file-name{flex:1;min-width:220px;font-size:12px;font-weight:700;color:#344054;word-break:break-all}
+.existing-file-actions{display:flex;gap:6px;flex-wrap:wrap}
+.file-action-btn{border:1px solid #9db7d7;background:#fff;color:#173b66;border-radius:7px;padding:6px 9px;font-size:11px;font-weight:800;cursor:pointer}
+.file-action-btn:hover{background:#eef4fb}
+.file-action-btn.replace{border-color:#7f9fc3}
+.file-action-btn.remove{border-color:#e6a3a3;color:#b42318;background:#fff7f7}
+.existing-file.replaced{opacity:.58;text-decoration:line-through;background:#f2f4f7}
+.existing-file.pending-replace{border-color:#7f9fc3;background:#f5f9ff}
+.replace-file-input{display:none}
+.existing-files-title{font-size:11px;font-weight:800;color:#667085;margin:7px 0 3px}
+
 </style>
 </head>
 <body>
@@ -393,6 +406,10 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 let editingSubmissionId = null;
 let existingUploadedFiles = [];
 let originalReviewStatus = null;
+let removedExistingFileKeys = new Set();
+let replacementFileMap = new Map();
+function existingFileKey(f){return String(f.path||f.storedName||f.originalName||"");}
+
 
 function safeFileName(name) {
   const raw=String(name||"");
@@ -492,7 +509,9 @@ window.submitToSupabase = async function() {
       remarks: d.remarks || null
     };
 
-    const uploaded = editingSubmissionId ? [...existingUploadedFiles] : [];
+    const uploaded = editingSubmissionId
+      ? existingUploadedFiles.filter(f=>!removedExistingFileKeys.has(existingFileKey(f)) && !replacementFileMap.has(existingFileKey(f)))
+      : [];
     const groups = [
       ["pfas", document.getElementById("pfasFiles")?.files || []],
       ["doc", document.getElementById("docFiles")?.files || []],
@@ -562,6 +581,38 @@ window.submitToSupabase = async function() {
       }
     }
 
+
+    // 기존 파일 "대치": 새 파일을 업로드하고 기존 메타데이터 대신 새 메타데이터를 저장합니다.
+    // Storage의 과거 파일 본체는 안전상 즉시 삭제하지 않고 DB 연결만 교체합니다.
+    for(const [oldKey, item] of replacementFileMap.entries()){
+      const old=item.oldFile, file=item.file;
+      const group=old.category||"other";
+      const folderNames={"pfas":"pfas","doc":"doc","other":"other","product-photo":"product_photo","material-report":"material_report","heavy-metal":"heavy_metal"};
+      const folder=folderNames[group]||"file";
+      const ext=fileExtension(file.name);
+      const tag=`R${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
+      let renamedFile;
+      if(group==="material-report"){
+        const mi=Number(old.materialIndex)||0;
+        renamedFile=`${submissionId}_Material${String(mi+1).padStart(2,"0")}_Report_${tag}${ext}`;
+      }else{
+        const groupNames={"pfas":"PFAS","doc":"DoC","other":"Other","product-photo":"Photo","heavy-metal":"HeavyMetal"};
+        renamedFile=`${submissionId}_${groupNames[group]||"File"}_${tag}${ext}`;
+      }
+      const path=`${submissionId}/${folder}/${renamedFile}`;
+      const {error:uploadError}=await supabase.storage.from("ppwr-files").upload(path,file,{cacheControl:"3600",upsert:false,contentType:file.type||undefined});
+      if(uploadError)throw {stage:"기존 파일 대치 업로드 / Replace file",group,fileName:file.name,message:uploadError.message,statusCode:uploadError.statusCode||uploadError.status,raw:uploadError};
+      uploaded.push({
+        ...old,
+        originalName:file.name,
+        storedName:renamedFile,
+        path,
+        size:file.size,
+        contentType:file.type||"",
+        replacedFrom:old.originalName||old.storedName||""
+      });
+    }
+
     row.uploaded_files = uploaded;
 
     currentStage = editingSubmissionId ? "수정 DB 저장 / Database update" : "설문 DB 저장 / Database insert";
@@ -626,17 +677,71 @@ window.submitToSupabase = async function() {
 };
 
 function renderExistingFiles(){
-  const map={pfas:"existingPfasFiles",doc:"existingDocFiles",other:"existingOtherFiles","product-photo":"existingProductPhotos"};
+  const map={pfas:"existingPfasFiles",doc:"existingDocFiles",other:"existingOtherFiles","product-photo":"existingProductPhotos","heavy-metal":"existingHeavyMetalFiles"};
   Object.values(map).forEach(id=>{const el=document.getElementById(id);if(el){el.innerHTML="";el.style.display="none";}});
   document.querySelectorAll(".existing-material-files").forEach(el=>{el.innerHTML="";el.style.display="none";});
-  const line=f=>`<div class="existing-file"><span>기존 파일 / Existing: ${escapeHtml(f.originalName||f.storedName||"File")}</span><span>유지 / Keep</span></div>`;
+
+  const line=(f)=>{
+    const key=existingFileKey(f);
+    const removed=removedExistingFileKeys.has(key);
+    const repl=replacementFileMap.get(key);
+    const stateClass=removed?"replaced":(repl?"pending-replace":"");
+    const stateText=removed?"삭제 예정 / Remove":(repl?`대치 예정: ${escapeHtml(repl.file.name)}`:"기존 파일 / Existing");
+    return `<div class="existing-file ${stateClass}" data-file-key="${escapeHtml(key)}">
+      <span class="existing-file-name">${stateText}<br>${escapeHtml(f.originalName||f.storedName||"File")}</span>
+      <span class="existing-file-actions">
+        <button type="button" class="file-action-btn" onclick="downloadExistingFile('${encodeURIComponent(key)}')">다운로드 / Download</button>
+        <button type="button" class="file-action-btn replace" onclick="chooseReplacementFile('${encodeURIComponent(key)}')">대치 / Replace</button>
+        <input class="replace-file-input" type="file" data-replace-key="${escapeHtml(key)}" onchange="setReplacementFile('${encodeURIComponent(key)}',this)">
+        <button type="button" class="file-action-btn remove" onclick="toggleRemoveExistingFile('${encodeURIComponent(key)}')">${removed?"유지 / Keep":"삭제 / Remove"}</button>
+      </span>
+    </div>`;
+  };
+
   existingUploadedFiles.forEach(f=>{
     if(f.category==="material-report" && Number.isInteger(Number(f.materialIndex))){
       const row=document.querySelectorAll(".material-row")[Number(f.materialIndex)];
-      const el=row?.querySelector(".existing-material-files"); if(el){el.innerHTML+=line(f);el.style.display="block";}
-    } else if(map[f.category]){const el=document.getElementById(map[f.category]);if(el){el.innerHTML+=line(f);el.style.display="block";}}
+      const el=row?.querySelector(".existing-material-files");
+      if(el){el.innerHTML+=line(f);el.style.display="block";}
+    } else if(map[f.category]){
+      const el=document.getElementById(map[f.category]);
+      if(el){el.innerHTML+=line(f);el.style.display="block";}
+    }
   });
 }
+
+function findExistingFileByKey(encodedKey){
+  const key=decodeURIComponent(encodedKey);
+  return existingUploadedFiles.find(f=>existingFileKey(f)===key);
+}
+window.downloadExistingFile=async function(encodedKey){
+  const f=findExistingFileByKey(encodedKey);
+  if(!f?.path){alert("파일 경로를 확인할 수 없습니다.");return;}
+  try{
+    const {data,error}=await supabase.storage.from("ppwr-files").createSignedUrl(f.path,120,{download:f.originalName||f.storedName||"download"});
+    if(error)throw error;
+    const a=document.createElement("a");a.href=data.signedUrl;a.download=f.originalName||f.storedName||"download";document.body.appendChild(a);a.click();a.remove();
+  }catch(e){console.error(e);alert("파일 다운로드에 실패했습니다. / Download failed\n"+(e?.message||e));}
+};
+window.chooseReplacementFile=function(encodedKey){
+  const key=decodeURIComponent(encodedKey);
+  const input=[...document.querySelectorAll(".replace-file-input")].find(x=>x.dataset.replaceKey===key);
+  input?.click();
+};
+window.setReplacementFile=function(encodedKey,input){
+  const key=decodeURIComponent(encodedKey), oldFile=findExistingFileByKey(encodedKey);
+  const file=input?.files?.[0];
+  if(!oldFile||!file)return;
+  removedExistingFileKeys.delete(key);
+  replacementFileMap.set(key,{oldFile,file});
+  renderExistingFiles();
+};
+window.toggleRemoveExistingFile=function(encodedKey){
+  const key=decodeURIComponent(encodedKey);
+  if(removedExistingFileKeys.has(key)) removedExistingFileKeys.delete(key);
+  else {removedExistingFileKeys.add(key);replacementFileMap.delete(key);}
+  renderExistingFiles();
+};
 function escapeHtml(v){return String(v??"").replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 
 window.loadExistingSubmission = async function(){
@@ -688,6 +793,8 @@ window.loadExistingSubmission = async function(){
 
     editingSubmissionId=row.submission_id;
     existingUploadedFiles=Array.isArray(row.uploaded_files)?row.uploaded_files:[];
+    removedExistingFileKeys.clear();
+    replacementFileMap.clear();
     originalReviewStatus=row.quality_review_status||null;
 
     const set=(id,v)=>{const el=document.getElementById(id); if(el) el.value=v??"";};
@@ -729,7 +836,7 @@ window.loadExistingSubmission = async function(){
     const submitBtn=document.getElementById("submitBtn");
     if(submitBtn) submitBtn.textContent="수정 제출 / Update Submission";
 
-    status.innerHTML=`<strong style="color:#067647">불러오기 완료 / Loaded</strong><br>${escapeHtml(editingSubmissionId)}<br>기존 첨부파일은 유지되며 누락된 파일을 추가할 수 있습니다.`;
+    status.innerHTML=`<strong style="color:#067647">불러오기 완료 / Loaded</strong><br>${escapeHtml(editingSubmissionId)}<br>기존 파일은 다운로드·대치·삭제할 수 있으며, 누락된 파일은 각 첨부란에서 추가할 수 있습니다.`;
     document.getElementById("company")?.scrollIntoView({behavior:"smooth",block:"center"});
   }catch(e){
     console.error("PPWR load existing submission error:",e);
