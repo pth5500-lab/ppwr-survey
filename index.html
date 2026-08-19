@@ -82,6 +82,82 @@
 .submission-box .label{font-size:12px;color:#667085;margin-bottom:6px}
 .submission-box strong{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:16px;word-break:break-all}
 
+
+.load-card{border:1px solid #b9cce3;background:#f7fbff;border-radius:14px;padding:18px;margin-top:18px}
+.load-grid{display:grid;grid-template-columns:1.2fr 1.5fr auto;gap:10px;align-items:end}
+.existing-files{margin-top:8px;padding:9px 11px;background:#f8fafc;border:1px solid #e4e7ec;border-radius:8px;font-size:12px;line-height:1.7}
+.existing-file{display:flex;gap:8px;align-items:center;justify-content:space-between;border-bottom:1px dashed #e4e7ec;padding:4px 0}
+.existing-file:last-child{border-bottom:0}.edit-badge{display:inline-block;padding:5px 9px;border-radius:999px;background:#fff3cd;color:#7a5d00;font-weight:700;font-size:12px;margin-top:10px}
+@media(max-width:760px){.load-grid{grid-template-columns:1fr}}
+
+.existing-edit-entry{margin-top:14px;text-align:right}
+.existing-edit-link{background:transparent!important;color:#235ea7!important;border:0!important;padding:4px 0!important;font-size:12px!important;font-weight:700!important;box-shadow:none!important}
+.existing-edit-link:hover{text-decoration:underline;transform:none!important}
+.edit-helper-panel{margin:10px 0 18px;background:#f8fafc;border:1px solid #dce4ee;border-radius:12px;padding:14px 16px}
+.edit-helper-panel h2,.edit-helper-panel h3{font-size:14px;margin:0 0 10px;color:#344054}
+.edit-helper-panel .grid,.edit-helper-panel .grid2,.edit-helper-panel .edit-helper-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end}
+.edit-helper-panel input{background:#fff}
+.edit-helper-action{display:flex;align-items:end}
+@media(max-width:800px){.edit-helper-panel .grid,.edit-helper-panel .grid2,.edit-helper-panel .edit-helper-grid{grid-template-columns:1fr}.existing-edit-entry{text-align:left}}
+
+
+/* Existing submission edit entry - high visibility secondary action */
+.existing-edit-entry{
+  margin-top:18px;
+  display:flex;
+  justify-content:flex-end;
+}
+.existing-edit-link{
+  appearance:none;
+  background:#ffffff!important;
+  color:#173B66!important;
+  border:2px solid #9DB7D7!important;
+  border-radius:10px!important;
+  padding:10px 16px!important;
+  font-size:14px!important;
+  line-height:1.35!important;
+  font-weight:800!important;
+  box-shadow:0 2px 8px rgba(23,59,102,.10)!important;
+  cursor:pointer!important;
+  text-decoration:none!important;
+}
+.existing-edit-link:hover{
+  background:#EEF4FB!important;
+  border-color:#5F86B5!important;
+  text-decoration:none!important;
+}
+.existing-edit-link:focus{
+  outline:3px solid rgba(35,94,167,.20)!important;
+  outline-offset:2px!important;
+}
+.edit-helper-panel{
+  margin:12px 0 22px!important;
+  background:#F7FAFD!important;
+  border:2px solid #B7CBE2!important;
+  border-radius:14px!important;
+  padding:18px 20px!important;
+  box-shadow:0 4px 14px rgba(23,59,102,.08)!important;
+}
+.edit-helper-panel h2,.edit-helper-panel h3{
+  color:#173B66!important;
+  font-size:16px!important;
+  font-weight:800!important;
+}
+.edit-helper-panel label{
+  color:#344054!important;
+  font-weight:700!important;
+  font-size:13px!important;
+}
+.edit-helper-panel .hint{
+  margin-top:10px!important;
+  color:#667085!important;
+  font-size:12px!important;
+}
+@media(max-width:800px){
+  .existing-edit-entry{justify-content:stretch}
+  .existing-edit-link{width:100%;text-align:center}
+}
+
 </style>
 </head>
 <body>
@@ -110,7 +186,27 @@
       </span>
     </div>
     <p class="small" style="margin-top:14px">Toray Advanced Materials Korea Inc. · 구매기획팀 / Purchasing Planning Team</p>
+  
+    <div class="existing-edit-entry">
+      <button type="button" id="toggleExistingEdit" class="existing-edit-link">
+        기존에 제출한 자료가 있으신가요?  기존 제출자료 수정 / Edit Previous Submission
+      </button>
+    </div>
+
   </section>
+<div id="existingEditPanel" class="edit-helper-panel" style="display:none">
+    <h2>기존 제출자료 불러오기 / Load Existing Submission</h2>
+    <p class="hint">이미 제출한 자료를 보완하려면 접수번호와 제출 당시 이메일을 입력해 주세요. 기존 내용과 첨부파일을 불러온 뒤 누락자료를 추가하여 수정 제출할 수 있습니다.<br>To update a previous submission, enter the Submission ID and the e-mail used for the original submission.</p>
+    <div class="load-grid">
+      <div><label>접수번호 / Submission ID</label><input id="loadSubmissionId" placeholder="PPWR-20260819-..." autocomplete="off"></div>
+      <div><label>제출 이메일 / Submission E-mail</label><input id="loadEmail" type="email" placeholder="supplier@company.com" autocomplete="off"></div>
+      <div><button type="button" class="btn" id="loadBtn" onclick="loadExistingSubmission()">불러오기 / Load</button></div>
+    </div>
+    <div id="loadStatus" class="notice" style="display:none;margin-top:12px"></div>
+    <div id="editModeBadge" class="edit-badge" style="display:none"></div>
+  </div>
+
+  
 
   <section class="card">
     <h2>1. 협력사 정보 / Supplier Information</h2>
@@ -214,7 +310,7 @@
     </div>
     <div id="pfasEvidence" style="margin-top:12px;display:none">
       <label>PFAS 시험성적서 / PFAS Test Report</label>
-      <input id="pfasFiles" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp">
+      <input id="pfasFiles" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp"><div id="existingPfasFiles" class="existing-files" style="display:none"></div>
       <div class="hint">PFAS가 '해당'인 경우 첨부해 주세요. / Attach when PFAS is applicable.</div>
     </div>
   </section>
@@ -222,7 +318,7 @@
   <section class="card">
     <h2>6. 포장재 제품 사진 / Packaging Photo</h2>
     <p class="hint">포장재를 식별할 수 있는 제품 사진을 첨부해 주세요. / Please attach a photo that identifies the packaging.</p>
-    <input id="productPhotos" type="file" multiple accept=".jpg,.jpeg,.png,.webp">
+    <input id="productPhotos" type="file" multiple accept=".jpg,.jpeg,.png,.webp"><div id="existingProductPhotos" class="existing-files" style="display:none"></div>
   </section>
 
   <section class="card">
@@ -230,12 +326,12 @@
     <div class="grid">
       <div>
         <label>DoC / Declaration of Conformity <span style="color:#d92d20;font-weight:700">* 필수 / Required</span></label>
-        <input id="docFiles" type="file" multiple required accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+        <input id="docFiles" type="file" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"><div id="existingDocFiles" class="existing-files" style="display:none"></div>
         <div class="hint">DoC를 1개 이상 첨부해 주세요. / Please attach at least one DoC.</div>
       </div>
       <div>
         <label>기타 참고자료 / Other Documents <span style="font-weight:400;color:#667085">(선택 / Optional)</span></label>
-        <input id="otherFiles" type="file" multiple accept=".pdf,.xls,.xlsx,.csv,.doc,.docx,.jpg,.jpeg,.png">
+        <input id="otherFiles" type="file" multiple accept=".pdf,.xls,.xlsx,.csv,.doc,.docx,.jpg,.jpeg,.png"><div id="existingOtherFiles" class="existing-files" style="display:none"></div>
       </div>
       <div style="grid-column:1/-1"><label>비고 / Remarks</label><textarea id="remarks"></textarea></div>
     </div>
@@ -294,6 +390,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const SUPABASE_URL = "https://husxmsxbhdalmubabfbv.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_eTDBSThdDcMahPfXeadm8g_N0wBGHSS";
 const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+let editingSubmissionId = null;
+let existingUploadedFiles = [];
+let originalReviewStatus = null;
 
 function safeFileName(name) {
   const raw=String(name||"");
@@ -336,7 +435,8 @@ function storedFileName(company, packagingType, group, submissionId, originalNam
 
 window.submitToSupabase = async function() {
   const docInput=document.getElementById("docFiles");
-  if(!docInput?.files?.length){
+  const hasExistingDoc = existingUploadedFiles.some(f=>f.category === "doc");
+  if(!docInput?.files?.length && !hasExistingDoc){
     alert("DoC는 필수 첨부자료입니다. DoC 파일을 1개 이상 첨부해 주세요.\nDoC is required. Please attach at least one DoC file.");
     docInput?.focus();
     return;
@@ -361,7 +461,7 @@ window.submitToSupabase = async function() {
   status.style.display = "block";
   status.textContent = "Supabase에 데이터를 저장하고 있습니다...";
 
-  const submissionId = makeSubmissionId();
+  const submissionId = editingSubmissionId || makeSubmissionId();
   let currentStage = "초기화 / Initializing";
 
   try {
@@ -392,7 +492,7 @@ window.submitToSupabase = async function() {
       remarks: d.remarks || null
     };
 
-    const uploaded = [];
+    const uploaded = editingSubmissionId ? [...existingUploadedFiles] : [];
     const groups = [
       ["pfas", document.getElementById("pfasFiles")?.files || []],
       ["doc", document.getElementById("docFiles")?.files || []],
@@ -464,20 +564,23 @@ window.submitToSupabase = async function() {
 
     row.uploaded_files = uploaded;
 
-    currentStage = "설문 DB 저장 / Database insert";
-    const { error: insertError } = await supabase
-      .from("ppwr_submissions")
-      .insert(row);
-
-    if (insertError) {
-      throw {
-        stage: currentStage,
-        message: insertError.message,
-        code: insertError.code,
-        details: insertError.details,
-        hint: insertError.hint,
-        raw: insertError
-      };
+    currentStage = editingSubmissionId ? "수정 DB 저장 / Database update" : "설문 DB 저장 / Database insert";
+    let dbError = null;
+    if(editingSubmissionId){
+      const updateRow={...row};
+      delete updateRow.submission_id;
+      // 업체가 검증 완료 후 내용을 수정하면 기존 검증결과를 유지하지 않습니다.
+      updateRow.quality_review_status = null;
+      updateRow.quality_rejection_reason = null;
+      updateRow.quality_reviewed_at = null;
+      const {error}=await supabase.from("ppwr_submissions").update(updateRow).eq("submission_id",editingSubmissionId);
+      dbError=error;
+    }else{
+      const {error}=await supabase.from("ppwr_submissions").insert(row);
+      dbError=error;
+    }
+    if (dbError) {
+      throw {stage:currentStage,message:dbError.message,code:dbError.code,details:dbError.details,hint:dbError.hint,raw:dbError};
     }
 
     document.getElementById("completedSubmissionId").textContent = submissionId;
@@ -520,7 +623,60 @@ window.submitToSupabase = async function() {
     btn.disabled = false;
     btn.textContent = "제출 / Submit";
   }
+
+
+function renderExistingFiles(){
+  const map={pfas:"existingPfasFiles",doc:"existingDocFiles",other:"existingOtherFiles","product-photo":"existingProductPhotos"};
+  Object.values(map).forEach(id=>{const el=document.getElementById(id);if(el){el.innerHTML="";el.style.display="none";}});
+  document.querySelectorAll(".existing-material-files").forEach(el=>{el.innerHTML="";el.style.display="none";});
+  const line=f=>`<div class="existing-file"><span>기존 파일 / Existing: ${escapeHtml(f.originalName||f.storedName||"File")}</span><span>유지 / Keep</span></div>`;
+  existingUploadedFiles.forEach(f=>{
+    if(f.category==="material-report" && Number.isInteger(Number(f.materialIndex))){
+      const row=document.querySelectorAll(".material-row")[Number(f.materialIndex)];
+      const el=row?.querySelector(".existing-material-files"); if(el){el.innerHTML+=line(f);el.style.display="block";}
+    } else if(map[f.category]){const el=document.getElementById(map[f.category]);if(el){el.innerHTML+=line(f);el.style.display="block";}}
+  });
+}
+function escapeHtml(v){return String(v??"").replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+window.loadExistingSubmission = async function(){
+  const sid=document.getElementById("loadSubmissionId").value.trim();
+  const mail=document.getElementById("loadEmail").value.trim().toLowerCase();
+  const status=document.getElementById("loadStatus"), btn=document.getElementById("loadBtn");
+  if(!sid||!mail){alert("접수번호와 제출 당시 이메일을 모두 입력해 주세요. / Enter both Submission ID and e-mail.");return;}
+  btn.disabled=true;status.style.display="block";status.textContent="기존 제출자료를 확인하고 있습니다... / Loading...";
+  try{
+    const {data:row,error}=await supabase.from("ppwr_submissions").select("*").eq("submission_id",sid).maybeSingle();
+    if(error)throw error;
+    if(!row || String(row.email||"").trim().toLowerCase()!==mail){throw new Error("접수번호 또는 이메일이 일치하지 않습니다. / Submission ID or e-mail does not match.");}
+    editingSubmissionId=row.submission_id; existingUploadedFiles=Array.isArray(row.uploaded_files)?row.uploaded_files:[]; originalReviewStatus=row.quality_review_status||null;
+    document.getElementById("company").value=row.company||"";document.getElementById("contact").value=row.contact_person||"";document.getElementById("email").value=row.email||"";document.getElementById("phone").value=row.phone||"";
+    document.getElementById("major").value=row.major_category||""; window.updateCategory?.(); document.getElementById("type").value=row.packaging_type||"";
+    const sp=Array.isArray(row.specifications)?(row.specifications[0]||{}):{};document.getElementById("representativeSpec").value=sp.size||"";document.getElementById("representativeCode").value=sp.code||"";
+    document.getElementById("materialsBody").innerHTML="";(Array.isArray(row.materials)?row.materials:[]).forEach(x=>window.addMaterial?window.addMaterial(x.material||"",false,x):null);
+    document.getElementById("pb").value=row.lead_pb??"";document.getElementById("cd").value=row.cadmium_cd??"";document.getElementById("hg").value=row.mercury_hg??"";document.getElementById("cr6").value=row.chromium_vi??"";
+    document.getElementById("pfasApplicable").value=row.pfas_applicable||"Not applicable";document.getElementById("pfasTotal").value=row.pfas_total??"";document.getElementById("pfasIndividual").value=row.pfas_individual||"";document.getElementById("pfasRemarks").value=row.pfas_remarks||"";document.getElementById("remarks").value=row.remarks||"";
+    document.getElementById("pfasApplicable").dispatchEvent(new Event("change")); window.calcComposition?.();window.calcMetals?.();window.updateSummary?.();renderExistingFiles();
+    const badge=document.getElementById("editModeBadge");badge.style.display="inline-block";badge.textContent=`수정 모드 / Edit Mode · ${editingSubmissionId}`;
+    document.getElementById("submitBtn").textContent="수정 제출 / Update Submission";
+    status.innerHTML=`<strong>불러오기 완료 / Loaded</strong><br>${escapeHtml(editingSubmissionId)} · 기존 첨부파일은 유지되며 새 파일을 추가할 수 있습니다.`;
+    document.getElementById("company").scrollIntoView({behavior:"smooth",block:"center"});
+  }catch(e){status.innerHTML=`<strong style="color:#b42318">불러오기 실패 / Load Failed</strong><br>${escapeHtml(e.message||e)}`;}finally{btn.disabled=false;}
 };
+};
+
+const toggleExistingEdit=document.getElementById("toggleExistingEdit");
+const existingEditPanel=document.getElementById("existingEditPanel");
+if(toggleExistingEdit && existingEditPanel){
+  toggleExistingEdit.addEventListener("click",()=>{
+    const open=existingEditPanel.style.display!=="none";
+    existingEditPanel.style.display=open?"none":"block";
+    toggleExistingEdit.textContent=open
+      ?"기존에 제출한 자료가 있으신가요?  기존 제출자료 수정 / Edit Previous Submission"
+      :"기존 제출자료 수정 닫기 / Close";
+    if(!open) existingEditPanel.scrollIntoView({behavior:"smooth",block:"nearest"});
+  });
+}
 </script>
 
 <script>
@@ -944,7 +1100,7 @@ function addMaterial(name='', auto=false, values={}){
     <td><input class="material-remarks" value="${esc(values.remarks||'')}"></td>
     <td>
       <input class="material-report" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp">
-      <div class="material-file-list hint">선택된 파일 없음 / No file selected</div>
+      <div class="material-file-list hint">선택된 파일 없음 / No file selected</div><div class="existing-material-files existing-files" style="display:none"></div>
     </td>
     <td class="delete-cell"><button type="button" class="btn-danger" onclick="this.closest('tr').remove();calcComposition();updateSummary()">삭제</button></td>`;
   document.getElementById('materialsBody').appendChild(tr);
@@ -1067,6 +1223,7 @@ function syncPfasEvidence(){
 }
 document.getElementById('pfasApplicable')?.addEventListener('change',syncPfasEvidence);
 syncPfasEvidence();
+window.updateCategory=updateCategory;window.addMaterial=addMaterial;window.calcComposition=calcComposition;window.calcMetals=calcMetals;window.updateSummary=updateSummary;
 init();
 </script>
 
