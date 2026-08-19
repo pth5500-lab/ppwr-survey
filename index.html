@@ -442,6 +442,15 @@ function fileExtension(name) {
   return m ? m[1].toLowerCase() : "";
 }
 
+function uniqueUploadTag() {
+  const d = new Date();
+  const p = n => String(n).padStart(2,"0");
+  const ms = String(d.getMilliseconds()).padStart(3,"0");
+  const stamp = `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}${ms}`;
+  const rnd = (globalThis.crypto?.randomUUID?.() || Math.random().toString(36).slice(2)).replace(/-/g,"").slice(0,8);
+  return `${stamp}_${rnd}`;
+}
+
 function storedFileName(company, packagingType, group, submissionId, originalName, sequence) {
   const ext=fileExtension(originalName);
   const groupNames={"pfas":"PFAS","doc":"DoC","other":"Other","product-photo":"Photo","material-report":"MaterialReport"};
@@ -525,7 +534,10 @@ window.submitToSupabase = async function() {
       let sequence = 0;
       for (const file of fileList) {
         sequence += 1;
-        const renamedFile = storedFileName(d.company, d.type, group, submissionId, file.name, sequence);
+        const baseStoredName = storedFileName(d.company, d.type, group, submissionId, file.name, sequence);
+        const ext = fileExtension(baseStoredName);
+        const baseNoExt = ext ? baseStoredName.slice(0,-ext.length) : baseStoredName;
+        const renamedFile = `${baseNoExt}_${uniqueUploadTag()}${ext}`;
         const folderNames={"pfas":"pfas","doc":"doc","other":"other","product-photo":"product_photo","material-report":"material_report"};
         const folder=folderNames[group]||"file";
         const path = `${submissionId}/${folder}/${renamedFile}`;
@@ -573,7 +585,7 @@ window.submitToSupabase = async function() {
         seq+=1;
         const ext=fileExtension(file.name);
         const suffix=seq>1?`_${seq}`:"";
-        const renamedFile=`${submissionId}_Material${String(mi+1).padStart(2,"0")}_Report${suffix}${ext}`;
+        const renamedFile=`${submissionId}_Material${String(mi+1).padStart(2,"0")}_Report${suffix}_${uniqueUploadTag()}${ext}`;
         const path=`${submissionId}/material_report/${renamedFile}`;
         const {error:uploadError}=await supabase.storage.from("ppwr-files").upload(path,file,{cacheControl:"3600",upsert:false,contentType:file.type||undefined});
         if(uploadError)throw {stage:currentStage,group:"material-report",fileName:file.name,message:uploadError.message,statusCode:uploadError.statusCode||uploadError.status,raw:uploadError};
@@ -590,7 +602,7 @@ window.submitToSupabase = async function() {
       const folderNames={"pfas":"pfas","doc":"doc","other":"other","product-photo":"product_photo","material-report":"material_report","heavy-metal":"heavy_metal"};
       const folder=folderNames[group]||"file";
       const ext=fileExtension(file.name);
-      const tag=`R${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
+      const tag=`R_${uniqueUploadTag()}`;
       let renamedFile;
       if(group==="material-report"){
         const mi=Number(old.materialIndex)||0;
