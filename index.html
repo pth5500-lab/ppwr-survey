@@ -171,6 +171,17 @@
 .replace-file-input{display:none}
 .existing-files-title{font-size:11px;font-weight:800;color:#667085;margin:7px 0 3px}
 
+
+/* Unified user-friendly message modal */
+.ppwr-modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.42);display:none;align-items:center;justify-content:center;z-index:99999;padding:18px}
+.ppwr-modal{width:min(460px,100%);background:#fff;border-radius:16px;box-shadow:0 22px 60px rgba(15,23,42,.22);overflow:hidden;border:1px solid #e4e7ec}
+.ppwr-modal-body{padding:22px 22px 16px}
+.ppwr-modal-title{font-size:18px;font-weight:900;color:#101828;margin:0 0 8px}
+.ppwr-modal-message{font-size:13px;line-height:1.65;color:#475467;white-space:pre-line}
+.ppwr-modal-footer{padding:0 22px 20px;display:flex;justify-content:flex-end}
+.ppwr-modal-ok{border:0;border-radius:9px;padding:9px 20px;font-size:13px;font-weight:800;background:#173b66;color:#fff;cursor:pointer}
+.ppwr-modal-ok:hover{filter:brightness(.96)}
+
 </style>
 </head>
 <body>
@@ -449,7 +460,7 @@ window.submitToSupabase = async function() {
   const docInput=document.getElementById("docFiles");
   const hasExistingDoc = existingUploadedFiles.some(f=>f.category === "doc");
   if(!docInput?.files?.length && !hasExistingDoc){
-    alert("DoC는 필수 첨부자료입니다. DoC 파일을 1개 이상 첨부해 주세요.\nDoC is required. Please attach at least one DoC file.");
+    ppwrMessage("DoC는 필수 첨부자료입니다. DoC 파일을 1개 이상 첨부해 주세요.\nDoC is required. Please attach at least one DoC file.");
     docInput?.focus();
     return;
   }
@@ -457,7 +468,7 @@ window.submitToSupabase = async function() {
   const d = window.collectData();
 
   if(!d.company || !d.contact || !d.major || !d.type) {
-    alert("필수 항목(회사명, 담당자, 대분류, 세부 품목군)을 입력해 주세요.");
+    ppwrMessage("필수 항목(회사명, 담당자, 대분류, 세부 품목군)을 입력해 주세요.");
     return;
   }
 
@@ -664,7 +675,7 @@ window.submitToSupabase = async function() {
       `<pre style="white-space:pre-wrap;word-break:break-all;background:#f7f7f7;padding:8px;border-radius:6px">${fallback.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</pre></details>` +
       `<div style="margin-top:8px">필요 시 CSV 저장 기능으로 데이터를 백업해 주세요.</div>`;
 
-    alert("제출에 실패했습니다. 화면 하단의 상세 오류를 확인해 주세요.");
+    ppwrMessage("제출에 실패했습니다. 화면 하단의 상세 오류를 확인해 주세요.");
   } finally {
     btn.disabled = false;
     btn.textContent = editingSubmissionId ? "수정 제출 / Update Submission" : "제출 / Submit";
@@ -711,7 +722,7 @@ function findExistingFileByKey(encodedKey){
 }
 window.downloadExistingFile=async function(encodedKey){
   const f=findExistingFileByKey(encodedKey);
-  if(!f?.path){alert("파일 경로를 확인할 수 없습니다.");return;}
+  if(!f?.path){ppwrMessage("파일 경로를 확인할 수 없습니다.");return;}
   try{
     const type=document.getElementById("type")?.value||"Packaging";
     let seq=1, materialName="";
@@ -728,7 +739,7 @@ window.downloadExistingFile=async function(encodedKey){
     const {data,error}=await supabase.storage.from("ppwr-files").createSignedUrl(f.path,120,{download:downloadName});
     if(error)throw error;
     const a=document.createElement("a");a.href=data.signedUrl;a.download=downloadName;document.body.appendChild(a);a.click();a.remove();
-  }catch(e){console.error(e);alert("파일 다운로드에 실패했습니다. / Download failed\n"+(e?.message||e));}
+  }catch(e){console.error(e);ppwrFriendlyError("파일 다운로드에 실패했습니다. / Download failed\n",e);}
 };
 window.chooseReplacementFile=function(encodedKey){
   const key=decodeURIComponent(encodedKey);
@@ -758,14 +769,9 @@ window.loadExistingSubmission = async function(){
   const btn=document.getElementById("loadBtn");
 
   const showError=(title,e)=>{
-    const parts=[
-      e?.message ? `오류: ${e.message}` : "",
-      e?.code ? `상태코드: ${e.code}` : "",
-      e?.details ? `상세: ${e.details}` : "",
-      e?.hint ? `Hint: ${e.hint}` : ""
-    ].filter(Boolean);
+    console.error("[PPWR Load]",title,e);
     status.style.display="block";
-    status.innerHTML=`<strong style="color:#b42318">${title}</strong><br>${parts.map(escapeHtml).join("<br>")}`;
+    status.innerHTML='<strong style="color:#b42318">불러오기 실패 / Load Failed</strong><br>입력한 접수번호와 이메일을 확인해 주세요. 문제가 계속될 경우 담당자에게 문의해 주세요.';
   };
 
   if(!sid||!mail){
@@ -885,6 +891,40 @@ if(toggleExistingEdit && existingEditPanel){
 </script>
 
 <script>
+
+function ppwrMessage(message,title="안내 / Notice"){
+  const bg=document.getElementById("ppwrMessageModal");
+  const t=document.getElementById("ppwrModalTitle");
+  const m=document.getElementById("ppwrModalMessage");
+  if(!bg||!t||!m){ console.log(title,message); return; }
+  t.textContent=title;
+  m.textContent=String(message||"");
+  bg.style.display="flex";
+  document.getElementById("ppwrModalOk")?.focus();
+}
+function ppwrCloseMessage(){
+  const bg=document.getElementById("ppwrMessageModal");
+  if(bg) bg.style.display="none";
+}
+document.addEventListener("click",e=>{
+  if(e.target?.id==="ppwrModalOk" || e.target?.id==="ppwrMessageModal") ppwrCloseMessage();
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")ppwrCloseMessage();});
+function ppwrFriendlyError(context,error){
+  // Detailed technical information is kept only in the browser console.
+  console.error("[PPWR]",context,error);
+  let msg="처리 중 오류가 발생했습니다.\n입력 내용을 확인한 후 다시 시도해 주세요.\n문제가 계속될 경우 담당자에게 문의해 주세요.";
+  const raw=String(error?.message||error||"").toLowerCase();
+  if(raw.includes("failed to fetch")||raw.includes("network")){
+    msg="서버와 연결하지 못했습니다.\n인터넷 연결 상태를 확인한 후 다시 시도해 주세요.";
+  }else if(raw.includes("not found")||raw.includes("찾지 못")){
+    msg="일치하는 자료를 찾지 못했습니다.\n입력한 정보를 다시 확인해 주세요.";
+  }else if(raw.includes("permission")||raw.includes("row-level")||raw.includes("rls")||raw.includes("policy")){
+    msg="현재 요청을 처리할 수 없습니다.\n문제가 계속될 경우 담당자에게 문의해 주세요.";
+  }
+  ppwrMessage(msg,"오류 / Error");
+}
+
 
 function closeSurveyWindow(){
   window.close();
@@ -1325,7 +1365,7 @@ function removeMaterialByName(name){
 function addOtherMaterial(){
   const el=document.getElementById('otherMaterial');
   const name=el.value.trim();
-  if(!name) return alert('재질명을 입력해 주세요.');
+  if(!name) return ppwrMessage('재질명을 입력해 주세요.');
   addMaterial(name,false);
   el.value='';
 }
@@ -1382,10 +1422,10 @@ window.collectData = function collectData(){
 
 function saveDraft(){
   localStorage.setItem('ppwrSurveyDraft',JSON.stringify(collectData()));
-  alert('임시저장되었습니다. / Draft saved.');
+  ppwrMessage('임시저장되었습니다. / Draft saved.');
 }
 function loadDraft(){
-  const raw=localStorage.getItem('ppwrSurveyDraft'); if(!raw)return alert('저장된 임시자료가 없습니다.');
+  const raw=localStorage.getItem('ppwrSurveyDraft'); if(!raw)return ppwrMessage('저장된 임시자료가 없습니다.');
   const d=JSON.parse(raw);
   ['company','contact','email','phone','representativeSpec','representativeCode','pb','cd','hg','cr6','pfasTotal','pfasIndividual','pfasRemarks','remarks'].forEach(id=>{if(d[id]!=null)document.getElementById(id).value=d[id]});
   major.value=d.major||''; updateCategory(); type.value=d.type||'';
@@ -1393,7 +1433,7 @@ function loadDraft(){
   document.getElementById('materialsBody').innerHTML=''; (d.materials||[]).forEach(x=>addMaterial(x.material,false,x));
   pfasApplicable.value=d.pfasApplicable||'Not applicable'; pfasApplicable.dispatchEvent(new Event('change'));
   calcComposition();calcMetals();updateSummary();
-  alert('임시저장 자료를 불러왔습니다. 첨부파일은 보안상 브라우저가 다시 불러올 수 없습니다.');
+  ppwrMessage('임시저장 자료를 불러왔습니다. 첨부파일은 보안상 브라우저가 다시 불러올 수 없습니다.');
 }
 function resetForm(){
   if(!confirm('모든 입력값을 초기화하시겠습니까?'))return;
@@ -1433,6 +1473,19 @@ init();
 </script>
 
 
+
+
+<div id="ppwrMessageModal" class="ppwr-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="ppwrModalTitle">
+  <div class="ppwr-modal">
+    <div class="ppwr-modal-body">
+      <div id="ppwrModalTitle" class="ppwr-modal-title">안내 / Notice</div>
+      <div id="ppwrModalMessage" class="ppwr-modal-message"></div>
+    </div>
+    <div class="ppwr-modal-footer">
+      <button type="button" id="ppwrModalOk" class="ppwr-modal-ok">확인 / OK</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
