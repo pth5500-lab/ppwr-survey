@@ -74,6 +74,17 @@ body{background:#eef2f6!important}
 button{border-radius:8px!important}
 @media(max-width:950px){.metric-grid{grid-template-columns:repeat(2,1fr)}.dash-grid{grid-template-columns:1fr}.dashboard-hero{align-items:flex-start;gap:14px;flex-direction:column}}
 
+
+/* Unified user-friendly message modal */
+.ppwr-modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.42);display:none;align-items:center;justify-content:center;z-index:99999;padding:18px}
+.ppwr-modal{width:min(460px,100%);background:#fff;border-radius:16px;box-shadow:0 22px 60px rgba(15,23,42,.22);overflow:hidden;border:1px solid #e4e7ec}
+.ppwr-modal-body{padding:22px 22px 16px}
+.ppwr-modal-title{font-size:18px;font-weight:900;color:#101828;margin:0 0 8px}
+.ppwr-modal-message{font-size:13px;line-height:1.65;color:#475467;white-space:pre-line}
+.ppwr-modal-footer{padding:0 22px 20px;display:flex;justify-content:flex-end}
+.ppwr-modal-ok{border:0;border-radius:9px;padding:9px 20px;font-size:13px;font-weight:800;background:#173b66;color:#fff;cursor:pointer}
+.ppwr-modal-ok:hover{filter:brightness(.96)}
+
 </style>
 </head>
 <body>
@@ -170,7 +181,7 @@ function standardFileName(submissionId,packagingType,category,index=1,materialNa
   const label={"heavy-metal":"HeavyMetal","pfas":"PFAS","doc":"DoC","other":"Other","product-photo":"Photo"}[category]||"File";
   return `${sid}_${type}_${label}${no}`;
 }
-const pw=()=>{const p=prompt("비밀번호를 입력해 주세요.");if(p===null)return false;if(p!=="1234"){alert("비밀번호가 올바르지 않습니다.");return false}return true};
+const pw=()=>{const p=prompt("비밀번호를 입력해 주세요.");if(p===null)return false;if(p!=="1234"){ppwrMessage("비밀번호가 올바르지 않습니다.");return false}return true};
 const spec=r=>A(r.specifications)[0]||{};
 const review=r=>r.quality_review_status||"미검증";
 const hmAssess=r=>{
@@ -305,7 +316,7 @@ function render(){
  $("status").textContent=`전체 ${rows.length}건 / 현재 조회 ${view.length}건`;
 }
 function bindDetail(root,r){
- root.querySelectorAll(".fileDownload").forEach(b=>b.onclick=async()=>{const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(b.dataset.path,60);if(error)alert(error.message);else window.open(data.signedUrl,"_blank")});
+ root.querySelectorAll(".fileDownload").forEach(b=>b.onclick=async()=>{const {data,error}=await sb.storage.from(BUCKET).createSignedUrl(b.dataset.path,60);if(error)ppwrMessage(error.message);else window.open(data.signedUrl,"_blank")});
  root.querySelectorAll(".fileSave").forEach(b=>b.onclick=async()=>{
    try{
      const {data,error}=await sb.storage.from(BUCKET).download(b.dataset.path);
@@ -313,9 +324,9 @@ function bindDetail(root,r){
      const url=URL.createObjectURL(data);
      const a=document.createElement("a");a.href=url;a.download=b.dataset.name||"download";document.body.appendChild(a);a.click();a.remove();
      setTimeout(()=>URL.revokeObjectURL(url),1000);
-   }catch(e){alert("파일 다운로드에 실패했습니다.\n"+(e?.message||e))}
+   }catch(e){ppwrMessage("파일 다운로드에 실패했습니다.\n"+(e?.message||e))}
  });
- const save=root.querySelector(".saveReview");if(save)save.onclick=async()=>{if(!pw())return;const val=root.querySelector(`input[name="rv_${CSS.escape(r.submission_id)}"]:checked`)?.value;if(!val){alert("적합 또는 반려를 선택해 주세요.");return}const reason=root.querySelector(".rejectReason").value.trim();if(val==="반려"&&!reason){alert("반려 사유를 입력해 주세요.");return}const {error}=await sb.from(TABLE).update({quality_review_status:val,quality_rejection_reason:val==="반려"?reason:null,quality_reviewed_at:new Date().toISOString()}).eq("submission_id",r.submission_id);if(error)alert(error.message);else load()};
+ const save=root.querySelector(".saveReview");if(save)save.onclick=async()=>{if(!pw())return;const val=root.querySelector(`input[name="rv_${CSS.escape(r.submission_id)}"]:checked`)?.value;if(!val){ppwrMessage("적합 또는 반려를 선택해 주세요.");return}const reason=root.querySelector(".rejectReason").value.trim();if(val==="반려"&&!reason){ppwrMessage("반려 사유를 입력해 주세요.");return}const {error}=await sb.from(TABLE).update({quality_review_status:val,quality_rejection_reason:val==="반려"?reason:null,quality_reviewed_at:new Date().toISOString()}).eq("submission_id",r.submission_id);if(error)ppwrMessage(error.message);else load()};
 
  const copyBtn=root.querySelector(".materialCopy");
  if(copyBtn)copyBtn.onclick=async()=>{
@@ -403,7 +414,7 @@ function openEdit(r){
 }
 function drawEditFiles(){
  $("existingFiles").innerHTML=editFiles.map((f,i)=>`<div class=file><span>${esc(f.storedName||f.originalName||f.path)}</span><button class="danger efDel" data-i="${i}">삭제</button></div>`).join("")||"<span class=muted>기존 첨부파일 없음</span>";
- $("existingFiles").querySelectorAll(".efDel").forEach(b=>b.onclick=async()=>{if(!pw())return;const f=editFiles[+b.dataset.i];if(f.path){const {error}=await sb.storage.from(BUCKET).remove([f.path]);if(error){alert(error.message);return}}editFiles.splice(+b.dataset.i,1);drawEditFiles()});
+ $("existingFiles").querySelectorAll(".efDel").forEach(b=>b.onclick=async()=>{if(!pw())return;const f=editFiles[+b.dataset.i];if(f.path){const {error}=await sb.storage.from(BUCKET).remove([f.path]);if(error){ppwrMessage(error.message);return}}editFiles.splice(+b.dataset.i,1);drawEditFiles()});
 }
 async function uploadNew(){
  for(const [cat,id] of [["heavy-metal","fHeavy"],["pfas","fPfas"],["doc","fDoc"],["other","fOther"]]){
@@ -432,7 +443,7 @@ $("addMaterial").onclick=()=>addMat();$("closeEdit").onclick=$("cancelEdit").onc
 $("refresh").onclick=load;
 $("refreshTop").onclick=load;["search","hmFilter","pfasFilter","reviewFilter"].forEach(id=>$(id).addEventListener(id==="search"?"input":"change",apply));
 $("checkAll").onchange=e=>document.querySelectorAll(".rowCheck").forEach(c=>c.checked=e.target.checked);
-$("deleteSelected").onclick=async()=>{const ids=[...document.querySelectorAll(".rowCheck:checked")].map(x=>x.dataset.id);if(!ids.length){alert("삭제할 건을 선택해 주세요.");return}if(!pw()||!confirm(`${ids.length}건을 삭제할까요?`))return;const {error}=await sb.from(TABLE).delete().in("submission_id",ids);if(error)alert(error.message);else load()};
+$("deleteSelected").onclick=async()=>{const ids=[...document.querySelectorAll(".rowCheck:checked")].map(x=>x.dataset.id);if(!ids.length){ppwrMessage("삭제할 건을 선택해 주세요.");return}if(!pw()||!confirm(`${ids.length}건을 삭제할까요?`))return;const {error}=await sb.from(TABLE).delete().in("submission_id",ids);if(error)ppwrMessage(error.message);else load()};
 $("csv").onclick=()=>{
  const H=["접수번호","회사명","담당자","이메일","연락처","대분류","세부 품목군","대표규격","대표품번","구성재질 상세","재질별 성적서","Pb","Cd","Hg","CrVI","중금속 합계","중금속 판정","PFAS 상태","PFAS Total","개별 PFAS","PFAS 비고","PFAS 성적서","제품 사진","DoC","기타 참고자료","적합성 검증","반려사유","검증일시","비고"];
  const Q=v=>`"${String(v??"").replace(/"/g,'""')}"`;
@@ -444,4 +455,17 @@ $("csv").onclick=()=>{
 };
 await load();
 </script>
+
+<div id="ppwrMessageModal" class="ppwr-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="ppwrModalTitle">
+  <div class="ppwr-modal">
+    <div class="ppwr-modal-body">
+      <div id="ppwrModalTitle" class="ppwr-modal-title">안내 / Notice</div>
+      <div id="ppwrModalMessage" class="ppwr-modal-message"></div>
+    </div>
+    <div class="ppwr-modal-footer">
+      <button type="button" id="ppwrModalOk" class="ppwr-modal-ok">확인 / OK</button>
+    </div>
+  </div>
+</div>
+
 </body></html>
