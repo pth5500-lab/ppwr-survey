@@ -411,52 +411,38 @@ let replacementFileMap = new Map();
 function existingFileKey(f){return String(f.path||f.storedName||f.originalName||"");}
 
 
-function safeFileName(name) {
-  const raw=String(name||"");
-  const dot=raw.lastIndexOf(".");
-  const ext=(dot>=0?raw.slice(dot+1):"").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,10);
-  const base=(dot>=0?raw.slice(0,dot):raw)
-    .normalize("NFKD")
-    .replace(/[^A-Za-z0-9._-]/g,"_")
-    .replace(/_+/g,"_")
-    .replace(/^[._-]+|[._-]+$/g,"")
-    .slice(0,60) || "file";
-  return ext ? `${base}.${ext}` : base;
-}
-
-function makeSubmissionId() {
-  const d = new Date();
-  const p = n => String(n).padStart(2, "0");
-  const stamp = `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
-  const rnd = Math.random().toString(36).slice(2, 7).toUpperCase();
-  return `PPWR-${stamp}-${rnd}`;
-}
-
-function compactLabel(value) {
-  const text = String(value || "").split("/")[0].trim();
-  return safeFileName(text || "Unknown").replace(/_+/g, "_").replace(/^_+|_+$/g, "");
-}
-
 function fileExtension(name) {
-  const m = String(name || "").match(/(\.[A-Za-z0-9]+)$/);
+  const m=String(name||"").match(/(\.[A-Za-z0-9]+)$/);
   return m ? m[1].toLowerCase() : "";
 }
-
-function uniqueUploadTag() {
-  const d = new Date();
-  const p = n => String(n).padStart(2,"0");
-  const ms = String(d.getMilliseconds()).padStart(3,"0");
-  const stamp = `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}${ms}`;
-  const rnd = (globalThis.crypto?.randomUUID?.() || Math.random().toString(36).slice(2)).replace(/-/g,"").slice(0,8);
-  return `${stamp}_${rnd}`;
+function safeFileToken(v){
+  return String(v??"").normalize("NFKC")
+    .replace(/\s*\/\s*/g,"_").replace(/&/g,"_")
+    .replace(/[\\:*?"<>|#%{}[\]~`]+/g,"_")
+    .replace(/\s+/g,"_").replace(/_+/g,"_")
+    .replace(/^_+|_+$/g,"") || "NA";
 }
-
-function storedFileName(company, packagingType, group, submissionId, originalName, sequence) {
+function englishLabel(v){
+  const raw=String(v??"").trim();
+  const parts=raw.split(/\s*\/\s*/);
+  return safeFileToken(parts.length>1 ? parts[parts.length-1] : raw);
+}
+function makeSubmissionId() {
+  const d=new Date(),p=n=>String(n).padStart(2,"0");
+  const stamp=`${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+  const rnd=Math.random().toString(36).slice(2,7).toUpperCase();
+  return `PPWR-${stamp}-${rnd}`;
+}
+function standardStoredName(submissionId, packagingType, group, sequence, originalName, materialName="", materialIndex=0){
+  const sid=safeFileToken(submissionId);
+  const type=englishLabel(packagingType);
+  const no=String(sequence).padStart(2,"0");
   const ext=fileExtension(originalName);
-  const groupNames={"pfas":"PFAS","doc":"DoC","other":"Other","product-photo":"Photo","material-report":"MaterialReport"};
-  const groupPart=groupNames[group]||"File";
-  const seq=sequence>1?`_${sequence}`:"";
-  return `${submissionId}_${groupPart}${seq}${ext}`;
+  if(group==="material-report"){
+    return `${sid}_${type}_${englishLabel(materialName)}_Material${String(Number(materialIndex)+1).padStart(2,"0")}_Report${no}${ext}`;
+  }
+  const label={"pfas":"PFAS","doc":"DoC","other":"Other","product-photo":"Photo","heavy-metal":"HeavyMetal"}[group]||"File";
+  return `${sid}_${type}_${label}${no}${ext}`;
 }
 
 window.submitToSupabase = async function() {
@@ -531,13 +517,10 @@ window.submitToSupabase = async function() {
     // Upload files first, then insert the submission once with all file metadata.
     currentStage = "첨부파일 업로드 / File upload";
     for (const [group, fileList] of groups) {
-      let sequence = 0;
+      let sequence = uploaded.filter(f=>f.category===group).length;
       for (const file of fileList) {
         sequence += 1;
-        const baseStoredName = storedFileName(d.company, d.type, group, submissionId, file.name, sequence);
-        const ext = fileExtension(baseStoredName);
-        const baseNoExt = ext ? baseStoredName.slice(0,-ext.length) : baseStoredName;
-        const renamedFile = `${baseNoExt}_${uniqueUploadTag()}${ext}`;
+        const renamedFile = standardStoredName(submissionId,d.type,group,sequence,file.name);
         const folderNames={"pfas":"pfas","doc":"doc","other":"other","product-photo":"product_photo","material-report":"material_report"};
         const folder=folderNames[group]||"file";
         const path = `${submissionId}/${folder}/${renamedFile}`;
@@ -580,12 +563,10 @@ window.submitToSupabase = async function() {
       const mr=materialRows[mi];
       const materialName=mr.querySelector(".material-name")?.value?.trim()||`Material${mi+1}`;
       const input=mr.querySelector(".material-report");
-      let seq=0;
+      let seq=uploaded.filter(f=>f.category==="material-report" && Number(f.materialIndex)===mi).length;
       for(const file of [...(input?.files||[])]){
         seq+=1;
-        const ext=fileExtension(file.name);
-        const suffix=seq>1?`_${seq}`:"";
-        const renamedFile=`${submissionId}_Material${String(mi+1).padStart(2,"0")}_Report${suffix}_${uniqueUploadTag()}${ext}`;
+        const renamedFile=standardStoredName(submissionId,d.type,"material-report",seq,file.name,materialName,mi);
         const path=`${submissionId}/material_report/${renamedFile}`;
         const {error:uploadError}=await supabase.storage.from("ppwr-files").upload(path,file,{cacheControl:"3600",upsert:false,contentType:file.type||undefined});
         if(uploadError)throw {stage:currentStage,group:"material-report",fileName:file.name,message:uploadError.message,statusCode:uploadError.statusCode||uploadError.status,raw:uploadError};
@@ -601,15 +582,17 @@ window.submitToSupabase = async function() {
       const group=old.category||"other";
       const folderNames={"pfas":"pfas","doc":"doc","other":"other","product-photo":"product_photo","material-report":"material_report","heavy-metal":"heavy_metal"};
       const folder=folderNames[group]||"file";
-      const ext=fileExtension(file.name);
-      const tag=`R_${uniqueUploadTag()}`;
       let renamedFile;
       if(group==="material-report"){
         const mi=Number(old.materialIndex)||0;
-        renamedFile=`${submissionId}_Material${String(mi+1).padStart(2,"0")}_Report_${tag}${ext}`;
+        const siblings=existingUploadedFiles.filter(f=>f.category==="material-report" && Number(f.materialIndex)===mi);
+        const seq=Math.max(1,siblings.indexOf(old)+1);
+        const materialName=document.querySelectorAll(".material-row")[mi]?.querySelector(".material-name")?.value || old.materialName || "Material";
+        renamedFile=standardStoredName(submissionId,d.type,"material-report",seq,file.name,materialName,mi);
       }else{
-        const groupNames={"pfas":"PFAS","doc":"DoC","other":"Other","product-photo":"Photo","heavy-metal":"HeavyMetal"};
-        renamedFile=`${submissionId}_${groupNames[group]||"File"}_${tag}${ext}`;
+        const siblings=existingUploadedFiles.filter(f=>f.category===group);
+        const seq=Math.max(1,siblings.indexOf(old)+1);
+        renamedFile=standardStoredName(submissionId,d.type,group,seq,file.name);
       }
       const path=`${submissionId}/${folder}/${renamedFile}`;
       const {error:uploadError}=await supabase.storage.from("ppwr-files").upload(path,file,{cacheControl:"3600",upsert:false,contentType:file.type||undefined});
@@ -730,9 +713,21 @@ window.downloadExistingFile=async function(encodedKey){
   const f=findExistingFileByKey(encodedKey);
   if(!f?.path){alert("파일 경로를 확인할 수 없습니다.");return;}
   try{
-    const {data,error}=await supabase.storage.from("ppwr-files").createSignedUrl(f.path,120,{download:f.originalName||f.storedName||"download"});
+    const type=document.getElementById("type")?.value||"Packaging";
+    let seq=1, materialName="";
+    if(f.category==="material-report"){
+      const mi=Number(f.materialIndex)||0;
+      const siblings=existingUploadedFiles.filter(x=>x.category==="material-report" && Number(x.materialIndex)===mi);
+      seq=Math.max(1,siblings.indexOf(f)+1);
+      materialName=document.querySelectorAll(".material-row")[mi]?.querySelector(".material-name")?.value || f.materialName || "Material";
+    }else{
+      const siblings=existingUploadedFiles.filter(x=>x.category===f.category);
+      seq=Math.max(1,siblings.indexOf(f)+1);
+    }
+    const downloadName=standardStoredName(editingSubmissionId||"PPWR",type,f.category||"other",seq,f.originalName||f.storedName||"file",materialName,f.materialIndex||0);
+    const {data,error}=await supabase.storage.from("ppwr-files").createSignedUrl(f.path,120,{download:downloadName});
     if(error)throw error;
-    const a=document.createElement("a");a.href=data.signedUrl;a.download=f.originalName||f.storedName||"download";document.body.appendChild(a);a.click();a.remove();
+    const a=document.createElement("a");a.href=data.signedUrl;a.download=downloadName;document.body.appendChild(a);a.click();a.remove();
   }catch(e){console.error(e);alert("파일 다운로드에 실패했습니다. / Download failed\n"+(e?.message||e));}
 };
 window.chooseReplacementFile=function(encodedKey){
